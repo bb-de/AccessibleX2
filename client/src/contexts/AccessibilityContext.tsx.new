@@ -1,0 +1,327 @@
+import React, { createContext, useCallback, useEffect, useState } from 'react';
+import { translations } from '@/lib/translation';
+import { applyAccessibilityStyles } from '@/lib/a11y-helpers';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+
+// Define types
+export type AccessibilityProfileId = 
+  | 'visionImpaired' 
+  | 'cognitiveDisability' 
+  | 'senior' 
+  | 'motorImpaired' 
+  | 'adhdFriendly' 
+  | 'dyslexiaFriendly';
+
+export type ContrastMode = 'default' | 'increased' | 'high' | 'dark' | 'light';
+export type FontFamily = 'default' | 'readable' | 'dyslexic';
+export type Language = 'en' | 'de' | 'fr' | 'es';
+
+export interface AccessibilitySettings {
+  // Vision settings
+  contrastMode: ContrastMode;
+  saturation: number;
+  monochrome: number;
+  textSize: number;
+  lineHeight: number;
+  letterSpacing: number;
+  darkMode: boolean;
+  hideImages: boolean;
+  stopAnimations: boolean;
+  
+  // Content settings
+  highlightTitles: boolean;
+  highlightLinks: boolean;
+  textToSpeech: boolean;
+  readingMask: boolean;
+  readingGuide: boolean;
+  fontFamily: FontFamily;
+  wordSpacing: number;
+  textAlignLeft: boolean;
+  
+  // Navigation settings
+  keyboardNavigation: boolean;
+  highlightFocus: boolean;
+  bigWhiteCursor: boolean;
+  bigBlackCursor: boolean;
+  virtualKeyboard: boolean;
+  pageStructure: boolean;
+}
+
+export const defaultSettings: AccessibilitySettings = {
+  contrastMode: 'default',
+  saturation: 100,
+  monochrome: 0,
+  textSize: 0,
+  lineHeight: 0,
+  letterSpacing: 0,
+  darkMode: false,
+  hideImages: false,
+  stopAnimations: false,
+  
+  highlightTitles: false,
+  highlightLinks: false,
+  textToSpeech: false,
+  readingMask: false,
+  readingGuide: false,
+  fontFamily: 'default',
+  wordSpacing: 0,
+  textAlignLeft: false,
+  
+  keyboardNavigation: false,
+  highlightFocus: false,
+  bigWhiteCursor: false,
+  bigBlackCursor: false,
+  virtualKeyboard: false,
+  pageStructure: false,
+};
+
+interface AccessibilityContextType {
+  isOpen: boolean;
+  toggleWidget: () => void;
+  settings: AccessibilitySettings;
+  updateSetting: <K extends keyof AccessibilitySettings>(
+    key: K, 
+    value: AccessibilitySettings[K]
+  ) => void;
+  incrementSetting: (key: keyof Pick<AccessibilitySettings, 'textSize' | 'lineHeight' | 'letterSpacing'>) => void;
+  decrementSetting: (key: keyof Pick<AccessibilitySettings, 'textSize' | 'lineHeight' | 'letterSpacing'>) => void;
+  resetSettings: () => void;
+  applyProfile: (profileId: AccessibilityProfileId, closeWidget?: boolean) => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  translations: typeof translations['en'];
+  applyAccessibilityChanges: () => void;
+}
+
+export const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
+
+export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [settings, setSettings] = useState<AccessibilitySettings>(defaultSettings);
+  const [language, setLanguage] = useState<Language>('en');
+  const { toast } = useToast();
+
+  // Load saved settings on initial render
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('accessibility-settings');
+    const savedLanguage = localStorage.getItem('accessibility-language');
+    
+    if (savedSettings) {
+      try {
+        setSettings(JSON.parse(savedSettings));
+      } catch (error) {
+        console.error('Failed to parse saved accessibility settings', error);
+      }
+    }
+    
+    if (savedLanguage) {
+      setLanguage(savedLanguage as Language);
+    }
+  }, []);
+
+  // Save settings when they change
+  useEffect(() => {
+    localStorage.setItem('accessibility-settings', JSON.stringify(settings));
+  }, [settings]);
+
+  // Save language when it changes
+  useEffect(() => {
+    localStorage.setItem('accessibility-language', language);
+  }, [language]);
+
+  // Toggle widget visibility
+  const toggleWidget = useCallback(() => {
+    setIsOpen(prev => !prev);
+  }, []);
+
+  // Update a single setting
+  const updateSetting = useCallback(<K extends keyof AccessibilitySettings>(
+    key: K, 
+    value: AccessibilitySettings[K]
+  ) => {
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      [key]: value,
+    }));
+    
+    // Save analytics data
+    try {
+      apiRequest('POST', '/api/analytics/setting-change', {
+        setting: key,
+        value,
+      });
+    } catch (error) {
+      console.error('Failed to log setting change', error);
+    }
+  }, []);
+
+  // Increment numeric settings
+  const incrementSetting = useCallback((
+    key: keyof Pick<AccessibilitySettings, 'textSize' | 'lineHeight' | 'letterSpacing'>
+  ) => {
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      [key]: Math.min((prevSettings[key] as number) + 1, 5),
+    }));
+  }, []);
+
+  // Decrement numeric settings
+  const decrementSetting = useCallback((
+    key: keyof Pick<AccessibilitySettings, 'textSize' | 'lineHeight' | 'letterSpacing'>
+  ) => {
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      [key]: Math.max((prevSettings[key] as number) - 1, -5),
+    }));
+  }, []);
+
+  // Apply a predefined profile
+  const applyProfile = useCallback((profileId: AccessibilityProfileId, closeWidget: boolean = false) => {
+    const profileSettings: Partial<AccessibilitySettings> = (() => {
+      switch (profileId) {
+        case 'visionImpaired':
+          return {
+            textSize: 3,
+            contrastMode: 'high',
+            lineHeight: 2,
+            letterSpacing: 1,
+            highlightLinks: true,
+            highlightFocus: true,
+          };
+        case 'cognitiveDisability':
+          return {
+            fontFamily: 'readable',
+            lineHeight: 2,
+            wordSpacing: 30,
+            textAlignLeft: true,
+            highlightTitles: true,
+            hideImages: false,
+          };
+        case 'senior':
+          return {
+            textSize: 2,
+            contrastMode: 'increased',
+            fontFamily: 'readable',
+            highlightFocus: true,
+            highlightLinks: true,
+          };
+        case 'motorImpaired':
+          return {
+            keyboardNavigation: true,
+            highlightFocus: true,
+            bigBlackCursor: true,
+          };
+        case 'adhdFriendly':
+          return {
+            readingMask: true,
+            hideImages: true,
+            stopAnimations: true,
+            contrastMode: 'light',
+          };
+        case 'dyslexiaFriendly':
+          return {
+            fontFamily: 'dyslexic',
+            lineHeight: 2,
+            wordSpacing: 50,
+            letterSpacing: 1,
+            textAlignLeft: true,
+          };
+        default:
+          return {};
+      }
+    })();
+
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      ...profileSettings,
+    }));
+
+    // Log analytics
+    try {
+      apiRequest('POST', '/api/analytics/profile-applied', { 
+        profileId
+      });
+    } catch (error) {
+      console.error('Failed to log profile application', error);
+    }
+
+    // Show toast notification
+    toast({
+      title: translations[language].profileApplied,
+      description: translations[language][profileId],
+    });
+    
+    // Only close the widget if explicitly requested
+    if (closeWidget) {
+      setIsOpen(false);
+    }
+  }, [language, toast]);
+
+  // Reset all settings to default
+  const resetSettings = useCallback(() => {
+    setSettings(defaultSettings);
+    
+    // Log analytics
+    try {
+      apiRequest('POST', '/api/analytics/settings-reset', {});
+    } catch (error) {
+      console.error('Failed to log settings reset', error);
+    }
+
+    // Show toast notification
+    toast({
+      title: translations[language].settingsReset,
+      description: translations[language].settingsResetDescription,
+    });
+  }, [language, toast]);
+  
+  // Handle Alt+U keyboard shortcut for settings reset
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check for Alt+U combination
+      if (event.altKey && event.key === 'u') {
+        resetSettings();
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    
+    // Cleanup listener on unmount
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [resetSettings]);
+
+  // Apply all accessibility changes to the DOM
+  const applyAccessibilityChanges = useCallback(() => {
+    applyAccessibilityStyles(settings);
+  }, [settings]);
+
+  // Apply changes whenever settings change
+  useEffect(() => {
+    applyAccessibilityChanges();
+  }, [settings, applyAccessibilityChanges]);
+
+  return (
+    <AccessibilityContext.Provider
+      value={{
+        isOpen,
+        toggleWidget,
+        settings,
+        updateSetting,
+        incrementSetting,
+        decrementSetting,
+        resetSettings,
+        applyProfile,
+        language,
+        setLanguage,
+        translations: translations[language],
+        applyAccessibilityChanges,
+      }}
+    >
+      {children}
+    </AccessibilityContext.Provider>
+  );
+};
