@@ -27,4 +27,4 @@ ReactDOM.createRoot(shadowRoot).render(
       <AccessibilityWidget />
     </AccessibilityProvider>
   </React.StrictMode>
-); 
+);
