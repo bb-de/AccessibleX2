@@ -13,7 +13,7 @@ document.body.appendChild(container);
 // Style-Tag für Tailwind/Widget-Styles ins Shadow DOM einfügen
 const styleTag = document.createElement("style");
 styleTag.textContent = `
-  @import url('/dist/widget/index.css');
+  @import url('/index.css');
 `;
 shadow.appendChild(styleTag);
 
