@@ -84,9 +84,9 @@ function disableKeyboardNavigation(): void {
 }
 
 // Helper function to show virtual keyboard
-function showVirtualKeyboard(): void {
+function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
   // Create a keyboard container
-  const keyboard = document.createElement('div');
+  const keyboard = document.createElement('div') as HTMLElement;
   keyboard.id = 'virtual-keyboard';
   keyboard.style.position = 'fixed';
   keyboard.style.bottom = '0';
@@ -109,18 +109,18 @@ function showVirtualKeyboard(): void {
   ];
 
   // Add close button
-  const closeBar = document.createElement('div');
+  const closeBar = document.createElement('div') as HTMLElement;
   closeBar.style.display = 'flex';
   closeBar.style.justifyContent = 'space-between';
   closeBar.style.alignItems = 'center';
   closeBar.style.marginBottom = '10px';
 
-  const keyboardTitle = document.createElement('span');
+  const keyboardTitle = document.createElement('span') as HTMLElement;
   keyboardTitle.textContent = 'Virtual Keyboard';
   keyboardTitle.style.fontWeight = 'bold';
   keyboardTitle.style.fontSize = '14px';
 
-  const closeButton = document.createElement('button');
+  const closeButton = document.createElement('button') as HTMLButtonElement;
   closeButton.textContent = '×';
   closeButton.setAttribute('aria-label', 'Close virtual keyboard');
   closeButton.style.backgroundColor = '#e0e0e0';
@@ -141,22 +141,26 @@ function showVirtualKeyboard(): void {
 
   // Create keyboard layout
   keyboardRows.forEach(row => {
-    const rowElement = document.createElement('div');
+    const rowElement = document.createElement('div') as HTMLElement;
     rowElement.style.display = 'flex';
     rowElement.style.justifyContent = 'center';
     rowElement.style.margin = '5px 0';
 
     row.forEach(key => {
-      const keyButton = document.createElement('button');
+      const keyButton = document.createElement('button') as HTMLButtonElement;
       keyButton.textContent = key;
       keyButton.style.margin = '2px';
       keyButton.style.minWidth = key === 'Space' ? '200px' : key === 'Backspace' || key === 'Shift' ? '80px' : '40px';
       keyButton.style.height = '40px';
-      keyButton.style.backgroundColor = '#fff';
-      keyButton.style.border = '1px solid #ccc';
-      keyButton.style.borderRadius = '4px';
-      keyButton.style.cursor = 'pointer';
-      keyButton.style.fontSize = '14px';
+      keyButton.style.backgroundColor = '#f0f0f0 !important';
+      keyButton.style.border = '1px solid #ccc !important';
+      keyButton.style.borderRadius = '4px !important';
+      keyButton.style.cursor = 'pointer !important';
+      keyButton.style.fontSize = '16px !important';
+      keyButton.style.color = '#000 !important';
+      keyButton.style.display = 'flex !important';
+      keyButton.style.alignItems = 'center !important';
+      keyButton.style.justifyContent = 'center !important';
 
       // Add key press functionality
       keyButton.addEventListener('click', () => {
@@ -172,13 +176,48 @@ function showVirtualKeyboard(): void {
       });
 
       rowElement.appendChild(keyButton);
+
+      // Log key button text content for debugging
+      if (key === 'q') {
+        console.log(`Debug: 'q' key textContent: ${keyButton.textContent}`);
+        console.log(`Debug: 'q' key computed style:`, window.getComputedStyle(keyButton));
+      }
     });
 
     keyboard.appendChild(rowElement);
   });
 
-  // Add to the document
-  document.body.appendChild(keyboard);
+  // Inject aggressive CSS for virtual keyboard buttons directly into shadowRoot
+  const keyboardStyle = document.createElement('style');
+  keyboardStyle.textContent = `
+    #virtual-keyboard button {
+      color: blue !important;
+      font-size: 20px !important;
+      opacity: 1 !important;
+      background-color: lightblue !important;
+    }
+    #virtual-keyboard #close-keyboard-nav {
+      color: initial !important;
+      font-size: initial !important;
+      background-color: initial !important;
+    }
+  `;
+  if (shadowRoot) {
+    shadowRoot.appendChild(keyboardStyle);
+    console.log('Debug: Keyboard style appended to shadowRoot');
+  } else {
+    document.head.appendChild(keyboardStyle);
+    console.log('Debug: Keyboard style appended to document.head');
+  }
+
+  // Add to the document or shadow DOM
+  if (shadowRoot) {
+    shadowRoot.appendChild(keyboard);
+    console.log('Debug: Virtual keyboard appended to shadowRoot');
+  } else {
+    document.body.appendChild(keyboard);
+    console.log('Debug: Virtual keyboard appended to document.body');
+  }
 
   // Shift state
   let shiftEnabled = false;
@@ -190,9 +229,9 @@ function showVirtualKeyboard(): void {
     // Update all letter keys
     const letterKeys = keyboard.querySelectorAll('button');
     letterKeys.forEach(button => {
-      const keyText = button.textContent;
+      const keyText = (button as HTMLButtonElement).textContent;
       if (keyText && keyText.length === 1 && /[a-z]/.test(keyText)) {
-        button.textContent = shiftEnabled ? keyText.toUpperCase() : keyText.toLowerCase();
+        (button as HTMLButtonElement).textContent = shiftEnabled ? keyText.toUpperCase() : keyText.toLowerCase();
       }
     });
   }
@@ -245,7 +284,15 @@ function showVirtualKeyboard(): void {
 
 // Helper function to hide virtual keyboard
 function hideVirtualKeyboard(): void {
-  const keyboard = document.getElementById('virtual-keyboard');
+  // First check in shadow DOM
+  let keyboard = document.getElementById('virtual-keyboard');
+  if (keyboard && keyboard.closest('[data-accessibility-widget]')) {
+    keyboard.remove();
+    return;
+  }
+
+  // Then check in document body
+  keyboard = document.body.querySelector('#virtual-keyboard');
   if (keyboard) {
     keyboard.remove();
   }
@@ -347,12 +394,12 @@ function showPageStructure(): void {
       structureTitle: 'Seitenstruktur',
       header: 'Header',
       main: 'Hauptinhalt',
-      sidebar: 'Seitenleiste',
-      footer: 'Fußzeile',
+      sidebar: 'Barra Lateral',
+      footer: 'Pie de Página',
       navigation: 'Navigation',
-      columns: 'Mehrspaltiger Inhalt',
-      column: 'Spalte',
-      currentView: 'Aktueller Bildschirmausschnitt'
+      columns: 'Contenido de Múltiples Columnas',
+      column: 'Columna',
+      currentView: 'Vista Actual'
     },
     fr: {
       panelTitle: 'Structure de la Page',
@@ -421,10 +468,10 @@ function showPageStructure(): void {
   };
 
   // Get translation for current language
-  const t = translations[language];
+  const t = translations[language as keyof typeof translations];
 
   // Create panel container on the left side
-  const panel = document.createElement('div');
+  const panel = document.createElement('div') as HTMLElement;
   panel.id = 'page-structure-panel';
   panel.style.position = 'fixed';
   panel.style.top = '0';
@@ -440,7 +487,7 @@ function showPageStructure(): void {
   panel.style.flexDirection = 'column';
 
   // Create header
-  const header = document.createElement('div');
+  const header = document.createElement('div') as HTMLElement;
   header.style.padding = '15px';
   header.style.borderBottom = '1px solid #eee';
   header.style.display = 'flex';
@@ -449,14 +496,14 @@ function showPageStructure(): void {
   header.style.backgroundColor = '#f8f8f8';
 
   // Add heading
-  const heading = document.createElement('h2');
+  const heading = document.createElement('h2') as HTMLElement;
   heading.textContent = t.panelTitle;
   heading.style.fontSize = '18px';
   heading.style.margin = '0';
   heading.style.fontWeight = 'bold';
 
   // Add close button
-  const closeButton = document.createElement('button');
+  const closeButton = document.createElement('button') as HTMLButtonElement;
   closeButton.textContent = '×';
   closeButton.setAttribute('aria-label', t.closeAriaLabel);
   closeButton.style.backgroundColor = 'transparent';
@@ -469,10 +516,10 @@ function showPageStructure(): void {
   closeButton.style.lineHeight = '1';
   closeButton.addEventListener('click', hidePageStructure);
   closeButton.addEventListener('mouseover', () => {
-    closeButton.style.color = '#000';
+    (closeButton as HTMLElement).style.color = '#000';
   });
   closeButton.addEventListener('mouseout', () => {
-    closeButton.style.color = '#666';
+    (closeButton as HTMLElement).style.color = '#666';
   });
 
   header.appendChild(heading);
@@ -480,7 +527,7 @@ function showPageStructure(): void {
   panel.appendChild(header);
 
   // Tab navigation
-  const tabContainer = document.createElement('div');
+  const tabContainer = document.createElement('div') as HTMLElement;
   tabContainer.style.display = 'flex';
   tabContainer.style.borderBottom = '1px solid #eee';
 
@@ -496,7 +543,7 @@ function showPageStructure(): void {
 
   tabs.forEach(tab => {
     // Create tab button
-    const tabButton = document.createElement('button');
+    const tabButton = document.createElement('button') as HTMLButtonElement;
     tabButton.textContent = tab.label;
     tabButton.dataset.tab = tab.id;
     tabButton.style.flex = '1';
@@ -508,7 +555,7 @@ function showPageStructure(): void {
     tabButton.style.fontSize = '14px';
 
     // Create tab content
-    const tabContent = document.createElement('div');
+    const tabContent = document.createElement('div') as HTMLDivElement;
     tabContent.id = `tab-${tab.id}`;
     tabContent.style.padding = '15px';
     tabContent.style.display = tab.id === 'toc' ? 'block' : 'none';
@@ -519,14 +566,14 @@ function showPageStructure(): void {
     tabButton.addEventListener('click', () => {
       // Update active tab
       Object.values(tabButtons).forEach(btn => {
-        btn.style.backgroundColor = 'transparent';
+        (btn as HTMLElement).style.backgroundColor = 'transparent';
       });
       Object.values(tabContents).forEach(content => {
-        content.style.display = 'none';
+        (content as HTMLElement).style.display = 'none';
       });
 
-      tabButton.style.backgroundColor = '#eee';
-      tabContent.style.display = 'block';
+      (tabButton as HTMLElement).style.backgroundColor = '#eee';
+      (tabContent as HTMLElement).style.display = 'block';
     });
 
     tabContainer.appendChild(tabButton);
@@ -535,34 +582,34 @@ function showPageStructure(): void {
   panel.appendChild(tabContainer);
 
   // Content container
-  const contentContainer = document.createElement('div');
+  const contentContainer = document.createElement('div') as HTMLElement;
   contentContainer.style.flex = '1';
   contentContainer.style.overflowY = 'auto';
   contentContainer.style.padding = '0';
 
   // 1. Table of Contents (Inhaltsverzeichnis)
   const tocContent = buildTableOfContents();
-  tabContents['toc'].appendChild(tocContent);
+  (tabContents['toc'] as HTMLElement).appendChild(tocContent);
 
   // 2. Skip Links (Sprungmarken)
   const skipLinksContent = buildSkipLinks();
-  tabContents['skiplinks'].appendChild(skipLinksContent);
+  (tabContents['skiplinks'] as HTMLElement).appendChild(skipLinksContent);
 
   // 3. Landmarks (Landmarken)
   const landmarksContent = buildLandmarks();
-  tabContents['landmarks'].appendChild(landmarksContent);
+  (tabContents['landmarks'] as HTMLElement).appendChild(landmarksContent);
 
   // 4. Headings (Überschriften)
   const headingsContent = buildHeadings();
-  tabContents['headings'].appendChild(headingsContent);
+  (tabContents['headings'] as HTMLElement).appendChild(headingsContent);
 
   // 5. Add footer with Breadcrumbs Navigation
-  const footerContainer = document.createElement('div');
+  const footerContainer = document.createElement('div') as HTMLElement;
   footerContainer.style.padding = '15px';
   footerContainer.style.borderTop = '1px solid #eee';
   footerContainer.style.backgroundColor = '#f8f8f8';
 
-  const breadcrumbsHeading = document.createElement('h3');
+  const breadcrumbsHeading = document.createElement('h3') as HTMLElement;
   breadcrumbsHeading.textContent = t.breadcrumbsTitle;
   breadcrumbsHeading.style.fontSize = '14px';
   breadcrumbsHeading.style.margin = '0 0 10px 0';
@@ -574,11 +621,11 @@ function showPageStructure(): void {
   footerContainer.appendChild(breadcrumbsContent);
 
   // 6. Add Visual Structure section
-  const structureContainer = document.createElement('div');
+  const structureContainer = document.createElement('div') as HTMLElement;
   structureContainer.style.padding = '15px';
   structureContainer.style.borderTop = '1px solid #eee';
 
-  const structureHeading = document.createElement('h3');
+  const structureHeading = document.createElement('h3') as HTMLElement;
   structureHeading.textContent = t.structureTitle;
   structureHeading.style.fontSize = '14px';
   structureHeading.style.margin = '0 0 10px 0';
@@ -591,7 +638,7 @@ function showPageStructure(): void {
 
   // Assemble the panel
   Object.values(tabContents).forEach(content => {
-    contentContainer.appendChild(content);
+    (content as HTMLElement).appendChild(content);
   });
 
   panel.appendChild(contentContainer);
@@ -609,19 +656,19 @@ function showPageStructure(): void {
 
   // Helper function to build table of contents
   function buildTableOfContents() {
-    const container = document.createElement('div');
+    const container = document.createElement('div') as HTMLElement;
 
-    const heading = document.createElement('h3');
+    const heading = document.createElement('h3') as HTMLElement;
     heading.textContent = t.tocTitle;
     heading.style.fontSize = '16px';
     heading.style.margin = '0 0 15px 0';
     heading.style.fontWeight = 'bold';
 
     const headings = Array.from(document.querySelectorAll('h1, h2, h3'))
-      .filter(el => !el.closest('[data-accessibility-widget]'));
+      .filter(el => !(el as HTMLElement).closest('[data-accessibility-widget]'));
 
     if (headings.length > 0) {
-      const list = document.createElement('ul');
+      const list = document.createElement('ul') as HTMLElement;
       list.style.listStyleType = 'none';
       list.style.padding = '0';
       list.style.margin = '0';
@@ -630,11 +677,11 @@ function showPageStructure(): void {
         const headingElement = heading as HTMLHeadingElement;
         const level = parseInt(headingElement.tagName.substring(1));
 
-        const item = document.createElement('li');
+        const item = document.createElement('li') as HTMLElement;
         item.style.marginBottom = '8px';
         item.style.marginLeft = `${(level - 1) * 15}px`;
 
-        const link = document.createElement('a');
+        const link = document.createElement('a') as HTMLAnchorElement;
 
         // Create an ID for the heading if it doesn't have one
         if (!headingElement.id) {
@@ -647,45 +694,22 @@ function showPageStructure(): void {
         link.style.textDecoration = 'none';
         link.style.fontSize = '14px';
         link.style.display = 'block';
-        link.style.padding = '6px 10px';
-        link.style.borderRadius = '4px';
-        link.style.backgroundColor = '#f8f8f8';
-        link.style.transition = 'background-color 0.2s';
-
-        link.addEventListener('mouseover', () => {
-          link.style.backgroundColor = '#e8e8e8';
-        });
-
-        link.addEventListener('mouseout', () => {
-          link.style.backgroundColor = '#f8f8f8';
-        });
-
-        // Add click event to scroll to the heading
         link.addEventListener('click', (e) => {
           e.preventDefault();
-          headingElement.scrollIntoView({ behavior: 'smooth' });
-
-          // Briefly highlight the heading
-          const originalBg = headingElement.style.backgroundColor;
-          headingElement.style.backgroundColor = 'yellow';
-          setTimeout(() => {
-            headingElement.style.backgroundColor = originalBg;
-          }, 2000);
+          document.getElementById(headingElement.id)?.scrollIntoView({
+            behavior: 'smooth'
+          });
+          hidePageStructure();
         });
 
         item.appendChild(link);
         list.appendChild(item);
       });
-
-      container.appendChild(heading);
       container.appendChild(list);
     } else {
-      const noHeadings = document.createElement('p');
+      const noHeadings = document.createElement('p') as HTMLElement;
       noHeadings.textContent = t.noHeadings;
-      noHeadings.style.color = '#666';
       noHeadings.style.fontStyle = 'italic';
-
-      container.appendChild(heading);
       container.appendChild(noHeadings);
     }
 
@@ -694,82 +718,51 @@ function showPageStructure(): void {
 
   // Helper function to build skip links
   function buildSkipLinks() {
-    const container = document.createElement('div');
+    const container = document.createElement('div') as HTMLElement;
 
-    const heading = document.createElement('h3');
+    const heading = document.createElement('h3') as HTMLElement;
     heading.textContent = t.skipLinksTitle;
     heading.style.fontSize = '16px';
     heading.style.margin = '0 0 15px 0';
     heading.style.fontWeight = 'bold';
 
+    container.appendChild(heading);
+
     const skipTargets = [
-      { name: t.skipToMain, target: 'main, [role="main"], article, .content, #content, #main' },
-      { name: t.skipToNav, target: 'nav, [role="navigation"], .navigation, #navigation, header, .header, #header' },
-      { name: t.skipToSearch, target: 'form[role="search"], [aria-label="search"], .search, #search' },
-      { name: t.skipToFooter, target: 'footer, [role="contentinfo"], .footer, #footer' },
-      { name: t.skipToTop, target: 'body' }
+      { id: 'main', label: t.skipToMain },
+      { id: 'navigation', label: t.skipToNav },
+      { id: 'search', label: t.skipToSearch },
+      { id: 'footer', label: t.skipToFooter },
+      { id: 'top', label: t.skipToTop }
     ];
 
-    const list = document.createElement('ul');
+    const list = document.createElement('ul') as HTMLElement;
     list.style.listStyleType = 'none';
     list.style.padding = '0';
     list.style.margin = '0';
 
     let hasTargets = false;
 
-    skipTargets.forEach(skipTarget => {
-      const target = document.querySelector(skipTarget.target);
-
-      if (target && !target.closest('[data-accessibility-widget]')) {
+    skipTargets.forEach(target => {
+      const targetElement = document.getElementById(target.id);
+      if (targetElement) {
         hasTargets = true;
+        const item = document.createElement('li') as HTMLElement;
+        item.style.marginBottom = '8px';
 
-        const item = document.createElement('li');
-        item.style.marginBottom = '10px';
-
-        const link = document.createElement('a');
-
-        // Create an ID for the target if it doesn't have one
-        if (!target.id) {
-          target.id = `skip-${Math.random().toString(36).substring(2, 9)}`;
-        }
-
+        const link = document.createElement('a') as HTMLAnchorElement;
         link.href = `#${target.id}`;
-        link.textContent = skipTarget.name;
+        link.textContent = target.label;
         link.style.color = '#0066cc';
         link.style.textDecoration = 'none';
         link.style.fontSize = '14px';
         link.style.display = 'block';
-        link.style.padding = '10px 15px';
-        link.style.borderRadius = '4px';
-        link.style.backgroundColor = '#f0f0f0';
-        link.style.transition = 'background-color 0.2s';
-        link.style.fontWeight = 'bold';
-
-        link.addEventListener('mouseover', () => {
-          link.style.backgroundColor = '#e0e0e0';
-        });
-
-        link.addEventListener('mouseout', () => {
-          link.style.backgroundColor = '#f0f0f0';
-        });
-
-        // Add click event to scroll to the target
         link.addEventListener('click', (e) => {
           e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth' });
-
-          // Set focus to the target
-          if (target instanceof HTMLElement) {
-            target.setAttribute('tabindex', '-1');
-            target.focus();
-
-            // Briefly highlight the target
-            const originalBg = target.style.backgroundColor;
-            target.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
-            setTimeout(() => {
-              target.style.backgroundColor = originalBg;
-            }, 2000);
-          }
+          targetElement.scrollIntoView({
+            behavior: 'smooth'
+          });
+          hidePageStructure();
         });
 
         item.appendChild(link);
@@ -777,14 +770,11 @@ function showPageStructure(): void {
       }
     });
 
-    container.appendChild(heading);
-
     if (hasTargets) {
       container.appendChild(list);
     } else {
-      const noTargets = document.createElement('p');
+      const noTargets = document.createElement('p') as HTMLElement;
       noTargets.textContent = t.noTargets;
-      noTargets.style.color = '#666';
       noTargets.style.fontStyle = 'italic';
       container.appendChild(noTargets);
     }
@@ -794,119 +784,59 @@ function showPageStructure(): void {
 
   // Helper function to build landmarks
   function buildLandmarks() {
-    const container = document.createElement('div');
+    const container = document.createElement('div') as HTMLElement;
 
-    const heading = document.createElement('h3');
+    const heading = document.createElement('h3') as HTMLElement;
     heading.textContent = t.landmarksTitle;
     heading.style.fontSize = '16px';
     heading.style.margin = '0 0 15px 0';
     heading.style.fontWeight = 'bold';
 
-const landmarks = Array.from(document.querySelectorAll(
-      'main, [role="main"], header, [role="banner"], nav, [role="navigation"], ' +
-      'aside, [role="complementary"], footer, [role="contentinfo"], ' +
-      '[role="search"], [role="form"], section[aria-label], section[aria-labelledby]'
-    )).filter(el => !el.closest('[data-accessibility-widget]'));
+    container.appendChild(heading);
+
+    const landmarks = Array.from(document.querySelectorAll('[role="main"], [role="navigation"], [role="complementary"], [role="contentinfo"], [role="banner"], [role="search"], [role="form"], [role="region"]'))
+      .filter(el => !(el as HTMLElement).closest('[data-accessibility-widget]'));
 
     if (landmarks.length > 0) {
-      const list = document.createElement('ul');
+      const list = document.createElement('ul') as HTMLElement;
       list.style.listStyleType = 'none';
       list.style.padding = '0';
       list.style.margin = '0';
 
       landmarks.forEach(landmark => {
-        const item = document.createElement('li');
-        item.style.marginBottom = '10px';
+        const landmarkElement = landmark as HTMLElement;
+        const item = document.createElement('li') as HTMLElement;
+        item.style.marginBottom = '8px';
 
-        // Determine the role and label of the landmark
-        let role = landmark.getAttribute('role');
-        if (!role) {
-          switch (landmark.tagName.toLowerCase()) {
-            case 'main': role = 'main'; break;
-            case 'header': role = 'banner'; break;
-            case 'nav': role = 'navigation'; break;
-            case 'aside': role = 'complementary'; break;
-            case 'footer': role = 'contentinfo'; break;
-            default: role = 'region';
-          }
-        }
-
-        let label = landmark.getAttribute('aria-label') ||
-          (landmark.getAttribute('aria-labelledby') ?
-            document.getElementById(landmark.getAttribute('aria-labelledby') || '')?.textContent : '');
-
-        if (!label) {
-          // Try to find a heading element inside
-          const headingEl = landmark.querySelector('h1, h2, h3, h4, h5, h6');
-          if (headingEl) {
-            label = headingEl.textContent;
-          } else {
-            label = role.charAt(0).toUpperCase() + role.slice(1);
-          }
-        }
-
-        const link = document.createElement('a');
+        const link = document.createElement('a') as HTMLAnchorElement;
 
         // Create an ID for the landmark if it doesn't have one
-        if (!landmark.id) {
-          landmark.id = `landmark-${Math.random().toString(36).substring(2, 9)}`;
+        if (!landmarkElement.id) {
+          landmarkElement.id = `landmark-${Math.random().toString(36).substring(2, 9)}`;
         }
 
-        link.href = `#${landmark.id}`;
-        link.innerHTML = `<strong>${role}:</strong> ${label}`;
+        link.href = `#${landmarkElement.id}`;
+        link.textContent = landmarkElement.getAttribute('aria-label') || landmarkElement.getAttribute('role') || 'Unbenannte Landmarke';
         link.style.color = '#0066cc';
         link.style.textDecoration = 'none';
         link.style.fontSize = '14px';
         link.style.display = 'block';
-        link.style.padding = '8px 12px';
-        link.style.borderRadius = '4px';
-        link.style.backgroundColor = '#f5f5f5';
-        link.style.transition = 'background-color 0.2s';
-
-        link.addEventListener('mouseover', () => {
-          link.style.backgroundColor = '#e5e5e5';
-
-          // Highlight the landmark on hover
-          if (landmark instanceof HTMLElement) {
-            landmark.dataset.originalOutline = landmark.style.outline;
-            landmark.style.outline = '2px solid #0066cc';
-          }
-        });
-
-        link.addEventListener('mouseout', () => {
-          link.style.backgroundColor = '#f5f5f5';
-
-          // Remove highlight on mouseout
-          if (landmark instanceof HTMLElement) {
-            landmark.style.outline = landmark.dataset.originalOutline || '';
-          }
-        });
-
-        // Add click event to scroll to the landmark
         link.addEventListener('click', (e) => {
           e.preventDefault();
-          landmark.scrollIntoView({ behavior: 'smooth' });
-
-          // Set focus to the landmark
-          if (landmark instanceof HTMLElement) {
-            landmark.setAttribute('tabindex', '-1');
-            landmark.focus();
-          }
+          document.getElementById(landmarkElement.id)?.scrollIntoView({
+            behavior: 'smooth'
+          });
+          hidePageStructure();
         });
 
         item.appendChild(link);
         list.appendChild(item);
       });
-
-      container.appendChild(heading);
       container.appendChild(list);
     } else {
-      const noLandmarks = document.createElement('p');
+      const noLandmarks = document.createElement('p') as HTMLElement;
       noLandmarks.textContent = t.noLandmarks;
-      noLandmarks.style.color = '#666';
       noLandmarks.style.fontStyle = 'italic';
-
-      container.appendChild(heading);
       container.appendChild(noLandmarks);
     }
 
@@ -915,92 +845,62 @@ const landmarks = Array.from(document.querySelectorAll(
 
   // Helper function to build headings
   function buildHeadings() {
-    const container = document.createElement('div');
+    const container = document.createElement('div') as HTMLElement;
 
-    const heading = document.createElement('h3');
+    const heading = document.createElement('h3') as HTMLElement;
     heading.textContent = t.headingsTitle;
     heading.style.fontSize = '16px';
     heading.style.margin = '0 0 15px 0';
     heading.style.fontWeight = 'bold';
 
+    container.appendChild(heading);
+
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'))
-      .filter(el => !el.closest('[data-accessibility-widget]'));
+      .filter(el => !(el as HTMLElement).closest('[data-accessibility-widget]'));
 
     if (headings.length > 0) {
-      const list = document.createElement('ul');
+      const list = document.createElement('ul') as HTMLElement;
       list.style.listStyleType = 'none';
       list.style.padding = '0';
       list.style.margin = '0';
 
-      headings.forEach(headingEl => {
-        const level = parseInt(headingEl.tagName.substring(1));
+      headings.forEach(heading => {
+        const headingElement = heading as HTMLHeadingElement;
+        const level = parseInt(headingElement.tagName.substring(1));
 
-        const item = document.createElement('li');
-        item.style.marginBottom = '5px';
+        const item = document.createElement('li') as HTMLElement;
+        item.style.marginBottom = '8px';
+        item.style.marginLeft = `${(level - 1) * 15}px`;
 
-        const link = document.createElement('a');
+        const link = document.createElement('a') as HTMLAnchorElement;
 
         // Create an ID for the heading if it doesn't have one
-        if (!headingEl.id) {
-          headingEl.id = `heading-${Math.random().toString(36).substring(2, 9)}`;
+        if (!headingElement.id) {
+          headingElement.id = `heading-${Math.random().toString(36).substring(2, 9)}`;
         }
 
-        link.href = `#${headingEl.id}`;
-        link.textContent = headingEl.textContent || '';
-        link.style.color = '#333';
+        link.href = `#${headingElement.id}`;
+        link.textContent = headingElement.textContent || '';
+        link.style.color = '#0066cc';
         link.style.textDecoration = 'none';
         link.style.fontSize = '14px';
         link.style.display = 'block';
-        link.style.padding = '4px 8px';
-        link.style.paddingLeft = `${(level - 1) * 15 + 8}px`;
-        link.style.borderLeft = level === 1 ? '3px solid #0066cc' : 
-                               level === 2 ? '2px solid #0066cc' : '1px solid #0066cc';
-        link.style.backgroundColor = level === 1 ? '#f0f0f0' : 'transparent';
-        link.style.transition = 'background-color 0.2s';
-
-        // Add level indicator
-        const levelIndicator = document.createElement('span');
-        levelIndicator.textContent = `H${level}: `;
-        levelIndicator.style.color = '#666';
-        levelIndicator.style.marginRight = '5px';
-        levelIndicator.style.fontSize = '12px';
-
-        link.prepend(levelIndicator);
-
-        link.addEventListener('mouseover', () => {
-          link.style.backgroundColor = '#f0f0f0';
-        });
-
-        link.addEventListener('mouseout', () => {
-          link.style.backgroundColor = level === 1 ? '#f0f0f0' : 'transparent';
-        });
-
-        // Add click event to scroll to the heading
         link.addEventListener('click', (e) => {
           e.preventDefault();
-          headingEl.scrollIntoView({ behavior: 'smooth' });
-
-          // Briefly highlight the heading
-          const originalBg = headingEl.style.backgroundColor;
-          headingEl.style.backgroundColor = 'yellow';
-          setTimeout(() => {
-            headingEl.style.backgroundColor = originalBg;
-          }, 2000);
+          document.getElementById(headingElement.id)?.scrollIntoView({
+            behavior: 'smooth'
+          });
+          hidePageStructure();
         });
 
         item.appendChild(link);
         list.appendChild(item);
       });
-
-      container.appendChild(heading);
       container.appendChild(list);
     } else {
-      const noHeadings = document.createElement('p');
+      const noHeadings = document.createElement('p') as HTMLElement;
       noHeadings.textContent = t.noHeadingsFound;
-      noHeadings.style.color = '#666';
       noHeadings.style.fontStyle = 'italic';
-
-      container.appendChild(heading);
       container.appendChild(noHeadings);
     }
 
@@ -1009,265 +909,164 @@ const landmarks = Array.from(document.querySelectorAll(
 
   // Helper function to build breadcrumbs
   function buildBreadcrumbs() {
-    const container = document.createElement('div');
+    const container = document.createElement('div') as HTMLElement;
+    container.style.fontSize = '12px';
 
-    // Try to find existing breadcrumbs
-    const existingBreadcrumbs = document.querySelector('.breadcrumbs, .breadcrumb, [aria-label="breadcrumb"], [role="navigation"][aria-label*="breadcrumb"]');
+    const breadcrumbs = [];
+    let current = window.location.pathname;
 
-    if (existingBreadcrumbs) {
-      // Clone existing breadcrumbs
-      const breadcrumbsClone = existingBreadcrumbs.cloneNode(true);
-      container.appendChild(breadcrumbsClone);
-    } else {
-      // Create simple breadcrumbs based on URL
-      const pathParts = window.location.pathname.split('/').filter(Boolean);
+    // Add home page
+    breadcrumbs.push({
+      label: t.homePage,
+      path: '/'
+    });
 
-      if (pathParts.length > 0) {
-        const breadcrumbsList = document.createElement('ol');
-        breadcrumbsList.style.listStyleType = 'none';
-        breadcrumbsList.style.padding = '0';
-        breadcrumbsList.style.margin = '0';
-        breadcrumbsList.style.display = 'flex';
-        breadcrumbsList.style.flexWrap = 'wrap';
-        breadcrumbsList.style.alignItems = 'center';
+    // Split path into segments and add to breadcrumbs
+    current.split('/').filter(segment => segment.length > 0).forEach((segment, index, array) => {
+      const path = '/' + array.slice(0, index + 1).join('/');
+      // Simple heuristic to make segment more readable
+      const label = segment.replace(/-/g, ' ').replace(/\.html$/, '').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+      breadcrumbs.push({
+        label: label,
+        path: path
+      });
+    });
 
-        // Home link
-        const homeItem = document.createElement('li');
+    const list = document.createElement('ol') as HTMLElement;
+    list.style.display = 'flex';
+    list.style.listStyleType = 'none';
+    list.style.padding = '0';
+    list.style.margin = '0';
 
-        const homeLink = document.createElement('a');
-        homeLink.href = '/';
-        homeLink.textContent = language === 'en' ? 'Home' : 
-                              language === 'de' ? 'Startseite' : 
-                              language === 'fr' ? 'Accueil' : 'Inicio';
-        homeLink.style.color = '#0066cc';
-        homeLink.style.textDecoration = 'none';
-        homeLink.style.fontSize = '14px';
+    breadcrumbs.forEach((crumb, index) => {
+      const item = document.createElement('li') as HTMLElement;
+      item.style.display = 'flex';
+      item.style.alignItems = 'center';
 
-        homeItem.appendChild(homeLink);
-        breadcrumbsList.appendChild(homeItem);
+      const link = document.createElement('a') as HTMLAnchorElement;
+      link.href = crumb.path;
+      link.textContent = crumb.label;
+      link.style.color = '#0066cc';
+      link.style.textDecoration = 'none';
+      link.style.whiteSpace = 'nowrap';
 
-        // Path parts
-        let currentPath = '';
+      item.appendChild(link);
 
-        pathParts.forEach((part, index) => {
-          // Add separator
-          const separator = document.createElement('li');
-          separator.innerHTML = '&nbsp;&rsaquo;&nbsp;';
-          separator.style.color = '#666';
-          separator.style.margin = '0 5px';
-
-          breadcrumbsList.appendChild(separator);
-
-          // Add path part
-          const item = document.createElement('li');
-
-          currentPath += `/${part}`;
-
-          if (index === pathParts.length - 1) {
-            // Last item (current page)
-            const span = document.createElement('span');
-            span.textContent = part
-              .replace(/-/g, ' ') // Replace hyphens with spaces
-              .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
-            span.style.fontWeight = 'bold';
-
-            item.appendChild(span);
-          } else {
-            // Navigation item
-            const link = document.createElement('a');
-            link.href = currentPath;
-            link.textContent = part
-              .replace(/-/g, ' ') // Replace hyphens with spaces
-              .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
-            link.style.color = '#0066cc';
-            link.style.textDecoration = 'none';
-            link.style.fontSize = '14px';
-
-            item.appendChild(link);
-          }
-
-          breadcrumbsList.appendChild(item);
-        });
-
-        container.appendChild(breadcrumbsList);
-      } else {
-        // Homepage
-        const homeText = document.createElement('span');
-        homeText.textContent = t.homePage;
-        homeText.style.color = '#666';
-        homeText.style.fontStyle = 'italic';
-        homeText.style.fontSize = '14px';
-
-        container.appendChild(homeText);
+      if (index < breadcrumbs.length - 1) {
+        const separator = document.createElement('span') as HTMLElement;
+        separator.textContent = ' / ';
+        separator.style.margin = '0 5px';
+        separator.style.color = '#666';
+        item.appendChild(separator);
       }
-    }
+      list.appendChild(item);
+    });
 
+    container.appendChild(list);
     return container;
   }
 
   // Helper function to build page structure
   function buildPageStructure() {
-    const container = document.createElement('div');
+    const container = document.createElement('div') as HTMLElement;
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(120px, 1fr))';
+    container.style.gap = '10px';
 
-    const structureMap = document.createElement('div');
-    structureMap.style.border = '1px solid #ddd';
-    structureMap.style.borderRadius = '4px';
-    structureMap.style.padding = '10px';
-    structureMap.style.backgroundColor = '#f9f9f9';
-    structureMap.style.position = 'relative';
-    structureMap.style.height = '200px';
+    const structureMap = [
+      { selector: 'header, [role="banner"]', label: t.header },
+      { selector: 'main, [role="main"]', label: t.main },
+      { selector: 'nav, [role="navigation"]', label: t.navigation },
+      { selector: 'aside, [role="complementary"]', label: t.sidebar },
+      { selector: 'footer, [role="contentinfo"]', label: t.footer },
+    ];
 
-    // Identify key sections of the page for visualization
-    const visibleArea = document.createElement('div');
-    visibleArea.style.position = 'absolute';
-    visibleArea.style.top = '0';
-    visibleArea.style.right = '0';
-    visibleArea.style.bottom = '0';
-    visibleArea.style.left = '0';
-    visibleArea.style.border = '2px dashed #999';
-    visibleArea.style.margin = '10px';
-    visibleArea.style.borderRadius = '2px';
-    visibleArea.style.overflow = 'hidden';
+    structureMap.forEach(item => {
+      const elements = document.querySelectorAll(item.selector);
+      if (elements.length > 0) {
+        const count = elements.length;
+        const section = document.createElement('div') as HTMLElement;
+        section.style.border = '1px solid #eee';
+        section.style.borderRadius = '5px';
+        section.style.padding = '10px';
+        section.style.textAlign = 'center';
+        section.style.backgroundColor = '#f9f9f9';
 
-    // Header/Banner
-    const hasHeader = document.querySelector('header, [role="banner"]');
-    if (hasHeader) {
-      const headerEl = document.createElement('div');
-      headerEl.textContent = t.header;
-      headerEl.style.backgroundColor = '#c5e1ff';
-      headerEl.style.padding = '5px';
-      headerEl.style.textAlign = 'center';
-      headerEl.style.fontWeight = 'bold';
-      headerEl.style.fontSize = '12px';
-      headerEl.style.height = '15%';
-      headerEl.style.borderBottom = '1px solid #aaa';
+        const label = document.createElement('div') as HTMLElement;
+        label.textContent = item.label;
+        label.style.fontWeight = 'bold';
+        label.style.fontSize = '14px';
+        section.appendChild(label);
 
-      visibleArea.appendChild(headerEl);
-    }
+        const countText = document.createElement('div') as HTMLElement;
+        countText.textContent = `(${count})`;
+        countText.style.fontSize = '12px';
+        countText.style.color = '#666';
+        section.appendChild(countText);
 
-    // Main content container
-    const mainContainer = document.createElement('div');
-    mainContainer.style.display = 'flex';
-    mainContainer.style.height = hasHeader ? '70%' : '85%';
+        section.addEventListener('click', () => {
+          (elements[0] as HTMLElement).scrollIntoView({
+            behavior: 'smooth'
+          });
+          hidePageStructure();
+        });
 
-    // Navigation
-    const hasNav = document.querySelector('nav, [role="navigation"]');
-    if (hasNav) {
-      const navEl = document.createElement('div');
-      navEl.textContent = t.navigation;
-      navEl.style.backgroundColor = '#ffe6c5';
-      navEl.style.padding = '5px';
-      navEl.style.textAlign = 'center';
-      navEl.style.fontWeight = 'bold';
-      navEl.style.fontSize = '12px';
-      navEl.style.width = '20%';
-      navEl.style.borderRight = '1px solid #aaa';
-
-      mainContainer.appendChild(navEl);
-    }
-
-    // Main content
-    const mainContent = document.createElement('div');
-    mainContent.textContent = t.main;
-    mainContent.style.backgroundColor = '#e1ffc5';
-    mainContent.style.padding = '5px';
-    mainContent.style.textAlign = 'center';
-    mainContent.style.fontWeight = 'bold';
-    mainContent.style.fontSize = '12px';
-    mainContent.style.flex = '1';
-
-    // Check for multiple columns
-    const possibleColumns = document.querySelectorAll('.column, .col, [class*="col-"], [class*="column-"]');
-    if (possibleColumns.length > 1) {
-      mainContent.textContent = t.columns;
-      mainContent.style.display = 'flex';
-
-      for (let i = 0; i < Math.min(3, possibleColumns.length); i++) {
-        const column = document.createElement('div');
-        column.textContent = `${t.column} ${i+1}`;
-        column.style.flex = '1';
-        column.style.border = '1px dashed #aaa';
-        column.style.margin = '2px';
-        column.style.fontSize = '10px';
-
-        mainContent.appendChild(column);
-      }
-    }
-
-    mainContainer.appendChild(mainContent);
-
-    // Sidebar/Complementary content
-    const hasAside = document.querySelector('aside, [role="complementary"]');
-    if (hasAside) {
-      const asideEl = document.createElement('div');
-      asideEl.textContent = t.sidebar;
-      asideEl.style.backgroundColor = '#ffc5e1';
-      asideEl.style.padding = '5px';
-      asideEl.style.textAlign = 'center';
-      asideEl.style.fontWeight = 'bold';
-      asideEl.style.fontSize = '12px';
-      asideEl.style.width = '20%';
-      asideEl.style.borderLeft = '1px solid #aaa';
-
-      mainContainer.appendChild(asideEl);
-    }
-
-    visibleArea.appendChild(mainContainer);
-
-    // Footer
-    const hasFooter = document.querySelector('footer, [role="contentinfo"]');
-    if (hasFooter) {
-      const footerEl = document.createElement('div');
-      footerEl.textContent = t.footer;
-      footerEl.style.backgroundColor = '#e6e6e6';
-      footerEl.style.padding = '5px';
-      footerEl.style.textAlign = 'center';
-      footerEl.style.fontWeight = 'bold';
-      footerEl.style.fontSize = '12px';
-      footerEl.style.height = '15%';
-      footerEl.style.borderTop = '1px solid #aaa';
-
-      visibleArea.appendChild(footerEl);
-    }
-
-    // Viewport indicator
-    const viewport = document.createElement('div');
-    viewport.textContent = t.currentView;
-    viewport.style.position = 'absolute';
-    viewport.style.border = '2px solid red';
-    viewport.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
-    viewport.style.padding = '2px';
-    viewport.style.fontSize = '10px';
-    viewport.style.color = 'red';
-    viewport.style.fontWeight = 'bold';
-    viewport.style.width = '70%';
-    viewport.style.height = '30%';
-    viewport.style.left = '15%';
-    viewport.style.top = '30%';
-    viewport.style.pointerEvents = 'none';
-
-    structureMap.appendChild(visibleArea);
-    structureMap.appendChild(viewport);
-
-    // Create scrolling effect on hover for the structure map
-    structureMap.addEventListener('mousemove', (e) => {
-      const rect = structureMap.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      const percentY = (y / rect.height) * 100;
-
-      // Move the viewport indicator to show current view
-      if (percentY < 25) {
-        viewport.style.top = '10%';
-      } else if (percentY > 75) {
-        viewport.style.top = '60%';
-      } else {
-        viewport.style.top = '30%';
+        container.appendChild(section);
       }
     });
 
-    container.appendChild(structureMap);
+    // Columns detection (simple heuristic)
+    const columnElements = document.querySelectorAll('[class*="col-"], [class*="grid-"]');
+    if (columnElements.length > 0) {
+      const section = document.createElement('div') as HTMLElement;
+      section.style.border = '1px solid #eee';
+      section.style.borderRadius = '5px';
+      section.style.padding = '10px';
+      section.style.textAlign = 'center';
+      section.style.backgroundColor = '#f9f9f9';
+
+      const label = document.createElement('div') as HTMLElement;
+      label.textContent = t.columns;
+      label.style.fontWeight = 'bold';
+      label.style.fontSize = '14px';
+      section.appendChild(label);
+
+      const countText = document.createElement('div') as HTMLElement;
+      countText.textContent = `(${columnElements.length})`;
+      countText.style.fontSize = '12px';
+      countText.style.color = '#666';
+      section.appendChild(countText);
+
+      section.addEventListener('click', () => {
+        (columnElements[0] as HTMLElement).scrollIntoView({
+          behavior: 'smooth'
+        });
+        hidePageStructure();
+      });
+      container.appendChild(section);
+    }
+
+    // Current Viewport
+    const viewportSection = document.createElement('div') as HTMLElement;
+    viewportSection.style.border = '1px solid #eee';
+    viewportSection.style.borderRadius = '5px';
+    viewportSection.style.padding = '10px';
+    viewportSection.style.textAlign = 'center';
+    viewportSection.style.backgroundColor = '#f9f9f9';
+
+    const viewportLabel = document.createElement('div') as HTMLElement;
+    viewportLabel.textContent = t.currentView;
+    viewportLabel.style.fontWeight = 'bold';
+    viewportLabel.style.fontSize = '14px';
+    viewportSection.appendChild(viewportLabel);
+
+    const viewportSize = document.createElement('div') as HTMLElement;
+    viewportSize.textContent = `${window.innerWidth}px x ${window.innerHeight}px`;
+    viewportSize.style.fontSize = '12px';
+    viewportSize.style.color = '#666';
+    viewportSection.appendChild(viewportSize);
+
+    container.appendChild(viewportSection);
 
     return container;
   }
@@ -1701,7 +1500,7 @@ function getFontFamilyStyles(fontFamily: string): string {
 }
 
 // Apply multiple style adjustments based on the active settings
-export function applyAccessibilityStyles(settings: AccessibilitySettings): void {
+export function applyAccessibilityStyles(settings: AccessibilitySettings, shadowRoot?: ShadowRoot): void {
   // Remove any existing accessibility styles
   const existingStyle = document.getElementById('accessibility-styles');
   if (existingStyle) {
@@ -1932,7 +1731,7 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings): void 
     // Add virtual keyboard
     const virtualKeyboard = document.getElementById('virtual-keyboard');
     if (!virtualKeyboard) {
-      showVirtualKeyboard();
+      showVirtualKeyboard(shadowRoot);
     }
   } else {
     // Remove virtual keyboard
@@ -2044,4 +1843,3 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings): void 
   styleElement.textContent = cssRules;
   document.head.appendChild(styleElement);
 }
-// This file corrects a typo in the Array.from calls within the accessibility helpers.

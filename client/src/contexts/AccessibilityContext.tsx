@@ -111,11 +111,12 @@ interface AccessibilityContextType {
   setLanguage: (lang: Language) => void;
   translations: typeof translations['en'];
   applyAccessibilityChanges: () => void;
+  shadowRoot: ShadowRoot | null;
 }
 
 export const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
 
-export function AccessibilityProvider({ children }: { children: React.ReactNode }) {
+export function AccessibilityProvider({ children, shadowRoot }: { children: React.ReactNode, shadowRoot: ShadowRoot | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState<AccessibilitySettings>(defaultSettings);
   const [language, setLanguage] = useState<Language>('en');
@@ -305,7 +306,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
     // Log analytics
     try {
-      apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, { 
+      apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, {
         action: 'profile-applied',
         payload: {
           profileId
@@ -368,76 +369,8 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
   // Apply all accessibility changes to the DOM
   const applyAccessibilityChanges = useCallback(() => {
-    // Get the container
-    let container = document.getElementById('keyboard-nav-container');
-
-    // If it doesn't exist, create it
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'keyboard-nav-container';
-    }
-
-    // Remove any existing instruction box
-    const existingInstructionBox = document.getElementById('keyboard-nav-instructions');
-    if (existingInstructionBox) {
-      existingInstructionBox.remove();
-    }
-
-    if (settings.keyboardNavigation) {
-        // Create keyboard navigation instruction box
-        const instructionBox = document.createElement('div');
-        instructionBox.id = 'keyboard-nav-instructions';
-        instructionBox.innerHTML = `
-          <div style="
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #333;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            z-index: 10001;
-            max-width: 300px;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-          ">
-            <h4 style="margin: 0 0 10px 0; color: #fff;">Keyboard Navigation Active</h4>
-            <p style="margin: 0 0 8px 0;">• Tab: Next element</p>
-            <p style="margin: 0 0 8px 0;">• Shift+Tab: Previous element</p>
-            <p style="margin: 0 0 8px 0;">• Enter/Space: Activate</p>
-            <p style="margin: 0 0 12px 0;">• Esc: Close this help</p>
-            <button id="close-keyboard-nav" style="
-              background: #ff6600;
-              color: white;
-              border: none;
-              padding: 5px 10px;
-              border-radius: 4px;
-              cursor: pointer;
-              font-size: 12px;
-            ">Close Help</button>
-          </div>
-        `;
-
-        container.appendChild(instructionBox);
-        document.body.appendChild(container);
-
-        // Add tab index to interactive elements if they don't have one
-        const interactiveElements = document.querySelectorAll('a, button, input, select, textarea, [role="button"]');
-        Array.from(interactiveElements).forEach(element => {
-          if (!element.hasAttribute('tabindex') && !element.closest('[data-accessibility-widget]')) {
-            element.setAttribute('tabindex', '0');
-          }
-        });
-    } else {
-      // Remove container if it exists when keyboardNavigation is off
-      if (container) {
-        container.remove();
-      }
-    }
-    
-    applyAccessibilityStyles(settings);
-  }, [settings]);
+    applyAccessibilityStyles(settings, shadowRoot);
+  }, [settings, shadowRoot]);
 
   // Apply changes whenever settings change
   useEffect(() => {
@@ -476,6 +409,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
         setLanguage,
         translations: {...translations.en, ...translations[language]},
         applyAccessibilityChanges,
+        shadowRoot,
       }}
     >
       {children}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { WidgetButton } from './WidgetButton';
 import { WidgetPanel } from './WidgetPanel';
 import { useAccessibility } from '@/hooks/useAccessibility';
+import { AccessibilityProvider } from '@/contexts/AccessibilityContext';
 
 interface AccessibilityWidgetProps {
   shadowRootElement: ShadowRoot | null;
@@ -53,11 +54,11 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
   }, [isOpen, closeWidget, shadowRootElement]);
   
   return (
-    <>
+    <AccessibilityProvider shadowRoot={shadowRootElement}>
       <WidgetButton onClick={toggleWidget} isOpen={isOpen} />
       <div style={{ position: 'fixed', top: 0, left: 0 }}>
         <WidgetPanel isOpen={isOpen} ref={widgetRef} />
       </div>
-    </>
+    </AccessibilityProvider>
   );
 }
