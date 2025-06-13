@@ -22,7 +22,7 @@ const config = {
   // GitHub Pages URL-Basis
   baseUrl: currentScript?.getAttribute('data-base-url') || ''
 };
-linkTag.href = `${config.baseUrl}/style.css`;
+linkTag.href = `${config.baseUrl}/index.css`;
 shadow.appendChild(linkTag);
 
 // Widget im Shadow DOM rendern
