@@ -120,10 +120,10 @@ export function VisionTab() {
       
       {/* Text Adjustments */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">{translations.textAdjustments.toUpperCase()}</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">{translations.textAdjustments.toUpperCase()}</h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">{translations.textSize}</span>
+            <span className="text-sm text-gray-900">{translations.textSize}</span>
             <div className="flex items-center gap-2">
               <button 
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -132,7 +132,7 @@ export function VisionTab() {
               >
                 <MinusIcon className="h-4 w-4" />
               </button>
-              <span className="text-sm w-5 text-center">{settings.textSize}</span>
+              <span className="text-sm w-5 text-center text-gray-900">{settings.textSize}</span>
               <button 
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 text-gray-800 hover:bg-gray-300"
                 onClick={() => incrementSetting('textSize')}
@@ -143,7 +143,7 @@ export function VisionTab() {
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">{translations.lineHeight}</span>
+            <span className="text-sm text-gray-900">{translations.lineHeight}</span>
             <div className="flex items-center gap-2">
               <button 
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -152,7 +152,7 @@ export function VisionTab() {
               >
                 <MinusIcon className="h-4 w-4" />
               </button>
-              <span className="text-sm w-5 text-center">{settings.lineHeight}</span>
+              <span className="text-sm w-5 text-center text-gray-900">{settings.lineHeight}</span>
               <button 
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 text-gray-800 hover:bg-gray-300"
                 onClick={() => incrementSetting('lineHeight')}
@@ -163,7 +163,7 @@ export function VisionTab() {
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">{translations.letterSpacing}</span>
+            <span className="text-sm text-gray-900">{translations.letterSpacing}</span>
             <div className="flex items-center gap-2">
               <button 
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -172,7 +172,7 @@ export function VisionTab() {
               >
                 <MinusIcon className="h-4 w-4" />
               </button>
-              <span className="text-sm w-5 text-center">{settings.letterSpacing}</span>
+              <span className="text-sm w-5 text-center text-gray-900">{settings.letterSpacing}</span>
               <button 
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 text-gray-800 hover:bg-gray-300"
                 onClick={() => incrementSetting('letterSpacing')}
