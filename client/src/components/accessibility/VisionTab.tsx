@@ -23,7 +23,7 @@ export function VisionTab() {
             className={`px-3 py-2 text-xs font-medium ${
               settings.contrastMode === 'increased' 
                 ? 'bg-primary text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
             } rounded-md transition-colors`}
             onClick={() => updateSetting('contrastMode', settings.contrastMode === 'increased' ? 'default' : 'increased')}
           >
@@ -33,7 +33,7 @@ export function VisionTab() {
             className={`px-3 py-2 text-xs font-medium ${
               settings.contrastMode === 'high' 
                 ? 'bg-primary text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
             } rounded-md transition-colors`}
             onClick={() => updateSetting('contrastMode', settings.contrastMode === 'high' ? 'default' : 'high')}
           >
@@ -43,7 +43,7 @@ export function VisionTab() {
             className={`px-3 py-2 text-xs font-medium ${
               settings.contrastMode === 'dark' 
                 ? 'bg-primary text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
             } rounded-md transition-colors`}
             onClick={() => updateSetting('contrastMode', settings.contrastMode === 'dark' ? 'default' : 'dark')}
           >
@@ -53,7 +53,7 @@ export function VisionTab() {
             className={`px-3 py-2 text-xs font-medium ${
               settings.contrastMode === 'light' 
                 ? 'bg-primary text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
             } rounded-md transition-colors`}
             onClick={() => updateSetting('contrastMode', settings.contrastMode === 'light' ? 'default' : 'light')}
           >
@@ -126,7 +126,7 @@ export function VisionTab() {
             <span className="text-sm text-gray-700">{translations.textSize}</span>
             <div className="flex items-center gap-2">
               <button 
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-700 hover:bg-gray-200"
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white hover:bg-blue-600"
                 onClick={() => decrementSetting('textSize')}
                 aria-label={translations.decreaseTextSize}
               >
@@ -134,7 +134,7 @@ export function VisionTab() {
               </button>
               <span className="text-sm w-5 text-center">{settings.textSize}</span>
               <button 
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-700 hover:bg-gray-200"
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white hover:bg-blue-600"
                 onClick={() => incrementSetting('textSize')}
                 aria-label={translations.increaseTextSize}
               >
@@ -146,7 +146,7 @@ export function VisionTab() {
             <span className="text-sm text-gray-700">{translations.lineHeight}</span>
             <div className="flex items-center gap-2">
               <button 
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-700 hover:bg-gray-200"
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white hover:bg-blue-600"
                 onClick={() => decrementSetting('lineHeight')}
                 aria-label={translations.decreaseLineHeight}
               >
@@ -154,7 +154,7 @@ export function VisionTab() {
               </button>
               <span className="text-sm w-5 text-center">{settings.lineHeight}</span>
               <button 
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-700 hover:bg-gray-200"
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white hover:bg-blue-600"
                 onClick={() => incrementSetting('lineHeight')}
                 aria-label={translations.increaseLineHeight}
               >
@@ -166,7 +166,7 @@ export function VisionTab() {
             <span className="text-sm text-gray-700">{translations.letterSpacing}</span>
             <div className="flex items-center gap-2">
               <button 
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-700 hover:bg-gray-200"
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white hover:bg-blue-600"
                 onClick={() => decrementSetting('letterSpacing')}
                 aria-label={translations.decreaseLetterSpacing}
               >
@@ -174,7 +174,7 @@ export function VisionTab() {
               </button>
               <span className="text-sm w-5 text-center">{settings.letterSpacing}</span>
               <button 
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-700 hover:bg-gray-200"
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white hover:bg-blue-600"
                 onClick={() => incrementSetting('letterSpacing')}
                 aria-label={translations.increaseLetterSpacing}
               >
