@@ -13,7 +13,16 @@ document.body.appendChild(container);
 // CSS als <link rel="stylesheet"> ins Shadow DOM einfügen
 const linkTag = document.createElement("link");
 linkTag.rel = "stylesheet";
-linkTag.href = "style.css";
+const currentScript = document.currentScript;
+const config = {
+  position: currentScript?.getAttribute('data-position') || 'bottom-right',
+  language: currentScript?.getAttribute('data-language') || 'de',
+  color: currentScript?.getAttribute('data-color') || '#0066cc',
+  size: currentScript?.getAttribute('data-size') || 'medium',
+  // GitHub Pages URL-Basis
+  baseUrl: currentScript?.getAttribute('data-base-url') || ''
+};
+linkTag.href = `${config.baseUrl}/style.css`;
 shadow.appendChild(linkTag);
 
 // Widget im Shadow DOM rendern
