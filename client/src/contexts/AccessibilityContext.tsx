@@ -4,6 +4,8 @@ import { applyAccessibilityStyles } from '@/lib/a11y-helpers';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
+const NETLIFY_FUNCTIONS_API_BASE = '/.netlify/functions/analytics';
+
 // Define types
 export type AccessibilityProfileId = 
   | 'visionImpaired' 
@@ -169,9 +171,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
     // Save analytics data
     try {
-      apiRequest('POST', '/api/analytics/setting-change', {
-        setting: key,
-        value,
+      apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, {
+        action: 'setting-change',
+        payload: {
+          setting: key,
+          value,
+        },
       });
     } catch (error) {
       console.error('Failed to log setting change', error);
@@ -186,7 +191,25 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
       ...prevSettings,
       [key]: Math.min((prevSettings[key] as number) + 1, 5),
     }));
-  }, []);
+
+    // Log analytics
+    try {
+      apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, { 
+        action: 'profile-applied',
+        payload: {
+          profileId: 'visionImpaired'
+        },
+      });
+    } catch (error) {
+      console.error('Failed to log profile application', error);
+    }
+
+    // Show toast notification
+    toast({
+      title: translations[language].profileApplied,
+      description: translations[language]['visionImpaired'],
+    });
+  }, [language, toast]);
 
   // Decrement numeric settings
   const decrementSetting = useCallback((
@@ -282,8 +305,11 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
     // Log analytics
     try {
-      apiRequest('POST', '/api/analytics/profile-applied', { 
-        profileId
+      apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, { 
+        action: 'profile-applied',
+        payload: {
+          profileId
+        },
       });
     } catch (error) {
       console.error('Failed to log profile application', error);
@@ -307,7 +333,10 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
     // Log analytics
     try {
-      apiRequest('POST', '/api/analytics/settings-reset', {});
+      apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, {
+        action: 'settings-reset',
+        payload: {},
+      });
     } catch (error) {
       console.error('Failed to log settings reset', error);
     }

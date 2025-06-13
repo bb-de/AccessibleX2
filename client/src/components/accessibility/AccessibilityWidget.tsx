@@ -13,6 +13,7 @@ interface AccessibilityWidgetProps {
  */
 export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetProps) {
   const { isOpen, toggleWidget, closeWidget } = useAccessibility();
+  console.log('AccessibilityWidget render. isOpen:', isOpen, 'shadowRootElement:', shadowRootElement);
   const widgetRef = useRef<HTMLDivElement>(null);
   
   // Event-Listener für Klicks außerhalb des Widgets
