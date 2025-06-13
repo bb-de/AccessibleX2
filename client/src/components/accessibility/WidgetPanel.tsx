@@ -87,7 +87,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
       <div className="flex border-b border-gray-200 bg-gray-50 rounded-t-lg overflow-x-auto">
         <button 
           className={`flex-1 py-3 px-2 text-sm font-medium ${
-            activeTab === "profiles" ? "text-primary border-b-2 border-primary" : "text-gray-500 hover:text-gray-700"
+            activeTab === "profiles" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700"
           }`}
           onClick={() => handleTabChange("profiles")}
           aria-selected={activeTab === "profiles"}
@@ -99,7 +99,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         </button>
         <button 
           className={`flex-1 py-3 px-2 text-sm font-medium ${
-            activeTab === "vision" ? "text-primary border-b-2 border-primary" : "text-gray-500 hover:text-gray-700"
+            activeTab === "vision" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700"
           }`}
           onClick={() => handleTabChange("vision")}
           aria-selected={activeTab === "vision"}
@@ -111,7 +111,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         </button>
         <button 
           className={`flex-1 py-3 px-2 text-sm font-medium ${
-            activeTab === "content" ? "text-primary border-b-2 border-primary" : "text-gray-500 hover:text-gray-700"
+            activeTab === "content" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700"
           }`}
           onClick={() => handleTabChange("content")}
           aria-selected={activeTab === "content"}
@@ -123,7 +123,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         </button>
         <button 
           className={`flex-1 py-3 px-2 text-sm font-medium ${
-            activeTab === "navigation" ? "text-primary border-b-2 border-primary" : "text-gray-500 hover:text-gray-700"
+            activeTab === "navigation" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700"
           }`}
           onClick={() => handleTabChange("navigation")}
           aria-selected={activeTab === "navigation"}
