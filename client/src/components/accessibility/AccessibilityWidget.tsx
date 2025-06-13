@@ -38,7 +38,7 @@ export function AccessibilityWidget() {
   return (
     <>
       <WidgetButton onClick={toggleWidget} isOpen={isOpen} />
-      <div ref={widgetRef} style={{ position: 'fixed', top: 0, left: 0, width: 0, height: 0 }}>
+      <div ref={widgetRef} style={{ position: 'fixed', top: 0, left: 0 }}>
         <WidgetPanel isOpen={isOpen} />
       </div>
     </>
