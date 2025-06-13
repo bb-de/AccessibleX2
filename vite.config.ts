@@ -36,12 +36,12 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [],
-      output: {
-        globals: {
-          react: "React",
-          "react-dom": "ReactDOM",
-        },
-      },
+      // output: { // DIESER BLOCK WIRD ENTFERNT ODER AUSKOMMENTIERT
+      //   globals: {
+      //     react: "React",
+      //     "react-dom": "ReactDOM",
+      //   },
+      // },
     },
   },
   define: {

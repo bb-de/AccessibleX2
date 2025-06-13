@@ -13,7 +13,7 @@ document.body.appendChild(container);
 // CSS als <link rel="stylesheet"> ins Shadow DOM einfügen
 const linkTag = document.createElement("link");
 linkTag.rel = "stylesheet";
-linkTag.href = "/style.css";
+linkTag.href = "/dist/widget/style.css";
 shadow.appendChild(linkTag);
 
 // Widget im Shadow DOM rendern
