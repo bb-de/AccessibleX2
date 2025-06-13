@@ -68,8 +68,8 @@ export function ContentTab() {
           <button 
             className={`px-3 py-2 text-xs font-medium ${
               settings.fontFamily === 'readable' 
-                ? 'bg-primary text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
             } rounded-md transition-colors`}
             onClick={() => updateSetting('fontFamily', settings.fontFamily === 'readable' ? 'default' : 'readable')}
           >
@@ -78,8 +78,8 @@ export function ContentTab() {
           <button 
             className={`px-3 py-2 text-xs font-medium ${
               settings.fontFamily === 'dyslexic' 
-                ? 'bg-primary text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
             } rounded-md transition-colors`}
             onClick={() => updateSetting('fontFamily', settings.fontFamily === 'dyslexic' ? 'default' : 'dyslexic')}
           >
@@ -88,8 +88,8 @@ export function ContentTab() {
           <button 
             className={`px-3 py-2 text-xs font-medium ${
               settings.fontFamily === 'default' 
-                ? 'bg-primary text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
             } rounded-md transition-colors`}
             onClick={() => updateSetting('fontFamily', 'default')}
           >
@@ -121,7 +121,9 @@ export function ContentTab() {
             <div className="grid grid-cols-3 gap-2">
               <button 
                 className={`flex flex-col items-center justify-center p-3 rounded-md transition-colors ${
-                  settings.textAlign === 'left' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  settings.textAlign === 'left' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                 }`}
                 onClick={() => updateSetting('textAlign', settings.textAlign === 'left' ? 'default' : 'left')}
                 aria-label="Align text left"
@@ -136,7 +138,9 @@ export function ContentTab() {
               
               <button 
                 className={`flex flex-col items-center justify-center p-3 rounded-md transition-colors ${
-                  settings.textAlign === 'center' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  settings.textAlign === 'center' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                 }`}
                 onClick={() => updateSetting('textAlign', settings.textAlign === 'center' ? 'default' : 'center')}
                 aria-label="Align text center"
@@ -151,7 +155,9 @@ export function ContentTab() {
               
               <button 
                 className={`flex flex-col items-center justify-center p-3 rounded-md transition-colors ${
-                  settings.textAlign === 'right' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  settings.textAlign === 'right' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                 }`}
                 onClick={() => updateSetting('textAlign', settings.textAlign === 'right' ? 'default' : 'right')}
                 aria-label="Align text right"
