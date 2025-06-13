@@ -21,15 +21,19 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
     if (!isOpen || !shadowRootElement) return;
     
     const handleClickOutside = (event: Event) => {
-      if (!widgetRef.current) return; // Sicherstellen, dass die Referenz verfügbar ist
+      if (!widgetRef.current) return;
 
-      // Überprüfen, ob der Klick auf das Widget-Panel selbst oder einen seiner Nachfahren im zusammengesetzten Pfad erfolgte
-      const isClickInsideWidget = event.composedPath().some(node => node === widgetRef.current || (widgetRef.current && widgetRef.current.contains(node as Node)));
-
-      // Überprüfen, ob der Klick auf den Umschalt-Button erfolgte
+      const path = event.composedPath();
+      const isClickInsideWidget = path.some(node => node === widgetRef.current || (widgetRef.current && widgetRef.current.contains(node as Node)));
       const isClickOnToggleButton = (event.target as Element).closest('#accessibility-toggle');
 
+      console.log('Klick-Ereignis:', event);
+      console.log('Pfad des Ereignisses:', path);
+      console.log('Ist Klick im Widget?', isClickInsideWidget);
+      console.log('Ist Klick auf Umschalt-Button?', isClickOnToggleButton);
+
       if (!isClickInsideWidget && !isClickOnToggleButton) {
+        console.log('Schließe Widget!');
         closeWidget();
       }
     };

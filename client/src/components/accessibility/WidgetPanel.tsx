@@ -48,7 +48,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         scrollBehavior: 'smooth'
       }}
       aria-hidden={!isOpen}
-      onClick={(e) => e.stopPropagation()} // Prevent clicks inside the panel from closing it
+      onMouseDown={(e) => e.stopPropagation()} // Prevent clicks inside the panel from closing it
     >
       {/* Panel Header */}
       <div className="p-4 border-b border-gray-200">
