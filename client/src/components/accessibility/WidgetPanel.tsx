@@ -35,7 +35,7 @@ export function WidgetPanel({ isOpen }: WidgetPanelProps) {
     <div 
       id="accessibility-panel" 
       className={`fixed top-4 right-4 bg-white rounded-xl shadow-lg transition-all duration-300 transform z-[9999] ${
-        isOpen ? 'translate-y-0 opacity-100 visible' : 'translate-y-[-100%] opacity-0 invisible'
+        isOpen ? 'translate-y-0 opacity-100 visible' : 'translate-y-[-100%] opacity-0 invisible w-0 h-0 overflow-hidden pointer-events-none'
       }`}
       style={{
         width: '340px',
