@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef } from "react";
 import { ProfilesTab } from "./ProfilesTab";
 import { VisionTab } from "./VisionTab";
 import { ContentTab } from "./ContentTab";
@@ -23,7 +23,7 @@ interface WidgetPanelProps {
 
 type TabType = "profiles" | "vision" | "content" | "navigation";
 
-export function WidgetPanel({ isOpen }: WidgetPanelProps) {
+export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpen }, ref) => {
   const [activeTab, setActiveTab] = useState<TabType>("profiles");
   const { toggleWidget, resetSettings, translations } = useAccessibility();
 
@@ -34,6 +34,7 @@ export function WidgetPanel({ isOpen }: WidgetPanelProps) {
   return (
     <div 
       id="accessibility-panel" 
+      ref={ref} 
       className={`fixed top-4 right-4 bg-white rounded-xl shadow-lg transition-all duration-300 transform z-[9999] ${
         isOpen ? 'translate-y-0 opacity-100 visible' : 'translate-y-[-100%] opacity-0 invisible w-0 h-0 overflow-hidden pointer-events-none'
       }`}
@@ -146,7 +147,7 @@ export function WidgetPanel({ isOpen }: WidgetPanelProps) {
       <WidgetFooter />
     </div>
   );
-}
+})
 
 function AccessibilityIcon({ className }: { className?: string }) {
   return (

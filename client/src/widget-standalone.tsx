@@ -33,7 +33,7 @@ shadow.appendChild(shadowRoot);
 ReactDOM.createRoot(shadowRoot).render(
   <React.StrictMode>
     <AccessibilityProvider>
-      <AccessibilityWidget />
+      <AccessibilityWidget shadowRootElement={shadow} />
     </AccessibilityProvider>
   </React.StrictMode>
 ); 
