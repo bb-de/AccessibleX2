@@ -4,7 +4,7 @@ import { applyAccessibilityStyles } from '@/lib/a11y-helpers';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
-const NETLIFY_FUNCTIONS_API_BASE = '/.netlify/functions/analytics';
+const NETLIFY_FUNCTIONS_API_BASE = 'https://shimmering-tartufo-f58e9c.netlify.app/.netlify/functions/analytics';
 
 // Define types
 export type AccessibilityProfileId = 
