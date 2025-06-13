@@ -17,8 +17,12 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
   
   // Event-Listener für Klicks außerhalb des Widgets
   useEffect(() => {
+    console.log('useEffect in AccessibilityWidget ausgeführt. isOpen:', isOpen, 'shadowRootElement:', shadowRootElement);
     // Nur hinzufügen, wenn das Widget geöffnet ist
-    if (!isOpen || !shadowRootElement) return;
+    if (!isOpen || !shadowRootElement) {
+      console.log('Bedingung zum Anhängen des Listeners nicht erfüllt. isOpen:', isOpen, 'shadowRootElement:', shadowRootElement);
+      return;
+    }
     
     const handleClickOutside = (event: Event) => {
       if (!widgetRef.current) return;
