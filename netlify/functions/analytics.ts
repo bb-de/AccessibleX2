@@ -5,6 +5,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
     'Access-Control-Allow-Origin': 'https://www.brandingbrothers.de', // Ersetzen Sie dies durch die genaue Domain, von der aus Sie Anfragen senden
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Credentials': 'true',
   };
 
   // Handle Preflight-Anfragen (OPTIONS)
