@@ -110,7 +110,11 @@ export function ProfilesTab() {
           return (
             <div 
               key={profile.id}
-              className={`relative border ${isActive ? 'border-primary bg-blue-100' : 'border-gray-200'} rounded-lg p-3 hover:border-primary cursor-pointer transition-colors`}
+              className={`relative border rounded-lg p-3 cursor-pointer transition-colors ${
+                isActive
+                  ? 'border-[#007bff] bg-[#007bff] text-white'
+                  : 'border-[#0056b3] bg-[#0056b3] text-white hover:bg-[#004085] hover:border-[#004085]'
+              }`}
               onClick={(e) => {
                 e.stopPropagation(); // Prevent event from bubbling up
                 handleProfileClick(profile.id);
@@ -128,14 +132,16 @@ export function ProfilesTab() {
               }}
             >
               {isActive && (
-                <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-md w-6 h-6 flex items-center justify-center">
+                <div className="absolute top-2 right-2 bg-[#007bff] text-white rounded-md w-6 h-6 flex items-center justify-center">
                   <Check className="w-4 h-4" />
                 </div>
               )}
-              <div className={`w-full h-20 ${isActive ? 'bg-blue-100' : 'bg-gray-100'} rounded mb-2 flex items-center justify-center`}>
+              <div className={`w-full h-20 rounded mb-2 flex items-center justify-center ${
+                isActive ? 'bg-white' : 'bg-[#0056b3]'
+              }`}>
                 {profile.icon}
               </div>
-              <h4 className="text-sm font-medium text-gray-800">{translations[profile.id]}</h4>
+              <h4 className="text-sm font-medium text-white">{translations[profile.id]}</h4>
             </div>
           );
         })}
