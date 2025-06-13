@@ -137,9 +137,9 @@ export function ProfilesTab() {
                 </div>
               )}
               <div className={`w-full h-20 rounded mb-2 flex items-center justify-center ${
-                isActive ? 'bg-white' : 'bg-gray-300'
+                isActive ? 'bg-blue-600' : 'bg-gray-300'
               }`}>
-                {profile.icon}
+                {profile.icon(isActive ? 'text-white' : 'text-gray-800')}
               </div>
               <h4 className="text-sm font-medium ${
                 isActive ? 'text-white' : 'text-gray-800'
