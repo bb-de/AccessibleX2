@@ -1821,7 +1821,7 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     }
   } else {
     // Remove virtual keyboard
-    hideVirtualKeyboard();
+    hideVirtualKeyboard(shadowRoot);
   }
 
   // Apply page structure

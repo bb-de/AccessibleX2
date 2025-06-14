@@ -25,11 +25,14 @@ type TabType = "profiles" | "vision" | "content" | "navigation";
 
 export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpen }, ref) => {
   const [activeTab, setActiveTab] = useState<TabType>("profiles");
-  const { toggleWidget, resetSettings, translations } = useAccessibility();
+  const { toggleWidget, resetSettings, translations, settings } = useAccessibility();
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
   };
+
+  // Calculate dynamic bottom position based on virtual keyboard status
+  const dynamicBottom = settings.virtualKeyboard ? '330px' : '80px'; // 80px (original) + ~250px (keyboard height)
 
   return (
     <div 
@@ -42,8 +45,8 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         width: '340px',
         minWidth: '340px',
         maxWidth: '340px',
-        maxHeight: 'calc(100vh - 120px)', // Platz für Button unten lassen
-        bottom: '80px', // Abstand vom Button
+        maxHeight: `calc(100vh - ${dynamicBottom} - 40px)`, // Anpassung der maximalen Höhe
+        bottom: dynamicBottom, // Dynamischer Abstand vom unteren Rand
         overflowY: 'scroll',
         scrollBehavior: 'smooth',
         zIndex: 999999 // Höherer z-index als die virtuelle Tastatur
