@@ -1,6 +1,9 @@
 import { AccessibilitySettings } from '@/contexts/AccessibilityContext';
 import { getTextColorStyles, getTitleColorStyles, getBackgroundColorStyles } from './color-helpers';
 
+// Global variable to store the last active input element
+let _lastActiveInput: HTMLInputElement | HTMLTextAreaElement | null = null;
+
 // Helper function to enable keyboard navigation
 function enableKeyboardNavigation(): void {
   // Create a container for keyboard navigation helpers
@@ -85,6 +88,16 @@ function disableKeyboardNavigation(): void {
 
 // Helper function to show virtual keyboard
 function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
+  // Store the currently active element if it's an input or textarea
+  const currentActiveElement = getActiveElement(document);
+  if (currentActiveElement instanceof HTMLInputElement || currentActiveElement instanceof HTMLTextAreaElement) {
+    _lastActiveInput = currentActiveElement;
+    console.log("Debug: Stored _lastActiveInput:", _lastActiveInput);
+  } else {
+    _lastActiveInput = null;
+    console.log("Debug: No active input/textarea to store.");
+  }
+
   // Create a keyboard container
   const keyboard = document.createElement('div') as HTMLElement;
   keyboard.id = 'virtual-keyboard';
@@ -165,13 +178,13 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
       // Add key press functionality
       keyButton.addEventListener('click', () => {
         if (key === 'Space') {
-          insertTextAtCursor(' ', shadowRoot);
+          insertTextAtCursor(' ');
         } else if (key === 'Backspace') {
-          deleteTextAtCursor(shadowRoot);
+          deleteTextAtCursor();
         } else if (key === 'Shift') {
           toggleShift();
         } else {
-          insertTextAtCursor(key, shadowRoot);
+          insertTextAtCursor(key);
         }
       });
 
@@ -246,9 +259,9 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
   }
 
   // Insert text at cursor position
-  function insertTextAtCursor(text: string, currentShadowRoot?: ShadowRoot) {
-    const activeElement = getActiveElement(document);
-    console.log("Debug: insertTextAtCursor - activeElement:", activeElement);
+  function insertTextAtCursor(text: string) {
+    const activeElement = _lastActiveInput;
+    console.log("Debug: insertTextAtCursor - activeElement (using _lastActiveInput):", activeElement);
 
     if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
       console.log("Debug: insertTextAtCursor - activeElement is input/textarea.");
@@ -268,14 +281,14 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
       activeElement.dispatchEvent(event);
       console.log("Debug: insertTextAtCursor - input event dispatched.");
     } else {
-      console.log("Debug: insertTextAtCursor - activeElement is NOT input/textarea.", activeElement);
+      console.log("Debug: insertTextAtCursor - _lastActiveInput is NOT input/textarea or is null.", activeElement);
     }
   }
 
   // Delete text at cursor position
-  function deleteTextAtCursor(currentShadowRoot?: ShadowRoot) {
-    const activeElement = getActiveElement(document);
-    console.log("Debug: deleteTextAtCursor - activeElement:", activeElement);
+  function deleteTextAtCursor() {
+    const activeElement = _lastActiveInput;
+    console.log("Debug: deleteTextAtCursor - activeElement (using _lastActiveInput):", activeElement);
 
     if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
       console.log("Debug: deleteTextAtCursor - activeElement is input/textarea.");
@@ -301,7 +314,7 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
       activeElement.dispatchEvent(event);
       console.log("Debug: deleteTextAtCursor - input event dispatched.");
     } else {
-      console.log("Debug: deleteTextAtCursor - activeElement is NOT input/textarea.", activeElement);
+      console.log("Debug: deleteTextAtCursor - _lastActiveInput is NOT input/textarea or is null.", activeElement);
     }
   }
 }
