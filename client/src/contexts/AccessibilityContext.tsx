@@ -192,6 +192,8 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
     } catch (error) {
       console.error('Failed to log setting change', error);
     }
+
+    console.log(`Debug: Setting '${key}' updated to '${value}'`);
   }, []);
 
   // Increment numeric settings
