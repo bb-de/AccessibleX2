@@ -30,7 +30,7 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
       if (!widgetRef.current) return;
 
       const path = event.composedPath();
-      const isClickInsideWidget = path.some(node => node === widgetRef.current || (widgetRef.current && widgetRef.current.contains(node as Node)));
+      const isClickInsideWidget = path.some(node => node === widgetRef.current || (widgetRef.current && node instanceof Node && widgetRef.current.contains(node)));
       const isClickOnToggleButton = (event.target as Element).closest('#accessibility-toggle');
 
       console.log('Klick-Ereignis:', event);
