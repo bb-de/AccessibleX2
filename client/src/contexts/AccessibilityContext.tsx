@@ -158,6 +158,16 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
   // Close widget
   const closeWidget = useCallback(() => {
     setIsOpen(false);
+    // Reset all slider values to default
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      textSize: defaultSettings.textSize,
+      lineHeight: defaultSettings.lineHeight,
+      letterSpacing: defaultSettings.letterSpacing,
+      wordSpacing: defaultSettings.wordSpacing,
+      saturation: defaultSettings.saturation,
+      monochrome: defaultSettings.monochrome
+    }));
   }, []);
 
   // Update a single setting
@@ -385,13 +395,21 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
       }
     };
 
-    // Listen for our custom event from the a11y-helpers.ts
+    const handleVirtualKeyboardClose = () => {
+      if (settings.virtualKeyboard) {
+        updateSetting('virtualKeyboard', false);
+      }
+    };
+
+    // Listen for our custom events
     document.addEventListener('accessibility:page-structure-closed', handlePageStructureClose);
+    document.addEventListener('accessibility:virtual-keyboard-closed', handleVirtualKeyboardClose);
 
     return () => {
       document.removeEventListener('accessibility:page-structure-closed', handlePageStructureClose);
+      document.removeEventListener('accessibility:virtual-keyboard-closed', handleVirtualKeyboardClose);
     };
-  }, [settings.pageStructure, updateSetting]);
+  }, [settings.pageStructure, settings.virtualKeyboard, updateSetting]);
 
   return (
     <AccessibilityContext.Provider

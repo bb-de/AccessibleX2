@@ -288,6 +288,9 @@ function hideVirtualKeyboard(): void {
   let keyboard = document.getElementById('virtual-keyboard');
   if (keyboard && keyboard.closest('[data-accessibility-widget]')) {
     keyboard.remove();
+    // Reset virtual keyboard setting
+    const event = new CustomEvent('accessibility:virtual-keyboard-closed');
+    document.dispatchEvent(event);
     return;
   }
 
@@ -295,6 +298,9 @@ function hideVirtualKeyboard(): void {
   keyboard = document.body.querySelector('#virtual-keyboard');
   if (keyboard) {
     keyboard.remove();
+    // Reset virtual keyboard setting
+    const event = new CustomEvent('accessibility:virtual-keyboard-closed');
+    document.dispatchEvent(event);
   }
 }
 
