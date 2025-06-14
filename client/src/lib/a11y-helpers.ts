@@ -165,13 +165,13 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
       // Add key press functionality
       keyButton.addEventListener('click', () => {
         if (key === 'Space') {
-          insertTextAtCursor(' ');
+          insertTextAtCursor(' ', shadowRoot);
         } else if (key === 'Backspace') {
-          deleteTextAtCursor();
+          deleteTextAtCursor(shadowRoot);
         } else if (key === 'Shift') {
           toggleShift();
         } else {
-          insertTextAtCursor(key);
+          insertTextAtCursor(key, shadowRoot);
         }
       });
 
@@ -237,8 +237,14 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
   }
 
   // Insert text at cursor position
-  function insertTextAtCursor(text: string) {
-    const activeElement = document.activeElement;
+  function insertTextAtCursor(text: string, currentShadowRoot?: ShadowRoot) {
+    let activeElement: Element | null = null;
+
+    if (currentShadowRoot && currentShadowRoot.activeElement) {
+      activeElement = currentShadowRoot.activeElement;
+    } else {
+      activeElement = document.activeElement;
+    }
 
     if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
       const start = activeElement.selectionStart || 0;
@@ -257,8 +263,14 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
   }
 
   // Delete text at cursor position
-  function deleteTextAtCursor() {
-    const activeElement = document.activeElement;
+  function deleteTextAtCursor(currentShadowRoot?: ShadowRoot) {
+    let activeElement: Element | null = null;
+
+    if (currentShadowRoot && currentShadowRoot.activeElement) {
+      activeElement = currentShadowRoot.activeElement;
+    } else {
+      activeElement = document.activeElement;
+    }
 
     if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
       const start = activeElement.selectionStart || 0;
