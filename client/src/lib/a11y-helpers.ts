@@ -119,9 +119,10 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
   const keyboard = document.createElement('div') as HTMLElement;
   keyboard.id = 'virtual-keyboard';
   keyboard.style.position = 'fixed';
-  keyboard.style.bottom = '0';
-  keyboard.style.left = '0';
-  keyboard.style.width = '100%';
+  keyboard.style.bottom = '80px'; // Adjusted to be above the widget button
+  keyboard.style.left = '20px';
+  keyboard.style.right = '100px';
+  // keyboard.style.width = '100%'; // Not needed with left/right
   keyboard.style.padding = '10px';
   keyboard.style.backgroundColor = '#f0f0f0';
   keyboard.style.boxShadow = '0 -2px 10px rgba(0, 0, 0, 0.2)';
@@ -163,7 +164,11 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
   closeButton.style.display = 'flex';
   closeButton.style.alignItems = 'center';
   closeButton.style.justifyContent = 'center';
-  closeButton.addEventListener('click', () => hideVirtualKeyboard(shadowRoot));
+  closeButton.addEventListener('click', (event) => {
+    event.stopPropagation(); // Prevent event from bubbling up
+    event.preventDefault(); // Prevent any default browser action
+    hideVirtualKeyboard(shadowRoot);
+  });
 
   closeBar.appendChild(keyboardTitle);
   closeBar.appendChild(closeButton);
