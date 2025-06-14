@@ -96,8 +96,8 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
     _lastActiveInput = currentActiveElementOnShow;
     console.log("Debug: Stored _lastActiveInput on show (initial):", _lastActiveInput);
   } else {
-    _lastActiveInput = null;
-    console.log("Debug: No active input/textarea to store on show (initial). Current active element:", currentActiveElementOnShow);
+    // Do NOT set to null here. We rely on the focusin listener to find the correct input.
+    console.log("Debug: No active input/textarea initially. Will rely on focusin. Current active element:", currentActiveElementOnShow);
   }
 
   // Add a focus listener to update _lastActiveInput dynamically
@@ -191,6 +191,7 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
       keyButton.style.display = 'flex !important';
       keyButton.style.alignItems = 'center !important';
       keyButton.style.justifyContent = 'center !important';
+      keyButton.tabIndex = -1; // Prevent buttons from taking focus
 
       // Add key press functionality
       keyButton.addEventListener('click', (event) => {
