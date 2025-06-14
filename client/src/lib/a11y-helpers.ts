@@ -236,22 +236,29 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
     });
   }
 
+  // Helper function to get the currently focused element, even if it's inside a shadow DOM
+  function getActiveElement(root: Document | ShadowRoot = document): Element | null {
+    const activeElement = root.activeElement;
+    if (!activeElement || !activeElement.shadowRoot) {
+      return activeElement;
+    }
+    return getActiveElement(activeElement.shadowRoot);
+  }
+
   // Insert text at cursor position
   function insertTextAtCursor(text: string, currentShadowRoot?: ShadowRoot) {
-    let activeElement: Element | null = null;
-
-    if (currentShadowRoot && currentShadowRoot.activeElement) {
-      activeElement = currentShadowRoot.activeElement;
-    } else {
-      activeElement = document.activeElement;
-    }
+    const activeElement = getActiveElement(document);
+    console.log("Debug: insertTextAtCursor - activeElement:", activeElement);
 
     if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
+      console.log("Debug: insertTextAtCursor - activeElement is input/textarea.");
       const start = activeElement.selectionStart || 0;
       const end = activeElement.selectionEnd || 0;
       const value = activeElement.value;
+      console.log(`Debug: insertTextAtCursor - start: ${start}, end: ${end}, value: ${value}`);
 
       activeElement.value = value.substring(0, start) + (shiftEnabled && text.length === 1 ? text.toUpperCase() : text) + value.substring(end);
+      console.log("Debug: insertTextAtCursor - new value:", activeElement.value);
 
       // Set cursor position after inserted text
       activeElement.selectionStart = activeElement.selectionEnd = start + 1;
@@ -259,37 +266,42 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
       // Trigger input event for form validation
       const event = new Event('input', { bubbles: true });
       activeElement.dispatchEvent(event);
+      console.log("Debug: insertTextAtCursor - input event dispatched.");
+    } else {
+      console.log("Debug: insertTextAtCursor - activeElement is NOT input/textarea.", activeElement);
     }
   }
 
   // Delete text at cursor position
   function deleteTextAtCursor(currentShadowRoot?: ShadowRoot) {
-    let activeElement: Element | null = null;
-
-    if (currentShadowRoot && currentShadowRoot.activeElement) {
-      activeElement = currentShadowRoot.activeElement;
-    } else {
-      activeElement = document.activeElement;
-    }
+    const activeElement = getActiveElement(document);
+    console.log("Debug: deleteTextAtCursor - activeElement:", activeElement);
 
     if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
+      console.log("Debug: deleteTextAtCursor - activeElement is input/textarea.");
       const start = activeElement.selectionStart || 0;
       const end = activeElement.selectionEnd || 0;
       const value = activeElement.value;
+      console.log(`Debug: deleteTextAtCursor - start: ${start}, end: ${end}, value: ${value}`);
 
       if (start === end && start > 0) {
         // No selection, delete character before cursor
         activeElement.value = value.substring(0, start - 1) + value.substring(end);
         activeElement.selectionStart = activeElement.selectionEnd = start - 1;
+        console.log("Debug: deleteTextAtCursor - new value (delete before cursor):", activeElement.value);
       } else if (start !== end) {
         // Delete selected text
         activeElement.value = value.substring(0, start) + value.substring(end);
         activeElement.selectionStart = activeElement.selectionEnd = start;
+        console.log("Debug: deleteTextAtCursor - new value (delete selected):", activeElement.value);
       }
 
       // Trigger input event for form validation
       const event = new Event('input', { bubbles: true });
       activeElement.dispatchEvent(event);
+      console.log("Debug: deleteTextAtCursor - input event dispatched.");
+    } else {
+      console.log("Debug: deleteTextAtCursor - activeElement is NOT input/textarea.", activeElement);
     }
   }
 }
