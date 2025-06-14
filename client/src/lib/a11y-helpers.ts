@@ -350,18 +350,22 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
 
 // Helper function to hide virtual keyboard
 function hideVirtualKeyboard(currentShadowRoot?: ShadowRoot): void {
-  console.log("hideVirtualKeyboard called");
+  console.log("Debug: hideVirtualKeyboard called.");
+  console.log("Debug: hideVirtualKeyboard - currentShadowRoot received:", currentShadowRoot);
   let keyboard: HTMLElement | null = null;
 
   if (currentShadowRoot) {
     keyboard = currentShadowRoot.getElementById('virtual-keyboard');
-    console.log("Keyboard found in shadowRoot:", keyboard);
+    console.log("Debug: Keyboard search in currentShadowRoot:", keyboard);
+    if (keyboard) {
+        console.log("Debug: Keyboard found in currentShadowRoot. Its parent is:", keyboard.parentNode);
+    }
   }
 
   // If not found in currentShadowRoot or no currentShadowRoot, check document body
   if (!keyboard) {
     keyboard = document.body.querySelector('#virtual-keyboard');
-    console.log("Keyboard found in document.body:", keyboard);
+    console.log("Debug: Keyboard search in document.body:", keyboard);
   }
 
   if (keyboard) {
@@ -378,9 +382,9 @@ function hideVirtualKeyboard(currentShadowRoot?: ShadowRoot): void {
     // Reset virtual keyboard setting
     const event = new CustomEvent('accessibility:virtual-keyboard-closed');
     document.dispatchEvent(event);
-    console.log("accessibility:virtual-keyboard-closed event dispatched");
+    console.log("Debug: accessibility:virtual-keyboard-closed event dispatched");
   } else {
-    console.log("Virtual keyboard not found to remove.");
+    console.log("Debug: Virtual keyboard not found to remove.");
   }
 }
 
