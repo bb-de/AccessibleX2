@@ -3,6 +3,7 @@ import { getTextColorStyles, getTitleColorStyles, getBackgroundColorStyles } fro
 
 // Global variable to store the last active input element
 let _lastActiveInput: HTMLInputElement | HTMLTextAreaElement | null = null;
+let _focusListener: ((event: FocusEvent) => void) | null = null;
 
 // Helper function to enable keyboard navigation
 function enableKeyboardNavigation(): void {
@@ -88,14 +89,30 @@ function disableKeyboardNavigation(): void {
 
 // Helper function to show virtual keyboard
 function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
+  console.log("Debug: showVirtualKeyboard called.");
   // Store the currently active element if it's an input or textarea
-  const currentActiveElement = getActiveElement(document);
-  if (currentActiveElement instanceof HTMLInputElement || currentActiveElement instanceof HTMLTextAreaElement) {
-    _lastActiveInput = currentActiveElement;
-    console.log("Debug: Stored _lastActiveInput:", _lastActiveInput);
+  const currentActiveElementOnShow = getActiveElement(document);
+  if (currentActiveElementOnShow instanceof HTMLInputElement || currentActiveElementOnShow instanceof HTMLTextAreaElement) {
+    _lastActiveInput = currentActiveElementOnShow;
+    console.log("Debug: Stored _lastActiveInput on show (initial):", _lastActiveInput);
   } else {
     _lastActiveInput = null;
-    console.log("Debug: No active input/textarea to store.");
+    console.log("Debug: No active input/textarea to store on show (initial). Current active element:", currentActiveElementOnShow);
+  }
+
+  // Add a focus listener to update _lastActiveInput dynamically
+  if (!_focusListener) {
+    _focusListener = (event: FocusEvent) => {
+      const target = event.target;
+      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+        _lastActiveInput = target;
+        console.log("Debug: Updated _lastActiveInput on focusin event:", _lastActiveInput);
+      } else {
+        console.log("Debug: focusin event on non-input/textarea element:", target);
+      }
+    };
+    document.addEventListener('focusin', _focusListener, { capture: true });
+    console.log("Debug: Added focusin listener for dynamic _lastActiveInput updates.");
   }
 
   // Create a keyboard container
@@ -176,7 +193,8 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
       keyButton.style.justifyContent = 'center !important';
 
       // Add key press functionality
-      keyButton.addEventListener('click', () => {
+      keyButton.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent button from stealing focus
         if (key === 'Space') {
           insertTextAtCursor(' ');
         } else if (key === 'Backspace') {
@@ -232,6 +250,15 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
     console.log('Debug: Virtual keyboard appended to document.body');
   }
 
+  // Explicitly focus on the last active input if it exists
+  if (_lastActiveInput) {
+    _lastActiveInput.focus();
+    // Re-set selection range to ensure cursor is at the end or where it was
+    const val = _lastActiveInput.value;
+    _lastActiveInput.selectionStart = _lastActiveInput.selectionEnd = val.length;
+    console.log("Debug: Explicitly focused on _lastActiveInput after keyboard shown:", _lastActiveInput);
+  }
+
   // Shift state
   let shiftEnabled = false;
 
@@ -252,6 +279,7 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
   // Helper function to get the currently focused element, even if it's inside a shadow DOM
   function getActiveElement(root: Document | ShadowRoot = document): Element | null {
     const activeElement = root.activeElement;
+    console.log("Debug: getActiveElement - current root:", root, "activeElement:", activeElement);
     if (!activeElement || !activeElement.shadowRoot) {
       return activeElement;
     }
@@ -338,6 +366,14 @@ function hideVirtualKeyboard(currentShadowRoot?: ShadowRoot): void {
   if (keyboard) {
     keyboard.remove();
     console.log("Virtual keyboard removed");
+
+    // Remove focus listener when keyboard is hidden
+    if (_focusListener) {
+      document.removeEventListener('focusin', _focusListener, { capture: true });
+      _focusListener = null;
+      console.log("Debug: Removed focusin listener.");
+    }
+
     // Reset virtual keyboard setting
     const event = new CustomEvent('accessibility:virtual-keyboard-closed');
     document.dispatchEvent(event);
