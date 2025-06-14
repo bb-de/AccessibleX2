@@ -55,10 +55,13 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
   
   return (
     <AccessibilityProvider shadowRoot={shadowRootElement}>
+      {/* Widget Button - Always fixed at bottom-5 right-5 */}
       <div className="fixed bottom-5 right-5 z-[9999]">
         <WidgetButton onClick={toggleWidget} isOpen={isOpen} />
-        <WidgetPanel isOpen={isOpen} ref={widgetRef} />
       </div>
+      
+      {/* Widget Panel - Position adjusted dynamically */}
+      <WidgetPanel isOpen={isOpen} ref={widgetRef} />
     </AccessibilityProvider>
   );
 }
