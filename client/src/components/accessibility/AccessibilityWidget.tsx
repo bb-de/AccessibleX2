@@ -55,8 +55,8 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
   
   return (
     <AccessibilityProvider shadowRoot={shadowRootElement}>
-      <WidgetButton onClick={toggleWidget} isOpen={isOpen} />
-      <div style={{ position: 'fixed', top: 0, left: 0 }}>
+      <div className="fixed bottom-5 right-5 z-[9999]">
+        <WidgetButton onClick={toggleWidget} isOpen={isOpen} />
         <WidgetPanel isOpen={isOpen} ref={widgetRef} />
       </div>
     </AccessibilityProvider>

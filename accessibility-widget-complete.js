@@ -19,12 +19,13 @@ shadow.appendChild(styleTag);
 
 // Widget im Shadow DOM rendern
 const shadowRoot = document.createElement("div");
+shadowRoot.style.display = "contents"; // Sicherstellen, dass das Shadow Root selbst kein Layout beeinflusst
 shadow.appendChild(shadowRoot);
 
 ReactDOM.createRoot(shadowRoot).render(
   <React.StrictMode>
     <AccessibilityProvider>
-      <AccessibilityWidget />
+      <AccessibilityWidget shadowRootElement={shadow} />
     </AccessibilityProvider>
   </React.StrictMode>
 );
