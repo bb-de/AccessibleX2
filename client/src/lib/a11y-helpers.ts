@@ -166,6 +166,7 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
   closeButton.style.alignItems = 'center';
   closeButton.style.justifyContent = 'center';
   closeButton.addEventListener('click', (event) => {
+    console.log("Debug: Virtual Keyboard Close Button clicked.", event.target);
     event.stopPropagation(); // Prevent event from bubbling up
     event.preventDefault(); // Prevent any default browser action
     hideVirtualKeyboard(shadowRoot);

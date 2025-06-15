@@ -32,11 +32,19 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
       const path = event.composedPath();
       const isClickInsideWidget = path.some(node => node === widgetRef.current || (widgetRef.current && node instanceof Node && widgetRef.current.contains(node)));
       const isClickOnToggleButton = (event.target as Element).closest('#accessibility-toggle');
+      // Überprüfen, ob der Klick innerhalb der virtuellen Tastatur erfolgte
+      const isClickInsideVirtualKeyboard = path.some(node => (node instanceof Element) && node.id === 'virtual-keyboard');
 
       console.log('Klick-Ereignis:', event);
       console.log('Pfad des Ereignisses:', path);
       console.log('Ist Klick im Widget?', isClickInsideWidget);
-      console.log('Ist Klick auf Umschalt-Button?', isClickOnToggleButton);
+      console.log('Ist Klick auf Umschalt-Button?', !!isClickOnToggleButton); // Als Boolean für klarere Logs
+      console.log('Ist Klick in virtueller Tastatur?', isClickInsideVirtualKeyboard); // Direkte Ausgabe des Boolean-Ergebnisses
+
+      if (isClickInsideVirtualKeyboard) {
+        console.log('Klick in virtueller Tastatur erkannt, schließe Widget NICHT.');
+        return; // Nichts tun, wenn der Klick innerhalb der virtuellen Tastatur erfolgte
+      }
 
       if (!isClickInsideWidget && !isClickOnToggleButton) {
         console.log('Schließe Widget!');
