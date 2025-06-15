@@ -118,37 +118,35 @@ export const AccessibilityContext = createContext<AccessibilityContextType | und
 
 export function AccessibilityProvider({ children, shadowRoot }: { children: React.ReactNode, shadowRoot: ShadowRoot | null }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [settings, setSettings] = useState<AccessibilitySettings>(defaultSettings);
-  const [language, setLanguage] = useState<Language>('en');
-  const { toast } = useToast();
-
-  // Load saved settings on initial render
-  useEffect(() => {
+  const [settings, setSettings] = useState<AccessibilitySettings>(() => {
+    // Initialisiere die Einstellungen aus dem localStorage beim ersten Rendern
     const savedSettings = localStorage.getItem('accessibility-settings');
-    const savedLanguage = localStorage.getItem('accessibility-language');
-
     if (savedSettings) {
       try {
-        setSettings(JSON.parse(savedSettings));
+        return JSON.parse(savedSettings);
       } catch (error) {
-        console.error('Failed to parse saved accessibility settings', error);
+        console.error('Fehler beim Laden der gespeicherten Einstellungen:', error);
+        return defaultSettings;
       }
     }
+    return defaultSettings;
+  });
+  const [language, setLanguage] = useState<Language>(() => {
+    const savedLanguage = localStorage.getItem('accessibility-language');
+    return (savedLanguage as Language) || 'en';
+  });
+  const { toast } = useToast();
 
-    if (savedLanguage) {
-      setLanguage(savedLanguage as Language);
-    }
-  }, []);
-
-  // Save settings when they change
+  // Wende die Einstellungen sofort an, wenn sie sich ändern
   useEffect(() => {
     localStorage.setItem('accessibility-settings', JSON.stringify(settings));
+    applyAccessibilityStyles(settings);
   }, [settings]);
 
-  // Save language when it changes
+  // Wende die Einstellungen auch beim ersten Laden an
   useEffect(() => {
-    localStorage.setItem('accessibility-language', language);
-  }, [language]);
+    applyAccessibilityStyles(settings);
+  }, []);
 
   // Toggle widget visibility
   const toggleWidget = useCallback(() => {
