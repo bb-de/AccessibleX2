@@ -62,7 +62,7 @@ export function NavigationTab() {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       className={`relative flex items-center justify-center py-2 px-3 rounded 
-                        ${settings.cursorSize === 'big' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                        ${settings.cursorSize === 'big' ? 'bg-primary text-gray-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                       onClick={() => updateSetting('cursorSize', settings.cursorSize === 'big' ? 'default' : 'big')}
                     >
                       <span className="text-sm">{translations.medium || "Medium"}</span>
@@ -75,7 +75,7 @@ export function NavigationTab() {
                     
                     <button
                       className={`relative flex items-center justify-center py-2 px-3 rounded 
-                        ${settings.cursorSize === 'bigger' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                        ${settings.cursorSize === 'bigger' ? 'bg-primary text-gray-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                       onClick={() => updateSetting('cursorSize', settings.cursorSize === 'bigger' ? 'default' : 'bigger')}
                     >
                       <span className="text-sm">{translations.large || "Large"}</span>
@@ -88,7 +88,7 @@ export function NavigationTab() {
                     
                     <button
                       className={`relative flex items-center justify-center py-2 px-3 rounded 
-                        ${settings.cursorSize === 'biggest' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                        ${settings.cursorSize === 'biggest' ? 'bg-primary text-gray-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                       onClick={() => updateSetting('cursorSize', settings.cursorSize === 'biggest' ? 'default' : 'biggest')}
                     >
                       <span className="text-sm">{translations.extraLarge || "Extra Large"}</span>

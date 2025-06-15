@@ -1193,13 +1193,13 @@ function handleCustomCursor(settings: AccessibilitySettings): void {
   cursorElement.id = 'custom-cursor';
 
   // Set size based on settings
-  let cursorSize = '32px';
+  let cursorSize = '32'; // Default size in pixels (as string for SVG)
   if (settings.cursorSize === 'big') {
-    cursorSize = '48px';
+    cursorSize = '48';
   } else if (settings.cursorSize === 'bigger') {
-    cursorSize = '64px';
+    cursorSize = '64';
   } else if (settings.cursorSize === 'biggest') {
-    cursorSize = '80px';
+    cursorSize = '80';
   }
 
   // Set color based on settings
@@ -1231,7 +1231,7 @@ function handleCustomCursor(settings: AccessibilitySettings): void {
   cursorElement.style.position = 'fixed';
   cursorElement.style.pointerEvents = 'none';
   cursorElement.style.zIndex = '999999';
-  cursorElement.style.transform = 'translate(-50%, -50%)';
+  cursorElement.style.transform = 'none'; // Kein initialer transform, die Position wird von handleMouseMove gesetzt
   cursorElement.style.display = 'none';
   cursorElement.innerHTML = svgCursor;
 
@@ -1246,19 +1246,25 @@ function handleCustomCursor(settings: AccessibilitySettings): void {
 function handleMouseMove(e: MouseEvent): void {
   const cursor = document.getElementById('custom-cursor');
   if (cursor) {
-    // Only show cursor if not over the accessibility widget
     const target = e.target as HTMLElement;
     const isOverWidget = target.closest('[data-accessibility-widget]');
+
+    // Holen Sie die aktuelle Cursorgröße in Pixeln
+    const cursorElementWidth = cursor.offsetWidth;
+    const cursorElementHeight = cursor.offsetHeight;
+
+    // Der Hotspot des SVG-Cursors ist bei (13, 5) im 50x50 ViewBox
+    // Berechnen Sie den Offset relativ zur tatsächlichen Größe des SVG-Elements
+    const offsetX = (13 / 50) * cursorElementWidth;
+    const offsetY = (5 / 50) * cursorElementHeight;
 
     if (isOverWidget) {
       cursor.style.display = 'none';
     } else {
       cursor.style.display = 'block';
-      // Entferne die Offset-Werte, da das SVG bereits korrekt zentriert ist
-      cursor.style.left = `${e.clientX}px`;
-      cursor.style.top = `${e.clientY}px`;
-      // Füge transform hinzu, um den Cursor zu zentrieren
-      cursor.style.transform = 'translate(-50%, -50%)';
+      cursor.style.left = `${e.clientX - offsetX}px`;
+      cursor.style.top = `${e.clientY - offsetY}px`;
+      cursor.style.transform = 'none'; // Stellen Sie sicher, dass keine zusätzliche Transformation angewendet wird
     }
   }
 }
