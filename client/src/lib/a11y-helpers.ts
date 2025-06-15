@@ -1231,7 +1231,7 @@ function handleCustomCursor(settings: AccessibilitySettings): void {
   cursorElement.style.position = 'fixed';
   cursorElement.style.pointerEvents = 'none';
   cursorElement.style.zIndex = '999999';
-  cursorElement.style.transform = 'translate(0, 0)';
+  cursorElement.style.transform = 'translate(-50%, -50%)';
   cursorElement.style.display = 'none';
   cursorElement.innerHTML = svgCursor;
 
@@ -1250,16 +1250,15 @@ function handleMouseMove(e: MouseEvent): void {
     const target = e.target as HTMLElement;
     const isOverWidget = target.closest('[data-accessibility-widget]');
 
-    // Adjust position to offset the cursor correctly (point at top-left of the cursor)
-    const cursorWidth = parseInt(cursor.querySelector('svg')?.getAttribute('width') || '32', 10);
-    const cursorHeight = parseInt(cursor.querySelector('svg')?.getAttribute('height') || '32', 10);
-
     if (isOverWidget) {
       cursor.style.display = 'none';
     } else {
       cursor.style.display = 'block';
-      cursor.style.left = `${e.clientX - 2}px`;
-      cursor.style.top = `${e.clientY - 2}px`;
+      // Entferne die Offset-Werte, da das SVG bereits korrekt zentriert ist
+      cursor.style.left = `${e.clientX}px`;
+      cursor.style.top = `${e.clientY}px`;
+      // Füge transform hinzu, um den Cursor zu zentrieren
+      cursor.style.transform = 'translate(-50%, -50%)';
     }
   }
 }
