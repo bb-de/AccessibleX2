@@ -64,20 +64,18 @@ export function setupWidgetApiRoutes(app: express.Express) {
       const result = registrationSchema.safeParse(req.body);
       
       if (!result.success) {
-        return res.status(400).json({ 
-          success: false, 
+        return res.status(400).json({
+          success: false,
           message: 'Validierungsfehler',
           errors: result.error.errors
         });
       }
 
-      const { domain, email, companyName } = result.data;
-
       // Einfache Token-Generierung
       const tokenId = `token_${crypto.randomBytes(16).toString('hex')}`;
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         tokenId,
         message: 'Widget erfolgreich registriert',
         scriptTag: `<script src="/widget/accessibility.js" data-token-id="${tokenId}" data-language="de"></script>`
@@ -93,6 +91,7 @@ export function setupWidgetApiRoutes(app: express.Express) {
 }
 
 // Helper functions
+/*
 async function validateToken(token: string): Promise<boolean> {
   // Implementierung der Token-Validierung gegen die Datenbank
   return true; // Placeholder
@@ -102,3 +101,4 @@ async function generateAndStoreToken(domain: string, email: string, companyName:
   // Implementierung der Token-Generierung und -Speicherung
   return crypto.randomBytes(32).toString('hex');
 }
+*/

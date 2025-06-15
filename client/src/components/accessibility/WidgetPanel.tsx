@@ -45,7 +45,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         width: '340px',
         minWidth: '340px',
         maxWidth: '340px',
-        maxHeight: `calc(100vh - ${dynamicBottom} - 40px)`, // Anpassung der maximalen Höhe
+        maxHeight: 'calc(100vh - 120px)', // Feste maximale Höhe unabhängig vom Keyboard
         bottom: dynamicBottom, // Dynamischer Abstand vom unteren Rand
         overflowY: 'scroll',
         scrollBehavior: 'smooth',
