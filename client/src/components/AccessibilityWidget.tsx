@@ -1,3 +1,4 @@
+/*
 import { WidgetButton } from "./accessibility/WidgetButton";
 import { WidgetPanel } from "./accessibility/WidgetPanel";
 import { useAccessibility } from "@/hooks/useAccessibility";
@@ -39,3 +40,4 @@ export function AccessibilityWidget() {
     </div>
   );
 }
+*/
