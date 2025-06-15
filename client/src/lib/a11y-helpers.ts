@@ -120,9 +120,10 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
   keyboard.id = 'virtual-keyboard';
   keyboard.style.position = 'fixed';
   keyboard.style.bottom = '80px'; // Adjusted to be above the widget button
-  keyboard.style.left = '20px';
-  keyboard.style.right = '100px';
-  // keyboard.style.width = '100%'; // Not needed with left/right
+  keyboard.style.left = '50%'; // Center horizontally
+  keyboard.style.transform = 'translateX(-50%)'; // Center horizontally
+  keyboard.style.width = 'fit-content'; // Make it fit content
+  keyboard.style.maxWidth = '600px'; // Limit maximum width
   keyboard.style.padding = '10px';
   keyboard.style.backgroundColor = '#f0f0f0';
   keyboard.style.boxShadow = '0 -2px 10px rgba(0, 0, 0, 0.2)';
