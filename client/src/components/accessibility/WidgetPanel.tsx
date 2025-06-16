@@ -25,7 +25,7 @@ type TabType = "profiles" | "vision" | "content" | "navigation";
 
 export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpen }, ref) => {
   const [activeTab, setActiveTab] = useState<TabType>("profiles");
-  const { toggleWidget, resetSettings, translations, settings, closeWidget } = useAccessibility();
+  const { toggleWidget, resetSettings, translations, settings } = useAccessibility();
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
@@ -74,7 +74,10 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
               id="close-panel-btn"
               aria-label={translations.closeAccessibilityMenu}
               className="text-gray-500 hover:text-gray-700 p-1 rounded flex items-center"
-              onClick={toggleWidget}
+              onClick={(e) => {
+                toggleWidget();
+                e.currentTarget.blur(); // Fokus entfernen, um Warnung zu vermeiden
+              }}
             >
               <X className="h-5 w-5" />
             </button>
