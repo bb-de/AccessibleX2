@@ -149,13 +149,16 @@
   }
 
   // Initialize the widget
+  let button: HTMLButtonElement; // Deklariere button außerhalb von initWidget
+  let iframe: HTMLIFrameElement; // Deklariere iframe außerhalb von initWidget
+
   function initWidget() {
     // Load the styles
     loadStyles();
     
     // Create button and iframe elements
-    const button = createWidgetButton();
-    const iframe = createWidgetIframe();
+    button = createWidgetButton(); // Zuweisung zu der deklarierten Variable
+    iframe = createWidgetIframe(); // Zuweisung zu der deklarierten Variable
     
     // Set iframe src after creating element (prevents flicker)
     const iframeSrc = new URL(config.apiEndpoint + '/widget-embed');
