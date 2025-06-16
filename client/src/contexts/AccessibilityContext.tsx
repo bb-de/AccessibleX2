@@ -155,39 +155,8 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
 
   // Close widget
   const closeWidget = useCallback(() => {
+    console.log("Debug: closeWidget called. Setting isOpen to false.");
     setIsOpen(false);
-    // Reset all slider values to default
-    setSettings(prevSettings => ({
-      ...prevSettings,
-      textSize: defaultSettings.textSize,
-      lineHeight: defaultSettings.lineHeight,
-      letterSpacing: defaultSettings.letterSpacing,
-      wordSpacing: defaultSettings.wordSpacing,
-      saturation: defaultSettings.saturation,
-      monochrome: defaultSettings.monochrome,
-      // Hinzufügen weiterer relevanter Einstellungen, die beim Schließen zurückgesetzt werden sollen
-      darkMode: defaultSettings.darkMode,
-      hideImages: defaultSettings.hideImages,
-      stopAnimations: defaultSettings.stopAnimations,
-      highlightTitles: defaultSettings.highlightTitles,
-      highlightLinks: defaultSettings.highlightLinks,
-      textToSpeech: defaultSettings.textToSpeech,
-      readingMask: defaultSettings.readingMask,
-      readingGuide: defaultSettings.readingGuide,
-      fontFamily: defaultSettings.fontFamily,
-      textAlign: defaultSettings.textAlign,
-      keyboardNavigation: defaultSettings.keyboardNavigation,
-      highlightFocus: defaultSettings.highlightFocus,
-      customCursor: defaultSettings.customCursor,
-      cursorSize: defaultSettings.cursorSize,
-      cursorColor: defaultSettings.cursorColor,
-      virtualKeyboard: defaultSettings.virtualKeyboard,
-      pageStructure: defaultSettings.pageStructure,
-      contrastMode: defaultSettings.contrastMode,
-      textColor: defaultSettings.textColor,
-      titleColor: defaultSettings.titleColor,
-      backgroundColor: defaultSettings.backgroundColor,
-    }));
   }, []);
 
   // Update a single setting

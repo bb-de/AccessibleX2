@@ -13,13 +13,13 @@ interface AccessibilityWidgetProps {
  * Kombiniert den Button und das Panel mit dem gemeinsamen Zustand
  */
 export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetProps) {
-  const { isOpen, toggleWidget, closeWidget } = useAccessibility();
-  console.log('AccessibilityWidget render. isOpen:', isOpen, 'shadowRootElement:', shadowRootElement);
+  const { isOpen, toggleWidget, closeWidget, settings } = useAccessibility();
+  console.log('AccessibilityWidget render. isOpen:', isOpen, 'shadowRootElement:', shadowRootElement, 'settings.virtualKeyboard:', settings.virtualKeyboard);
   const widgetRef = useRef<HTMLDivElement>(null);
   
   // Event-Listener für Klicks außerhalb des Widgets
   useEffect(() => {
-    console.log('useEffect in AccessibilityWidget ausgeführt. isOpen:', isOpen, 'shadowRootElement:', shadowRootElement);
+    console.log('useEffect in AccessibilityWidget ausgeführt. isOpen:', isOpen, 'shadowRootElement:', shadowRootElement, 'settings.virtualKeyboard:', settings.virtualKeyboard);
     // Nur hinzufügen, wenn das Widget geöffnet ist
     if (!isOpen) {
       console.log('Bedingung zum Anhängen des Listeners nicht erfüllt. isOpen:', isOpen);
@@ -68,7 +68,7 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
     return () => {
       document.body.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, closeWidget, shadowRootElement, widgetRef]);
+  }, [isOpen, closeWidget, shadowRootElement, widgetRef, settings.virtualKeyboard]);
   
   return (
     <AccessibilityProvider shadowRoot={shadowRootElement}>

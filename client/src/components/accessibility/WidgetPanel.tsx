@@ -74,12 +74,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
               id="close-panel-btn"
               aria-label={translations.closeAccessibilityMenu}
               className="text-gray-500 hover:text-gray-700 p-1 rounded flex items-center"
-              onClick={(e) => {
-                console.log("Debug: X-Button clicked!");
-                console.log("Debug: closeWidget function:", closeWidget);
-                console.log("Debug: Event path:", (e.nativeEvent as MouseEvent).composedPath());
-                closeWidget();
-              }}
+              onClick={closeWidget}
             >
               <X className="h-5 w-5" />
             </button>
