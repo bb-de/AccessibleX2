@@ -150,6 +150,7 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
   // Toggle widget visibility
   const toggleWidget = useCallback(() => {
     setIsOpen(prev => {
+      console.log(`Debug: Inside setIsOpen callback. Previous isOpen (prev): ${prev}`);
       const newState = !prev;
       console.log(`Debug: toggleWidget called. Setting isOpen to ${newState}.`);
       // Sende eine Nachricht an das übergeordnete Fenster, um den Status zu synchronisieren
