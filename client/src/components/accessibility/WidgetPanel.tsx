@@ -25,7 +25,7 @@ type TabType = "profiles" | "vision" | "content" | "navigation";
 
 export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpen }, ref) => {
   const [activeTab, setActiveTab] = useState<TabType>("profiles");
-  const { toggleWidget, resetSettings, translations, settings } = useAccessibility();
+  const { toggleWidget, resetSettings, translations, settings, closeWidget } = useAccessibility();
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
