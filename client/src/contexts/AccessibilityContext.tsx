@@ -164,7 +164,29 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
       letterSpacing: defaultSettings.letterSpacing,
       wordSpacing: defaultSettings.wordSpacing,
       saturation: defaultSettings.saturation,
-      monochrome: defaultSettings.monochrome
+      monochrome: defaultSettings.monochrome,
+      // Hinzufügen weiterer relevanter Einstellungen, die beim Schließen zurückgesetzt werden sollen
+      darkMode: defaultSettings.darkMode,
+      hideImages: defaultSettings.hideImages,
+      stopAnimations: defaultSettings.stopAnimations,
+      highlightTitles: defaultSettings.highlightTitles,
+      highlightLinks: defaultSettings.highlightLinks,
+      textToSpeech: defaultSettings.textToSpeech,
+      readingMask: defaultSettings.readingMask,
+      readingGuide: defaultSettings.readingGuide,
+      fontFamily: defaultSettings.fontFamily,
+      textAlign: defaultSettings.textAlign,
+      keyboardNavigation: defaultSettings.keyboardNavigation,
+      highlightFocus: defaultSettings.highlightFocus,
+      customCursor: defaultSettings.customCursor,
+      cursorSize: defaultSettings.cursorSize,
+      cursorColor: defaultSettings.cursorColor,
+      virtualKeyboard: defaultSettings.virtualKeyboard,
+      pageStructure: defaultSettings.pageStructure,
+      contrastMode: defaultSettings.contrastMode,
+      textColor: defaultSettings.textColor,
+      titleColor: defaultSettings.titleColor,
+      backgroundColor: defaultSettings.backgroundColor,
     }));
   }, []);
 
@@ -379,7 +401,7 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
 
   // Apply all accessibility changes to the DOM
   const applyAccessibilityChanges = useCallback(() => {
-    applyAccessibilityStyles(settings, shadowRoot);
+    applyAccessibilityStyles(settings, shadowRoot || undefined);
   }, [settings, shadowRoot]);
 
   // Apply changes whenever settings change
