@@ -173,20 +173,27 @@
     // Toggle widget panel
     function toggleWidget() {
       isOpen = !isOpen;
-      
+      console.log(`Debug: Parent toggleWidget called. Setting isOpen to ${isOpen}.`);
+
       if (isOpen) {
-        iframe.style.width = '340px';
-        iframe.style.height = '500px';
-        iframe.style.opacity = '1';
-        iframe.style.pointerEvents = 'auto';
+        iframe.style.display = 'block'; // Set display to block before setting opacity
+        // Delay setting opacity to allow display change to register
+        setTimeout(() => {
+          iframe.style.width = '340px';
+          iframe.style.height = '500px';
+          iframe.style.opacity = '1';
+          iframe.style.pointerEvents = 'auto';
+        }, 10); // Small delay
         button.setAttribute('aria-expanded', 'true');
       } else {
         iframe.style.opacity = '0';
+        // Delay setting display to none to allow opacity transition
         setTimeout(() => {
+          iframe.style.display = 'none'; // Hide it completely
           iframe.style.width = '0';
           iframe.style.height = '0';
           iframe.style.pointerEvents = 'none';
-        }, 300);
+        }, 300); // Corresponds to the transition duration
         button.setAttribute('aria-expanded', 'false');
       }
       
@@ -219,19 +226,27 @@
       } else if (event.data.type === 'accessibility-widget-toggle') {
         // Dies ist der bereits vorhandene Listener für Toggle-Nachrichten
         isOpen = event.data.isOpen;
+        console.log(`Debug: Message listener in parent processed accessibility-widget-toggle. isOpen: ${isOpen}`);
+
         if (isOpen) {
-          iframe.style.width = '340px';
-          iframe.style.height = '500px';
-          iframe.style.opacity = '1';
-          iframe.style.pointerEvents = 'auto';
+          iframe.style.display = 'block'; // Set display to block before setting opacity
+          // Delay setting opacity to allow display change to register
+          setTimeout(() => {
+            iframe.style.width = '340px';
+            iframe.style.height = '500px';
+            iframe.style.opacity = '1';
+            iframe.style.pointerEvents = 'auto';
+          }, 10); // Small delay
           button.setAttribute('aria-expanded', 'true');
         } else {
           iframe.style.opacity = '0';
+          // Delay setting display to none to allow opacity transition
           setTimeout(() => {
+            iframe.style.display = 'none'; // Hide it completely
             iframe.style.width = '0';
             iframe.style.height = '0';
             iframe.style.pointerEvents = 'none';
-          }, 300);
+          }, 300); // Corresponds to the transition duration
           button.setAttribute('aria-expanded', 'false');
         }
       }
