@@ -202,6 +202,7 @@
     
     // Setup cross-window communication
     window.addEventListener('message', (event: MessageEvent) => {
+      console.log('Debug: Message received in parent window:', event.data);
       // Überprüfen, ob die Nachricht von der erwarteten Quelle stammt (optional, aber empfohlen)
       // Hier verwenden wir '*' als origin, aber in einer Produktionsumgebung sollte event.origin überprüft werden
 
