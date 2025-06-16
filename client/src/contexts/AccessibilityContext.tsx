@@ -159,8 +159,13 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
     setIsOpen(false);
     
     // Sende eine Nachricht an das übergeordnete Fenster, um den iframe zu schließen
-    if (window.parent) {
-      window.parent.postMessage({ type: 'accessibility-widget-closed' }, '*');
+    try {
+      if (window.parent) {
+        window.parent.postMessage({ type: 'accessibility-widget-closed' }, '*');
+        console.log("Debug: postMessage 'accessibility-widget-closed' sent to parent.");
+      }
+    } catch (error) {
+      console.error("Error sending postMessage from iframe:", error);
     }
   }, []);
 
