@@ -22,7 +22,7 @@
   const config = { ...DEFAULT_CONFIG };
   for (const key in DEFAULT_CONFIG) {
     if (currentScript.dataset[key]) {
-      config[key] = currentScript.dataset[key];
+      config[key as keyof typeof DEFAULT_CONFIG] = currentScript.dataset[key];
     }
   }
 
@@ -198,279 +198,195 @@
     button.addEventListener('click', toggleWidget);
     
     // Setup cross-window communication
-    window.addEventListener('message', (event) => {
-      // Only accept messages from our iframe
-      if (event.source !== iframe.contentWindow) {
-        return;
-      }
-      
-      const { type, data } = event.data;
-      
-      switch (type) {
-        case 'accessibility-widget-ready':
-          // Widget has loaded in iframe
-          console.log('Accessibility widget ready');
-          break;
-          
-        case 'accessibility-widget-close':
-          // Close widget when requested from iframe
-          if (isOpen) {
-            toggleWidget();
-          }
-          break;
-          
-        case 'accessibility-widget-profile-applied':
-          // Apply accessibility changes to host page
-          applyAccessibilityStyles(data.profileSettings);
-          break;
-          
-        case 'accessibility-widget-reset':
-          // Reset accessibility styles
-          resetAccessibilityStyles();
-          break;
-          
-        case 'accessibility-widget-setting-changed':
-          // Apply single setting change
-          updateAccessibilitySetting(data.setting, data.value);
-          break;
+    window.addEventListener('message', (event: MessageEvent) => {
+      // Überprüfen, ob die Nachricht von der erwarteten Quelle stammt (optional, aber empfohlen)
+      // Hier verwenden wir '*' als origin, aber in einer Produktionsumgebung sollte event.origin überprüft werden
+
+      if (event.data.type === 'accessibility-widget-closed') {
+        console.log('Debug: Received widget-closed message from iframe. Hiding iframe.');
+        isOpen = false; // Zustand im übergeordneten Skript aktualisieren
+        iframe.style.opacity = '0';
+        setTimeout(() => {
+          iframe.style.width = '0';
+          iframe.style.height = '0';
+          iframe.style.pointerEvents = 'none';
+        }, 300); // Entspricht der Transition-Dauer im iframe
+        button.setAttribute('aria-expanded', 'false');
+      } else if (event.data.type === 'accessibility-widget-toggle') {
+        // Dies ist der bereits vorhandene Listener für Toggle-Nachrichten
+        isOpen = event.data.isOpen;
+        if (isOpen) {
+          iframe.style.width = '340px';
+          iframe.style.height = '500px';
+          iframe.style.opacity = '1';
+          iframe.style.pointerEvents = 'auto';
+          button.setAttribute('aria-expanded', 'true');
+        } else {
+          iframe.style.opacity = '0';
+          setTimeout(() => {
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.pointerEvents = 'none';
+          }, 300);
+          button.setAttribute('aria-expanded', 'false');
+        }
       }
     });
   }
-  
+
   // Apply accessibility styles to the host page
-  function applyAccessibilityStyles(settings) {
-    // Remove existing styles
-    resetAccessibilityStyles();
-    
-    // Create a new style tag
-    const styleTag = document.createElement('style');
+  // Note: These functions are simplified for the embed script.
+  // Full accessibility logic resides within the iframe's React app.
+  function applyAccessibilityStyles(settings: any) { // Type 'any' for simplicity in embed script
+    const styleTag = document.getElementById('accessibility-styles') as HTMLStyleElement || document.createElement('style');
     styleTag.id = 'accessibility-styles';
-    
-    // Build CSS based on settings
     let css = '';
-    
+
+    // Remove existing styles to prevent duplication
+    if (styleTag.parentNode) {
+      styleTag.parentNode.removeChild(styleTag);
+    }
+
     // Text size adjustments
     if (settings.textSize !== 0) {
       const textSizePercent = 100 + (settings.textSize * 10);
-      css += `
-        body, p, div, span, a, li, input, button, textarea, select, label {
-          font-size: ${textSizePercent}% !important;
-        }
-      `;
+      css += `html { font-size: ${textSizePercent}% !important; }`;
     }
-    
+
     // Line height adjustments
     if (settings.lineHeight !== 0) {
-      const lineHeightValue = 1.5 + (settings.lineHeight * 0.1);
-      css += `
-        p, div, span, li {
-          line-height: ${lineHeightValue} !important;
-        }
-      `;
+      const lineHeightEm = 1.6 + (settings.lineHeight * 0.2);
+      css += `body, p, li, h1, h2, h3, h4, h5, h6 { line-height: ${lineHeightEm}em !important; }`;
     }
-    
-    // Letter spacing
+
+    // Letter spacing adjustments
     if (settings.letterSpacing !== 0) {
-      const letterSpacingValue = settings.letterSpacing * 0.5;
-      css += `
-        body, p, div, span, a, li, input, button, textarea, select, label {
-          letter-spacing: ${letterSpacingValue}px !important;
-        }
-      `;
+      const letterSpacingPx = settings.letterSpacing * 1;
+      css += `body, p, li, h1, h2, h3, h4, h5, h6 { letter-spacing: ${letterSpacingPx}px !important; }`;
     }
-    
+
+    // Word spacing adjustments
+    if (settings.wordSpacing !== 0) {
+      const wordSpacingPx = settings.wordSpacing * 1;
+      css += `body, p, li { word-spacing: ${wordSpacingPx}px !important; }`;
+    }
+
+    // Contrast mode adjustments
+    if (settings.contrastMode === 'increased') {
+      css += `html { filter: contrast(1.2) !important; }`;
+    } else if (settings.contrastMode === 'high') {
+      css += `html { filter: contrast(1.5) !important; }`;
+    } else if (settings.contrastMode === 'dark') {
+      css += `html { filter: invert(1) hue-rotate(180deg) !important; background-color: #000 !important; } img, video { filter: invert(1) hue-rotate(180deg) !important; }`;
+    } else if (settings.contrastMode === 'light') {
+      css += `html { filter: contrast(0.8) !important; }`;
+    }
+
+    // Saturation and monochrome filters
+    if (settings.saturation !== 100 || settings.monochrome > 0) {
+      const filterValues = [];
+      if (settings.saturation !== 100) {
+        filterValues.push(`saturate(${settings.saturation}%)`);
+      }
+      if (settings.monochrome > 0) {
+        filterValues.push(`grayscale(${settings.monochrome}%)`);
+      }
+      css += `html, img, video { filter: ${filterValues.join(' ')} !important; }`;
+    }
+
+    // Text color adjustments
+    if (settings.textColor !== 'default') {
+      css += `body, p, li, span, div, a:not([data-accessibility-widget]), button:not([data-accessibility-widget]) { color: ${settings.textColor} !important; }`;
+    }
+
+    // Title color adjustments
+    if (settings.titleColor !== 'default') {
+      css += `h1, h2, h3, h4, h5, h6 { color: ${settings.titleColor} !important; }`;
+    }
+
+    // Background color adjustments
+    if (settings.backgroundColor !== 'default') {
+      css += `body { background-color: ${settings.backgroundColor} !important; }`;
+    }
+
     // Dark mode
     if (settings.darkMode) {
-      css += `
-        html, body {
-          background-color: #121212 !important;
-          filter: invert(1) hue-rotate(180deg) !important;
-        }
-        
-        img, video, picture, svg, canvas, [style*="background-image"] {
-          filter: invert(1) hue-rotate(180deg) !important;
-        }
-      `;
+      css += `body { background-color: #1a1a1a !important; color: #f0f0f0 !important; } h1, h2, h3, h4, h5, h6 { color: #f0f0f0 !important; } a { color: #8ab4f8 !important; } a:visited { color: #c58af9 !important; }`;
     }
-    
-    // Font family
-    if (settings.fontFamily !== 'default') {
-      let fontFamilyValue = '';
-      
-      switch (settings.fontFamily) {
-        case 'readable':
-          fontFamilyValue = 'Arial, sans-serif';
-          break;
-        case 'dyslexic':
-          fontFamilyValue = 'OpenDyslexic, Comic Sans MS, sans-serif';
-          // Add OpenDyslexic font if it's not already loaded
-          if (!document.getElementById('accessibility-font-dyslexic')) {
-            const fontLink = document.createElement('link');
-            fontLink.id = 'accessibility-font-dyslexic';
-            fontLink.rel = 'stylesheet';
-            fontLink.href = 'https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic-regular.css';
-            document.head.appendChild(fontLink);
-          }
-          break;
-      }
-      
-      if (fontFamilyValue) {
-        css += `
-          body, p, div, span, a, li, input, button, textarea, select, label {
-            font-family: ${fontFamilyValue} !important;
-          }
-        `;
-      }
-    }
-    
-    // Text alignment
-    if (settings.textAlign !== 'default') {
-      css += `
-        p, div, h1, h2, h3, h4, h5, h6 {
-          text-align: ${settings.textAlign} !important;
-        }
-      `;
-    }
-    
-    // High contrast
-    if (settings.contrastMode === 'high') {
-      css += `
-        body, p, div, span, a, li, input, button, textarea, select, label {
-          color: white !important;
-          background-color: black !important;
-        }
-        
-        a, button {
-          color: yellow !important;
-          text-decoration: underline !important;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-          color: white !important;
-          background-color: black !important;
-        }
-      `;
-    }
-    
-    // Highlight links
-    if (settings.highlightLinks) {
-      css += `
-        a {
-          text-decoration: underline !important;
-          font-weight: bold !important;
-          color: #0000EE !important;
-          background-color: rgba(255, 255, 0, 0.3) !important;
-        }
-        
-        a:visited {
-          color: #551A8B !important;
-        }
-      `;
-    }
-    
-    // Highlight focus
-    if (settings.highlightFocus) {
-      css += `
-        :focus {
-          outline: 3px solid #2196F3 !important;
-          outline-offset: 3px !important;
-        }
-      `;
-    }
-    
-    // Stop animations
-    if (settings.stopAnimations) {
-      css += `
-        *, *::before, *::after {
-          animation: none !important;
-          transition: none !important;
-          scroll-behavior: auto !important;
-        }
-      `;
-    }
-    
+
     // Hide images
     if (settings.hideImages) {
-      css += `
-        img, picture, svg, video, canvas, [style*="background-image"] {
-          opacity: 0.01 !important;
-        }
-      `;
+      css += `img, picture, svg, video, canvas, [style*="background-image"] { opacity: 0.01 !important; }`;
     }
 
-    // Apply styles
+    // Stop animations
+    if (settings.stopAnimations) {
+      css += `*, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }`;
+    }
+
+    // Highlight titles
+    if (settings.highlightTitles) {
+      css += `h1, h2, h3, h4, h5, h6 { background-color: rgba(255, 255, 0, 0.3) !important; padding: 2px 5px !important; border-radius: 3px !important; }`;
+    }
+
+    // Highlight links
+    if (settings.highlightLinks) {
+      css += `a { text-decoration: underline !important; font-weight: bold !important; color: #0000EE !important; background-color: rgba(255, 255, 0, 0.3) !important; } a:visited { color: #551A8B !important; }`;
+    }
+
+    // Highlight focus
+    if (settings.highlightFocus) {
+      css += `:focus { outline: 3px solid #2196F3 !important; outline-offset: 3px !important; }`;
+    }
+
+    // Font family adjustments
+    if (settings.fontFamily === 'readable') {
+      css += `body, p, li, h1, h2, h3, h4, h5, h6 { font-family: 'Arial', sans-serif !important; }`;
+    } else if (settings.fontFamily === 'dyslexic') {
+      css += `body, p, li, h1, h2, h3, h4, h5, h6 { font-family: 'Open Dyslexic', sans-serif !important; }`;
+    }
+
+    // Text align adjustments
+    if (settings.textAlign !== 'default') {
+      css += `body, p, li { text-align: ${settings.textAlign} !important; }`;
+    }
+
     styleTag.textContent = css;
     document.head.appendChild(styleTag);
-    
-    // Additional non-CSS adjustments here
-    if (settings.keyboardNavigation) {
-      enableKeyboardNavigation();
-    }
-  }
-  
-  // Reset all applied accessibility styles
-  function resetAccessibilityStyles() {
-    // Remove the accessibility style tag
-    const existingStyles = document.getElementById('accessibility-styles');
-    if (existingStyles) {
-      existingStyles.remove();
-    }
-    
-    // Remove keyboard navigation listeners and elements
-    if (document.getElementById('keyboard-nav-helpers')) {
-      disableKeyboardNavigation();
-    }
-    
-    // Remove reading mask
-    const readingMask = document.getElementById('accessibility-reading-mask');
-    if (readingMask) {
-      readingMask.remove();
-    }
-    
-    // Remove reading guide
-    const readingGuide = document.getElementById('accessibility-reading-guide');
-    if (readingGuide) {
-      readingGuide.remove();
-    }
-  }
-  
-  // Update a single accessibility setting
-  function updateAccessibilitySetting(setting, value) {
-    // Get the current styles
-    let styleTag = document.getElementById('accessibility-styles');
-    if (!styleTag) {
-      styleTag = document.createElement('style');
-      styleTag.id = 'accessibility-styles';
-      document.head.appendChild(styleTag);
-    }
-    
-    // Handle specific setting changes
-    // This is a simplified version, you would need to expand this based on the setting
-    switch(setting) {
-      case 'textSize':
-        // Update text size CSS
-        break;
-      case 'darkMode':
-        // Toggle dark mode
-        break;
-      // Add other cases as needed
-    }
-  }
-  
-  // Basic keyboard navigation implementation
-  function enableKeyboardNavigation() {
-    // This would be a simplified version of your existing keyboard navigation
-    console.log('Keyboard navigation enabled');
-    // Add event listeners and visual helpers
-  }
-  
-  function disableKeyboardNavigation() {
-    // Remove keyboard navigation helpers
-    console.log('Keyboard navigation disabled');
-    // Remove event listeners and visual helpers
   }
 
-  // Initialize when the DOM is fully loaded
+  // Reset accessibility styles
+  function resetAccessibilityStyles() {
+    const styleTag = document.getElementById('accessibility-styles');
+    if (styleTag) {
+      styleTag.textContent = '';
+    }
+  }
+
+  // Update a single accessibility setting
+  function updateAccessibilitySetting(setting: any, value: any) { // Type 'any' for simplicity in embed script
+    console.log(`Debug: External script received setting update: ${setting} = ${value}`);
+  }
+
+  // Enable keyboard navigation (dummy implementation for now)
+  function enableKeyboardNavigation() {
+    console.log("Debug: Keyboard navigation enabled.");
+    const navHelpers = document.createElement('div');
+    navHelpers.id = 'keyboard-nav-helpers';
+    navHelpers.textContent = 'Keyboard Navigation Enabled';
+    document.body.appendChild(navHelpers);
+  }
+
+  // Disable keyboard navigation (dummy implementation for now)
+  function disableKeyboardNavigation() {
+    console.log("Debug: Keyboard navigation disabled.");
+    const navHelpers = document.getElementById('keyboard-nav-helpers');
+    if (navHelpers) {
+      navHelpers.remove();
+    }
+  }
+
+  // Initialize on DOMContentLoaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);
   } else {

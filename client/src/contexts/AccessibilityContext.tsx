@@ -157,6 +157,11 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
   const closeWidget = useCallback(() => {
     console.log("Debug: closeWidget called. Setting isOpen to false.");
     setIsOpen(false);
+    
+    // Sende eine Nachricht an das übergeordnete Fenster, um den iframe zu schließen
+    if (window.parent) {
+      window.parent.postMessage({ type: 'accessibility-widget-closed' }, '*');
+    }
   }, []);
 
   // Update a single setting
