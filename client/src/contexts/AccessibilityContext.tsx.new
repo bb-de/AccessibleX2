@@ -79,6 +79,7 @@ export const defaultSettings: AccessibilitySettings = {
 interface AccessibilityContextType {
   isOpen: boolean;
   toggleWidget: () => void;
+  closeWidget: () => void;
   settings: AccessibilitySettings;
   updateSetting: <K extends keyof AccessibilitySettings>(
     key: K, 
@@ -133,6 +134,11 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
   // Toggle widget visibility
   const toggleWidget = useCallback(() => {
     setIsOpen(prev => !prev);
+  }, []);
+
+  // Close widget
+  const closeWidget = useCallback(() => {
+    setIsOpen(false);
   }, []);
 
   // Update a single setting
@@ -309,6 +315,7 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         isOpen,
         toggleWidget,
+        closeWidget,
         settings,
         updateSetting,
         incrementSetting,
