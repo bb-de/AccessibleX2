@@ -149,7 +149,17 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
 
   // Toggle widget visibility
   const toggleWidget = useCallback(() => {
-    setIsOpen(prev => !prev);
+    setIsOpen(prev => {
+      const newState = !prev;
+      console.log(`Debug: toggleWidget called. Setting isOpen to ${newState}.`);
+      // Sende eine Nachricht an das übergeordnete Fenster, um den Status zu synchronisieren
+      // Dies ist wichtig, wenn das Widget von innen geschlossen wird (z.B. durch das 'X' oder 'Klick außerhalb')
+      window.parent.postMessage({
+        type: 'accessibility-widget-toggle',
+        isOpen: newState,
+      }, '*');
+      return newState;
+    });
   }, []);
 
   // Update a single setting
