@@ -97,7 +97,6 @@ export const defaultSettings: AccessibilitySettings = {
 interface AccessibilityContextType {
   isOpen: boolean;
   toggleWidget: () => void;
-  closeWidget: () => void;
   settings: AccessibilitySettings;
   updateSetting: <K extends keyof AccessibilitySettings>(
     key: K, 
@@ -151,22 +150,6 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
   // Toggle widget visibility
   const toggleWidget = useCallback(() => {
     setIsOpen(prev => !prev);
-  }, []);
-
-  // Close widget
-  const closeWidget = useCallback(() => {
-    console.log("Debug: closeWidget called. Setting isOpen to false.");
-    setIsOpen(false);
-    
-    // Sende eine Nachricht an das übergeordnete Fenster, um den iframe zu schließen
-    try {
-      if (window.parent) {
-        window.parent.postMessage({ type: 'accessibility-widget-closed' }, '*');
-        console.log("Debug: postMessage 'accessibility-widget-closed' sent to parent.");
-      }
-    } catch (error) {
-      console.error("Error sending postMessage from iframe:", error);
-    }
   }, []);
 
   // Update a single setting
@@ -417,7 +400,6 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
       value={{
         isOpen,
         toggleWidget,
-        closeWidget,
         settings,
         updateSetting,
         incrementSetting,

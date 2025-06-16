@@ -74,7 +74,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
               id="close-panel-btn"
               aria-label={translations.closeAccessibilityMenu}
               className="text-gray-500 hover:text-gray-700 p-1 rounded flex items-center"
-              onClick={closeWidget}
+              onClick={toggleWidget}
             >
               <X className="h-5 w-5" />
             </button>
