@@ -13,7 +13,7 @@ interface AccessibilityWidgetProps {
  * Kombiniert den Button und das Panel mit dem gemeinsamen Zustand
  */
 export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetProps) {
-  const { isOpen, toggleWidget, closeWidget, settings } = useAccessibility();
+  const { isOpen, toggleWidget, settings } = useAccessibility();
   console.log('AccessibilityWidget render. isOpen:', isOpen, 'shadowRootElement:', shadowRootElement, 'settings.virtualKeyboard:', settings.virtualKeyboard);
   const widgetRef = useRef<HTMLDivElement>(null);
   
@@ -57,7 +57,7 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
 
       if (!isClickInsideWidgetOrToggleButton) {
         console.log('Schließe Widget!');
-        closeWidget();
+        toggleWidget();
       }
     };
     
@@ -68,7 +68,7 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
     return () => {
       document.body.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, closeWidget, shadowRootElement, widgetRef, settings.virtualKeyboard]);
+  }, [isOpen, toggleWidget, shadowRootElement, widgetRef, settings.virtualKeyboard]);
   
   return (
     <AccessibilityProvider shadowRoot={shadowRootElement}>
