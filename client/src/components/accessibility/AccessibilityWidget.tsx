@@ -21,45 +21,54 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
   useEffect(() => {
     console.log('useEffect in AccessibilityWidget ausgeführt. isOpen:', isOpen, 'shadowRootElement:', shadowRootElement);
     // Nur hinzufügen, wenn das Widget geöffnet ist
-    if (!isOpen || !shadowRootElement) {
-      console.log('Bedingung zum Anhängen des Listeners nicht erfüllt. isOpen:', isOpen, 'shadowRootElement:', shadowRootElement);
+    if (!isOpen) {
+      console.log('Bedingung zum Anhängen des Listeners nicht erfüllt. isOpen:', isOpen);
       return;
     }
-    
-    const handleClickOutside = (event: Event) => {
+
+    const handleClickOutside = (event: MouseEvent) => {
       if (!widgetRef.current) return;
+      const currentWidgetRef = widgetRef.current;
 
       const path = event.composedPath();
-      const isClickInsideWidget = path.some(node => node === widgetRef.current || (widgetRef.current && node instanceof Node && widgetRef.current.contains(node)));
-      const isClickOnToggleButton = (event.target as Element).closest('#accessibility-toggle');
-      // Überprüfen, ob der Klick innerhalb der virtuellen Tastatur erfolgte
+      const widgetContainer = shadowRootElement?.host;
+
+      // Überprüfen, ob der Klick innerhalb des Widget-Containers (Shadow Host) erfolgte
+      // Oder innerhalb des Panels oder des Toggle-Buttons, die sich im Shadow DOM befinden
+      const isClickInsideWidgetOrToggleButton = path.some(node => 
+        (node === currentWidgetRef) ||
+        (node instanceof Node && currentWidgetRef.contains(node)) ||
+        ((node instanceof Element) && node.id === 'accessibility-toggle') ||
+        (node === widgetContainer)
+      );
+      
+      // Überprüfen, ob der Klick innerhalb der virtuellen Tastatur erfolgte (diese ist im Haupt-DOM)
       const isClickInsideVirtualKeyboard = path.some(node => (node instanceof Element) && node.id === 'virtual-keyboard');
 
       console.log('Klick-Ereignis:', event);
       console.log('Pfad des Ereignisses:', path);
-      console.log('Ist Klick im Widget?', isClickInsideWidget);
-      console.log('Ist Klick auf Umschalt-Button?', !!isClickOnToggleButton); // Als Boolean für klarere Logs
-      console.log('Ist Klick in virtueller Tastatur?', isClickInsideVirtualKeyboard); // Direkte Ausgabe des Boolean-Ergebnisses
+      console.log('Ist Klick im Widget oder auf Toggle-Button?', isClickInsideWidgetOrToggleButton);
+      console.log('Ist Klick in virtueller Tastatur?', isClickInsideVirtualKeyboard);
 
       if (isClickInsideVirtualKeyboard) {
         console.log('Klick in virtueller Tastatur erkannt, schließe Widget NICHT.');
-        return; // Nichts tun, wenn der Klick innerhalb der virtuellen Tastatur erfolgte
+        return; 
       }
 
-      if (!isClickInsideWidget && !isClickOnToggleButton) {
+      if (!isClickInsideWidgetOrToggleButton) {
         console.log('Schließe Widget!');
         closeWidget();
       }
     };
     
-    // Event-Listener zum Shadow Root hinzufügen
-    shadowRootElement.addEventListener('mousedown', handleClickOutside);
+    // Event-Listener zum gesamten Dokument hinzufügen, um Klicks überall zu erfassen
+    document.body.addEventListener('mousedown', handleClickOutside);
     
     // Cleanup beim Unmounten oder Ändern der Dependencies
     return () => {
-      shadowRootElement.removeEventListener('mousedown', handleClickOutside);
+      document.body.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, closeWidget, shadowRootElement]);
+  }, [isOpen, closeWidget, shadowRootElement, widgetRef]);
   
   return (
     <AccessibilityProvider shadowRoot={shadowRootElement}>
