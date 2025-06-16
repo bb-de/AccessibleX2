@@ -147,6 +147,24 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
     applyAccessibilityStyles(settings);
   }, []);
 
+  // Lausche auf Nachrichten vom übergeordneten Fenster, um den Widget-Status zu synchronisieren
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Stellen Sie sicher, dass die Nachricht von einer vertrauenswürdigen Quelle stammt, falls möglich
+      // Für diese Implementierung verwenden wir '*' als origin, aber in einer Produktionsumgebung sollte event.origin überprüft werden.
+      if (event.data.type === 'accessibility-widget-toggle') {
+        console.log(`Debug: Iframe received message from parent. isOpen: ${event.data.isOpen}`);
+        setIsOpen(event.data.isOpen);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []); // Leere Abhängigkeitsliste, um sicherzustellen, dass der Listener nur einmal hinzugefügt wird
+
   // Toggle widget visibility
   const toggleWidget = useCallback(() => {
     setIsOpen(prev => {
