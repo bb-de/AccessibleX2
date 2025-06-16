@@ -105,7 +105,7 @@ interface AccessibilityContextType {
   incrementSetting: (key: keyof Pick<AccessibilitySettings, 'textSize' | 'lineHeight' | 'letterSpacing'>) => void;
   decrementSetting: (key: keyof Pick<AccessibilitySettings, 'textSize' | 'lineHeight' | 'letterSpacing'>) => void;
   resetSettings: () => void;
-  applyProfile: (profileId: AccessibilityProfileId, closeWidget?: boolean) => void;
+  applyProfile: (profileId: AccessibilityProfileId) => void;
   language: Language;
   setLanguage: (lang: Language) => void;
   translations: typeof translations['en'];
@@ -217,7 +217,7 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
   }, []);
 
   // Apply a predefined profile
-  const applyProfile = useCallback((profileId: AccessibilityProfileId, closeWidget: boolean = false) => {
+  const applyProfile = useCallback((profileId: AccessibilityProfileId) => {
     // First reset to default settings
     const defaultSettingsCopy = { ...defaultSettings };
 
@@ -315,11 +315,6 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
       title: translations[language].profileApplied,
       description: translations[language][profileId],
     });
-
-    // Only close the widget if explicitly requested
-    if (closeWidget) {
-      setIsOpen(false);
-    }
   }, [language, toast]);
 
   // Reset all settings to default
