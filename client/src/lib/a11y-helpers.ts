@@ -414,6 +414,39 @@ function showPageStructure(): void {
   pageStructureContainer.style.padding = '20px';
   pageStructureContainer.style.boxSizing = 'border-box';
 
+  // Füge den Container zum Body hinzu, bevor Inhalte hinzugefügt werden
+  document.body.appendChild(pageStructureContainer);
+
+  // Füge Stile für die Seitenstruktur hinzu
+  const style = document.createElement('style');
+  style.textContent = `
+    #page-structure-container {
+      font-family: sans-serif;
+      color: #333;
+    }
+    #page-structure-container h2 {
+      color: #0056b3;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+      margin-top: 20px;
+    }
+    #page-structure-container ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    #page-structure-container li {
+      margin-bottom: 5px;
+    }
+    #page-structure-container a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+    #page-structure-container a:hover {
+      text-decoration: underline;
+    }
+  `;
+  pageStructureContainer.appendChild(style);
+
   // Erstelle den Inhalt
   const content = document.createElement('div');
   content.style.backgroundColor = 'white';
@@ -424,9 +457,6 @@ function showPageStructure(): void {
 
   // Füge den Inhalt zum Container hinzu
   pageStructureContainer.appendChild(content);
-
-  // Füge den Container zum Body hinzu
-  document.body.appendChild(pageStructureContainer);
 
   // Baue die verschiedenen Komponenten
   const sections = [
@@ -477,8 +507,6 @@ function buildTableOfContents(container: HTMLElement): void {
       const link = document.createElement('a');
       link.textContent = heading.textContent || `Überschrift ${index + 1}`;
       link.href = '#';
-      link.style.color = '#0066cc';
-      link.style.textDecoration = 'none';
 
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -514,8 +542,6 @@ function buildSkipLinks(container: HTMLElement): void {
       const link = document.createElement('a');
       link.textContent = text;
       link.href = '#';
-      link.style.color = '#0066cc';
-      link.style.textDecoration = 'none';
 
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -556,8 +582,6 @@ function buildLandmarks(container: HTMLElement): void {
       const link = document.createElement('a');
       link.textContent = text;
       link.href = '#';
-      link.style.color = '#0066cc';
-      link.style.textDecoration = 'none';
 
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -587,8 +611,6 @@ function buildHeadings(container: HTMLElement): void {
       const link = document.createElement('a');
       link.textContent = heading.textContent || `Überschrift ${index + 1}`;
       link.href = '#';
-      link.style.color = '#0066cc';
-      link.style.textDecoration = 'none';
 
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -619,8 +641,6 @@ function buildBreadcrumbs(container: HTMLElement): void {
       const breadcrumbLink = document.createElement('a');
       breadcrumbLink.textContent = link.textContent || `Link ${index + 1}`;
       breadcrumbLink.href = link.href;
-      breadcrumbLink.style.color = '#0066cc';
-      breadcrumbLink.style.textDecoration = 'none';
 
       listItem.appendChild(breadcrumbLink);
       breadcrumbsList.appendChild(listItem);
@@ -657,8 +677,6 @@ function buildPageStructure(container: HTMLElement): void {
       const link = document.createElement('a');
       link.textContent = `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}${element.className ? `.${element.className.split(' ').join('.')}` : ''}`;
       link.href = '#';
-      link.style.color = '#0066cc';
-      link.style.textDecoration = 'none';
 
       link.addEventListener('click', (e) => {
         e.preventDefault();
