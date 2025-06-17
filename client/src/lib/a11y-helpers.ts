@@ -88,7 +88,7 @@ function disableKeyboardNavigation(): void {
 }
 
 // Helper function to show virtual keyboard
-function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
+function showVirtualKeyboard(shadowRoot: ShadowRoot | null | undefined): void {
   console.log("Debug: showVirtualKeyboard called.");
   // Store the currently active element if it's an input or textarea
   const currentActiveElementOnShow = getActiveElement(document);
@@ -356,7 +356,7 @@ function showVirtualKeyboard(shadowRoot?: ShadowRoot): void {
 }
 
 // Helper function to hide virtual keyboard
-function hideVirtualKeyboard(currentShadowRoot?: ShadowRoot): void {
+function hideVirtualKeyboard(currentShadowRoot: ShadowRoot | null | undefined): void {
   console.log("Debug: hideVirtualKeyboard called.");
   console.log("Debug: hideVirtualKeyboard - currentShadowRoot received:", currentShadowRoot);
   let keyboard: HTMLElement | null = null;
@@ -395,319 +395,16 @@ function hideVirtualKeyboard(currentShadowRoot?: ShadowRoot): void {
   }
 }
 
-// Helper function to show page structure
 function showPageStructure(): void {
-  // Entferne zuerst alle existierenden Page Structure Elemente
-  hidePageStructure();
-
-  // Erstelle einen Container für die Page Structure
-  const pageStructureContainer = document.createElement('div');
-  pageStructureContainer.id = 'page-structure-container';
-  pageStructureContainer.style.position = 'fixed';
-  pageStructureContainer.style.top = '0';
-  pageStructureContainer.style.left = '0';
-  pageStructureContainer.style.width = '100%';
-  pageStructureContainer.style.height = '100%';
-  pageStructureContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-  pageStructureContainer.style.zIndex = '9999';
-  pageStructureContainer.style.overflow = 'auto';
-  pageStructureContainer.style.padding = '20px';
-  pageStructureContainer.style.boxSizing = 'border-box';
-
-  // Füge den Container zum Body hinzu, bevor Inhalte hinzugefügt werden
-  document.body.appendChild(pageStructureContainer);
-
-  // Füge Stile für die Seitenstruktur hinzu
-  const style = document.createElement('style');
-  style.textContent = `
-    #page-structure-container {
-      font-family: sans-serif;
-      color: #333;
-    }
-    #page-structure-container h2 {
-      color: #0056b3;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 5px;
-      margin-top: 20px;
-    }
-    #page-structure-container ul {
-      list-style-type: none;
-      padding-left: 0;
-    }
-    #page-structure-container li {
-      margin-bottom: 5px;
-    }
-    #page-structure-container a {
-      color: #0066cc;
-      text-decoration: none;
-    }
-    #page-structure-container a:hover {
-      text-decoration: underline;
-    }
-  `;
-  pageStructureContainer.appendChild(style);
-
-  // Erstelle den Inhalt
-  const content = document.createElement('div');
-  content.style.backgroundColor = 'white';
-  content.style.padding = '20px';
-  content.style.borderRadius = '8px';
-  content.style.maxWidth = '800px';
-  content.style.margin = '0 auto';
-
-  // Füge den Inhalt zum Container hinzu
-  pageStructureContainer.appendChild(content);
-
-  // Baue die verschiedenen Komponenten
-  const sections = [
-    { title: 'Inhaltsverzeichnis', buildFn: buildTableOfContents },
-    { title: 'Schnellzugriff', buildFn: buildSkipLinks },
-    { title: 'Seitenbereiche', buildFn: buildLandmarks },
-    { title: 'Überschriften', buildFn: buildHeadings },
-    { title: 'Breadcrumbs', buildFn: buildBreadcrumbs },
-    { title: 'Seitenstruktur', buildFn: buildPageStructure }
-  ];
-
-  sections.forEach(({ title, buildFn }) => {
-    const section = document.createElement('div');
-    section.className = `${title.toLowerCase().replace(/\s+/g, '-')}-section`;
-    section.style.marginBottom = '20px';
-
-    const sectionTitle = document.createElement('h2');
-    sectionTitle.textContent = title;
-    sectionTitle.style.fontSize = '1.5em';
-    sectionTitle.style.marginBottom = '10px';
-
-    section.appendChild(sectionTitle);
-    buildFn(section);
-    content.appendChild(section);
-  });
-
-  // Füge Event-Listener für ESC-Taste hinzu
-  document.addEventListener('keydown', function handleEscKey(e) {
-    if (e.key === 'Escape') {
-      hidePageStructure();
-      document.removeEventListener('keydown', handleEscKey);
-    }
-  });
+  // Funktion zur Fehlerbehebung temporär deaktiviert
+  console.log("Seitenstruktur-Funktion ist temporär deaktiviert.");
+  // Originaler Code für showPageStructure hier auskommentiert oder entfernt.
 }
 
-function buildTableOfContents(container: HTMLElement): void {
-  const tocList = document.createElement('ul');
-  tocList.style.listStyle = 'none';
-  tocList.style.padding = '0';
-
-  const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-  headings.forEach((heading, index) => {
-    if (heading instanceof HTMLElement) {
-      const listItem = document.createElement('li');
-      listItem.style.margin = '5px 0';
-      listItem.style.paddingLeft = `${(parseInt(heading.tagName[1]) - 1) * 20}px`;
-
-      const link = document.createElement('a');
-      link.textContent = heading.textContent || `Überschrift ${index + 1}`;
-      link.href = '#';
-
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        heading.scrollIntoView({ behavior: 'smooth' });
-      });
-
-      listItem.appendChild(link);
-      tocList.appendChild(listItem);
-    }
-  });
-
-  container.appendChild(tocList);
-}
-
-function buildSkipLinks(container: HTMLElement): void {
-  const skipLinksList = document.createElement('ul');
-  skipLinksList.style.listStyle = 'none';
-  skipLinksList.style.padding = '0';
-
-  const skipPoints = [
-    { text: 'Zum Hauptinhalt', selector: 'main, [role="main"]' },
-    { text: 'Zur Navigation', selector: 'nav, [role="navigation"]' },
-    { text: 'Zur Suche', selector: 'form[role="search"], input[type="search"]' },
-    { text: 'Zum Footer', selector: 'footer, [role="contentinfo"]' }
-  ];
-
-  skipPoints.forEach(({ text, selector }) => {
-    const element = document.querySelector(selector);
-    if (element) {
-      const listItem = document.createElement('li');
-      listItem.style.margin = '5px 0';
-
-      const link = document.createElement('a');
-      link.textContent = text;
-      link.href = '#';
-
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        element.scrollIntoView({ behavior: 'smooth' });
-        if (element instanceof HTMLElement) {
-          element.focus();
-        }
-      });
-
-      listItem.appendChild(link);
-      skipLinksList.appendChild(listItem);
-    }
-  });
-
-  container.appendChild(skipLinksList);
-}
-
-function buildLandmarks(container: HTMLElement): void {
-  const landmarksList = document.createElement('ul');
-  landmarksList.style.listStyle = 'none';
-  landmarksList.style.padding = '0';
-
-  const landmarks = [
-    { text: 'Header', selector: 'header, [role="banner"]' },
-    { text: 'Navigation', selector: 'nav, [role="navigation"]' },
-    { text: 'Hauptinhalt', selector: 'main, [role="main"]' },
-    { text: 'Seitenleiste', selector: 'aside, [role="complementary"]' },
-    { text: 'Footer', selector: 'footer, [role="contentinfo"]' },
-    { text: 'Suche', selector: 'form[role="search"]' }
-  ];
-
-  landmarks.forEach(({ text, selector }) => {
-    const element = document.querySelector(selector);
-    if (element) {
-      const listItem = document.createElement('li');
-      listItem.style.margin = '5px 0';
-
-      const link = document.createElement('a');
-      link.textContent = text;
-      link.href = '#';
-
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        element.scrollIntoView({ behavior: 'smooth' });
-      });
-
-      listItem.appendChild(link);
-      landmarksList.appendChild(listItem);
-    }
-  });
-
-  container.appendChild(landmarksList);
-}
-
-function buildHeadings(container: HTMLElement): void {
-  const headingsList = document.createElement('ul');
-  headingsList.style.listStyle = 'none';
-  headingsList.style.padding = '0';
-
-  const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-  headings.forEach((heading, index) => {
-    if (heading instanceof HTMLElement) {
-      const listItem = document.createElement('li');
-      listItem.style.margin = '5px 0';
-      listItem.style.paddingLeft = `${(parseInt(heading.tagName[1]) - 1) * 20}px`;
-
-      const link = document.createElement('a');
-      link.textContent = heading.textContent || `Überschrift ${index + 1}`;
-      link.href = '#';
-
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        heading.scrollIntoView({ behavior: 'smooth' });
-      });
-
-      listItem.appendChild(link);
-      headingsList.appendChild(listItem);
-    }
-  });
-
-  container.appendChild(headingsList);
-}
-
-function buildBreadcrumbs(container: HTMLElement): void {
-  const breadcrumbsList = document.createElement('ul');
-  breadcrumbsList.style.listStyle = 'none';
-  breadcrumbsList.style.padding = '0';
-
-  const breadcrumbs = document.querySelector('nav[aria-label="breadcrumb"], [role="navigation"][aria-label="breadcrumb"]');
-  if (breadcrumbs) {
-    const links = breadcrumbs.querySelectorAll('a');
-    links.forEach((link, index) => {
-      const listItem = document.createElement('li');
-      listItem.style.margin = '5px 0';
-      listItem.style.display = 'inline';
-
-      const breadcrumbLink = document.createElement('a');
-      breadcrumbLink.textContent = link.textContent || `Link ${index + 1}`;
-      breadcrumbLink.href = link.href;
-
-      listItem.appendChild(breadcrumbLink);
-      breadcrumbsList.appendChild(listItem);
-
-      if (index < links.length - 1) {
-        const separator = document.createElement('span');
-        separator.textContent = ' > ';
-        separator.style.margin = '0 5px';
-        separator.style.color = '#666';
-        breadcrumbsList.appendChild(separator);
-      }
-    });
-  } else {
-    const listItem = document.createElement('li');
-    listItem.textContent = 'Keine Breadcrumbs gefunden';
-    listItem.style.color = '#666';
-    breadcrumbsList.appendChild(listItem);
-  }
-
-  container.appendChild(breadcrumbsList);
-}
-
-function buildPageStructure(container: HTMLElement): void {
-  const structureList = document.createElement('ul');
-  structureList.style.listStyle = 'none';
-  structureList.style.padding = '0';
-
-  function buildStructure(element: Element, level: number = 0): void {
-    if (element instanceof HTMLElement) {
-      const listItem = document.createElement('li');
-      listItem.style.margin = '5px 0';
-      listItem.style.paddingLeft = `${level * 20}px`;
-
-      const link = document.createElement('a');
-      link.textContent = `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}${element.className ? `.${element.className.split(' ').join('.')}` : ''}`;
-      link.href = '#';
-
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        element.scrollIntoView({ behavior: 'smooth' });
-      });
-
-      listItem.appendChild(link);
-      structureList.appendChild(listItem);
-
-      Array.from(element.children).forEach(child => {
-        buildStructure(child, level + 1);
-      });
-    }
-  }
-
-  buildStructure(document.body);
-  container.appendChild(structureList);
-}
-
-// Helper function to hide page structure
 function hidePageStructure(): void {
-  const panel = document.getElementById('page-structure-panel');
-  if (panel) {
-    panel.remove();
-
-    // Create a custom event that will be listened to by the React app
-    const customEvent = new CustomEvent('accessibility:page-structure-closed', {
-      bubbles: true
-    });
-    document.dispatchEvent(customEvent);
-  }
+  // Funktion zur Fehlerbehebung temporär deaktiviert
+  console.log("Seitenstruktur-Funktion ist temporär deaktiviert.");
+  // Originaler Code für hidePageStructure hier auskommentiert oder entfernt.
 }
 
 // Helper function to handle custom cursor
@@ -1129,9 +826,9 @@ function getFontFamilyStyles(fontFamily: string): string {
 }
 
 // Apply multiple style adjustments based on the active settings
-export function applyAccessibilityStyles(settings: AccessibilitySettings, shadowRoot?: ShadowRoot): void {
+export function applyAccessibilityStyles(settings: AccessibilitySettings, shadowRoot: ShadowRoot | null | undefined): void {
   // Remove any existing accessibility styles
-  const existingStyle = document.getElementById('accessibility-styles');
+  const existingStyle = (shadowRoot || document).getElementById('accessibility-styles');
   if (existingStyle) {
     existingStyle.remove();
   }
@@ -1142,7 +839,7 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
 
   let cssRules = '';
 
-  // Apply contrast mode styles
+  // Vision settings
   cssRules += getContrastModeStyles(settings.contrastMode);
 
   // Always apply custom color adjustments, regardless of contrast mode
@@ -1346,36 +1043,33 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   // Apply keyboard navigation
   if (settings.keyboardNavigation) {
     // Add keyboard navigation helpers
-    const keyboardNavHelpers = document.getElementById('keyboard-nav-helpers');
+    const keyboardNavHelpers = (shadowRoot || document).getElementById('keyboard-nav-helpers');
     if (!keyboardNavHelpers) {
       enableKeyboardNavigation();
     }
   } else {
-    // Remove keyboard navigation helpers
     disableKeyboardNavigation();
   }
 
   // Apply virtual keyboard
   if (settings.virtualKeyboard) {
     // Add virtual keyboard
-    const virtualKeyboard = document.getElementById('virtual-keyboard');
+    const virtualKeyboard = (shadowRoot || document).getElementById('virtual-keyboard');
     if (!virtualKeyboard) {
       showVirtualKeyboard(shadowRoot);
     }
   } else {
-    // Remove virtual keyboard
     hideVirtualKeyboard(shadowRoot);
   }
 
   // Apply page structure
   if (settings.pageStructure) {
     // Add page structure panel
-    const pageStructurePanel = document.getElementById('page-structure-panel');
+    const pageStructurePanel = (shadowRoot || document).getElementById('page-structure-panel');
     if (!pageStructurePanel) {
       showPageStructure();
     }
   } else {
-    // Remove page structure panel
     hidePageStructure();
   }
 
@@ -1470,5 +1164,9 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
 
   // Apply all CSS rules
   styleElement.textContent = cssRules;
-  document.head.appendChild(styleElement);
+  if (shadowRoot) {
+    shadowRoot.appendChild(styleElement);
+  } else {
+    document.head.appendChild(styleElement);
+  }
 }

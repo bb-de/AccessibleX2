@@ -59,7 +59,6 @@ export interface AccessibilitySettings {
   cursorSize: CursorType;
   cursorColor: CursorColor;
   virtualKeyboard: boolean;
-  pageStructure: boolean;
 }
 
 export const defaultSettings: AccessibilitySettings = {
@@ -91,7 +90,6 @@ export const defaultSettings: AccessibilitySettings = {
   cursorSize: 'default',
   cursorColor: 'black',
   virtualKeyboard: false,
-  pageStructure: false,
 };
 
 interface AccessibilityContextType {
@@ -136,15 +134,17 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
   });
   const { toast } = useToast();
 
-  // Wende die Einstellungen sofort an, wenn sie sich ändern
+  // Wende die Einstellungen an, wenn sie sich ändern
   useEffect(() => {
     localStorage.setItem('accessibility-settings', JSON.stringify(settings));
-    applyAccessibilityStyles(settings);
-  }, [settings]);
+    applyAccessibilityStyles(settings, shadowRoot);
+
+    // Handle virtual keyboard visibility
+  }, [settings, shadowRoot]);
 
   // Wende die Einstellungen auch beim ersten Laden an
   useEffect(() => {
-    applyAccessibilityStyles(settings);
+    applyAccessibilityStyles(settings, shadowRoot);
   }, []);
 
   // Lausche auf Nachrichten vom übergeordneten Fenster, um den Widget-Status zu synchronisieren
@@ -272,10 +272,13 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
         case 'senior':
           return {
             textSize: 2,
-            contrastMode: 'increased',
-            fontFamily: 'readable',
-            highlightFocus: true,
+            lineHeight: 2,
+            letterSpacing: 0,
+            highlightTitles: true,
             highlightLinks: true,
+            customCursor: true,
+            cursorSize: 'bigger',
+            keyboardNavigation: true,
           };
         case 'motorImpaired':
           return {
@@ -306,7 +309,6 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
             darkMode: true,
             highlightLinks: true,
             highlightFocus: true,
-            pageStructure: true,
             customCursor: true,
             cursorSize: 'bigger',
             cursorColor: 'red',

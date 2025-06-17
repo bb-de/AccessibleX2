@@ -28,7 +28,12 @@
 
   // Function to load CSS
   function loadStyles() {
+    if (document.getElementById('accessibility-widget-styles')) {
+      console.log('Accessibility widget styles already loaded.');
+      return;
+    }
     const styleTag = document.createElement('style');
+    styleTag.id = 'accessibility-widget-styles';
     styleTag.textContent = 
       '#accessibility-widget-container * {' +
       '  box-sizing: border-box;' +
@@ -89,6 +94,11 @@
 
   // Widget button HTML with SVG icon
   function createWidgetButton() {
+    if (document.getElementById('accessibility-widget-container')) {
+      console.log('Accessibility widget container already exists.');
+      return document.getElementById('accessibility-widget-button') as HTMLButtonElement;
+    }
+
     const container = document.createElement('div');
     container.id = 'accessibility-widget-container';
     
@@ -113,6 +123,11 @@
 
   // Create iframe to load the widget panel
   function createWidgetIframe() {
+    if (document.getElementById('accessibility-widget-iframe')) {
+      console.log('Accessibility widget iframe already exists.');
+      return document.getElementById('accessibility-widget-iframe') as HTMLIFrameElement;
+    }
+
     const iframe = document.createElement('iframe');
     iframe.id = 'accessibility-widget-iframe';
     iframe.style.position = 'fixed';
