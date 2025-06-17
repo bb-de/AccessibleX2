@@ -397,776 +397,285 @@ function hideVirtualKeyboard(currentShadowRoot?: ShadowRoot): void {
 
 // Helper function to show page structure
 function showPageStructure(): void {
-  // Import the language from AccessibilityContext if available, otherwise detect from document
-  let language = 'de'; // Default to German
+  // Entferne zuerst alle existierenden Page Structure Elemente
+  hidePageStructure();
 
-  try {
-    // First check for explicitly saved language preference in localStorage
-    const savedLanguage = localStorage.getItem('accessibility-language');
-    if (savedLanguage && ['en', 'de', 'fr', 'es'].includes(savedLanguage)) {
-      language = savedLanguage;
-    }
-    // Then try to get the language from the widget's context
-    else {
-      const accessibilityToggle = document.querySelector('[data-accessibility-widget]');
-      if (accessibilityToggle) {
-        const widgetLang = accessibilityToggle.getAttribute('data-lang');
-        if (widgetLang && ['en', 'de', 'fr', 'es'].includes(widgetLang)) {
-          language = widgetLang;
-        }
-      } else {
-        // Fallback to document language
-        const documentLang = document.documentElement.lang || 
-                            document.querySelector('html')?.getAttribute('lang') || 
-                            navigator.language || 
-                            'de';
+  // Erstelle einen Container für die Page Structure
+  const pageStructureContainer = document.createElement('div');
+  pageStructureContainer.id = 'page-structure-container';
+  pageStructureContainer.style.position = 'fixed';
+  pageStructureContainer.style.top = '0';
+  pageStructureContainer.style.left = '0';
+  pageStructureContainer.style.width = '100%';
+  pageStructureContainer.style.height = '100%';
+  pageStructureContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  pageStructureContainer.style.zIndex = '9999';
+  pageStructureContainer.style.overflow = 'auto';
+  pageStructureContainer.style.padding = '20px';
+  pageStructureContainer.style.boxSizing = 'border-box';
 
-        if (documentLang.startsWith('en')) language = 'en';
-        else if (documentLang.startsWith('fr')) language = 'fr';
-        else if (documentLang.startsWith('es')) language = 'es';
-        // Default is already 'de'
-      }
-    }
-  } catch (error) {
-    console.error('Error detecting language for accessibility widget:', error);
-    // Default to German if there's an error
-  }
+  // Erstelle den Inhalt
+  const content = document.createElement('div');
+  content.style.backgroundColor = 'white';
+  content.style.padding = '20px';
+  content.style.borderRadius = '8px';
+  content.style.maxWidth = '800px';
+  content.style.margin = '0 auto';
 
-  // Translations for UI elements
-  const translations = {
-    en: {
-      panelTitle: 'Page Structure',
-      closeAriaLabel: 'Close page structure',
-      toc: 'Table of Contents',
-      landmarks: 'Landmarks',
-      headings: 'Headings',
-      skipLinks: 'Skip Links',
-      tocTitle: 'Table of Contents',
-      noHeadings: 'No headings found on this page.',
-      skipLinksTitle: 'Skip Links',
-      skipToMain: 'Skip to main content',
-      skipToNav: 'Skip to navigation',
-      skipToSearch: 'Skip to search',
-      skipToFooter: 'Skip to footer',
-      skipToTop: 'Skip to top of page',
-      noTargets: 'No skip targets found.',
-      landmarksTitle: 'Landmarks Navigation',
-      noLandmarks: 'No landmarks found on this page.',
-      headingsTitle: 'Headings Navigation',
-      noHeadingsFound: 'No headings found on this page.',
-      breadcrumbsTitle: 'Breadcrumbs Navigation',
-      homePage: 'You are on the home page',
-      structureTitle: 'Page Structure',
-      header: 'Header',
-      main: 'Main Content',
-      sidebar: 'Sidebar',
-      footer: 'Footer',
-      navigation: 'Navigation',
-      columns: 'Multi-column Content',
-      column: 'Column',
-      currentView: 'Current Viewport'
-    },
-    de: {
-      panelTitle: 'Seitenstruktur',
-      closeAriaLabel: 'Seitenstruktur schließen',
-      toc: 'Inhaltsverzeichnis',
-      landmarks: 'Landmarken',
-      headings: 'Überschriften',
-      skipLinks: 'Sprungmarken',
-      tocTitle: 'Inhaltsverzeichnis',
-      noHeadings: 'Keine Überschriften gefunden.',
-      skipLinksTitle: 'Sprungmarken',
-      skipToMain: 'Zum Hauptinhalt',
-      skipToNav: 'Zur Navigation',
-      skipToSearch: 'Zur Suche',
-      skipToFooter: 'Zum Footer',
-      skipToTop: 'Zum Anfang der Seite',
-      noTargets: 'Keine Sprungziele gefunden.',
-      landmarksTitle: 'Landmarken-Navigation',
-      noLandmarks: 'Keine Landmarken gefunden.',
-      headingsTitle: 'Überschriften-Navigation',
-      noHeadingsFound: 'Keine Überschriften gefunden.',
-      breadcrumbsTitle: 'Breadcrumbs Navigation',
-      homePage: 'Sie befinden sich auf der Startseite',
-      structureTitle: 'Seitenstruktur',
-      header: 'Header',
-      main: 'Hauptinhalt',
-      sidebar: 'Barra Lateral',
-      footer: 'Pie de Página',
-      navigation: 'Navigation',
-      columns: 'Contenido de Múltiples Columnas',
-      column: 'Columna',
-      currentView: 'Vista Actual'
-    },
-    fr: {
-      panelTitle: 'Structure de la Page',
-      closeAriaLabel: 'Fermer la structure de la page',
-      toc: 'Table des Matières',
-      landmarks: 'Points de Repère',
-      headings: 'En-têtes',
-      skipLinks: 'Liens de Saut',
-      tocTitle: 'Table des Matières',
-      noHeadings: 'Aucun en-tête trouvé sur cette page.',
-      skipLinksTitle: 'Liens de Saut',
-      skipToMain: 'Aller au contenu principal',
-      skipToNav: 'Aller à la navigation',
-      skipToSearch: 'Aller à la recherche',
-      skipToFooter: 'Aller au bas de page',
-      skipToTop: 'Aller en haut de la page',
-      noTargets: 'Aucune cible de saut trouvée.',
-      landmarksTitle: 'Navigation par Points de Repère',
-      noLandmarks: 'Aucun point de repère trouvé.',
-      headingsTitle: 'Navigation par En-têtes',
-      noHeadingsFound: 'Aucun en-tête trouvé.',
-      breadcrumbsTitle: 'Fil d\'Ariane',
-      homePage: 'Vous êtes sur la page d\'accueil',
-      structureTitle: 'Structure de la Page',
-      header: 'En-tête',
-      main: 'Contenu Principal',
-      sidebar: 'Barre Latérale',
-      footer: 'Pied de Page',
-      navigation: 'Navigation',
-      columns: 'Contenu Multi-colonnes',
-      column: 'Colonne',
-      currentView: 'Fenêtre Actuelle'
-    },
-    es: {
-      panelTitle: 'Estructura de la Página',
-      closeAriaLabel: 'Cerrar estructura de página',
-      toc: 'Tabla de Contenidos',
-      landmarks: 'Puntos de Referencia',
-      headings: 'Encabezados',
-      skipLinks: 'Enlaces de Salto',
-      tocTitle: 'Tabla de Contenidos',
-      noHeadings: 'No se encontraron encabezados en esta página.',
-      skipLinksTitle: 'Enlaces de Salto',
-      skipToMain: 'Saltar al contenido principal',
-      skipToNav: 'Saltar a la navegación',
-      skipToSearch: 'Saltar a la búsqueda',
-      skipToFooter: 'Saltar al pie de página',
-      skipToTop: 'Saltar al inicio de la página',
-      noTargets: 'No se encontraron objetivos de salto.',
-      landmarksTitle: 'Navegación por Puntos de Referencia',
-      noLandmarks: 'No se encontraron puntos de referencia.',
-      headingsTitle: 'Navegación por Encabezados',
-      noHeadingsFound: 'No se encontraron encabezados.',
-      breadcrumbsTitle: 'Navegación de Migas de Pan',
-      homePage: 'Está en la página de inicio',
-      structureTitle: 'Estructura de la Página',
-      header: 'Encabezado',
-      main: 'Contenido Principal',
-      sidebar: 'Barra Lateral',
-      footer: 'Pie de Página',
-      navigation: 'Navegación',
-      columns: 'Contenido de Múltiples Columnas',
-      column: 'Columna',
-      currentView: 'Vista Actual'
-    }
-  };
+  // Füge den Inhalt zum Container hinzu
+  pageStructureContainer.appendChild(content);
 
-  // Get translation for current language
-  const t = translations[language as keyof typeof translations];
+  // Füge den Container zum Body hinzu
+  document.body.appendChild(pageStructureContainer);
 
-  // Create panel container on the left side
-  const panel = document.createElement('div') as HTMLElement;
-  panel.id = 'page-structure-panel';
-  panel.style.position = 'fixed';
-  panel.style.top = '0';
-  panel.style.left = '0';
-  panel.style.height = '100vh';
-  panel.style.width = '320px';
-  panel.style.backgroundColor = 'white';
-  panel.style.overflowY = 'auto';
-  panel.style.zIndex = '99998';
-  panel.style.boxShadow = '2px 0 10px rgba(0, 0, 0, 0.2)';
-  panel.style.padding = '0';
-  panel.style.display = 'flex';
-  panel.style.flexDirection = 'column';
-
-  // Create header
-  const header = document.createElement('div') as HTMLElement;
-  header.style.padding = '15px';
-  header.style.borderBottom = '1px solid #eee';
-  header.style.display = 'flex';
-  header.style.justifyContent = 'space-between';
-  header.style.alignItems = 'center';
-  header.style.backgroundColor = '#f8f8f8';
-
-  // Add heading
-  const heading = document.createElement('h2') as HTMLElement;
-  heading.textContent = t.panelTitle;
-  heading.style.fontSize = '18px';
-  heading.style.margin = '0';
-  heading.style.fontWeight = 'bold';
-
-  // Add close button
-  const closeButton = document.createElement('button') as HTMLButtonElement;
-  closeButton.textContent = '×';
-  closeButton.setAttribute('aria-label', t.closeAriaLabel);
-  closeButton.style.backgroundColor = 'transparent';
-  closeButton.style.border = 'none';
-  closeButton.style.fontSize = '24px';
-  closeButton.style.fontWeight = 'bold';
-  closeButton.style.color = '#666';
-  closeButton.style.cursor = 'pointer';
-  closeButton.style.padding = '0 8px';
-  closeButton.style.lineHeight = '1';
-  closeButton.addEventListener('click', hidePageStructure);
-  closeButton.addEventListener('mouseover', () => {
-    (closeButton as HTMLElement).style.color = '#000';
-  });
-  closeButton.addEventListener('mouseout', () => {
-    (closeButton as HTMLElement).style.color = '#666';
-  });
-
-  header.appendChild(heading);
-  header.appendChild(closeButton);
-  panel.appendChild(header);
-
-  // Tab navigation
-  const tabContainer = document.createElement('div') as HTMLElement;
-  tabContainer.style.display = 'flex';
-  tabContainer.style.borderBottom = '1px solid #eee';
-
-  const tabs = [
-    { id: 'toc', label: t.toc },
-    { id: 'landmarks', label: t.landmarks },
-    { id: 'headings', label: t.headings },
-    { id: 'skiplinks', label: t.skipLinks }
+  // Baue die verschiedenen Komponenten
+  const sections = [
+    { title: 'Inhaltsverzeichnis', buildFn: buildTableOfContents },
+    { title: 'Schnellzugriff', buildFn: buildSkipLinks },
+    { title: 'Seitenbereiche', buildFn: buildLandmarks },
+    { title: 'Überschriften', buildFn: buildHeadings },
+    { title: 'Breadcrumbs', buildFn: buildBreadcrumbs },
+    { title: 'Seitenstruktur', buildFn: buildPageStructure }
   ];
 
-  const tabButtons: {[key: string]: HTMLButtonElement} = {};
-  const tabContents: {[key: string]: HTMLDivElement} = {};
+  sections.forEach(({ title, buildFn }) => {
+    const section = document.createElement('div');
+    section.className = `${title.toLowerCase().replace(/\s+/g, '-')}-section`;
+    section.style.marginBottom = '20px';
 
-  tabs.forEach(tab => {
-    // Create tab button
-    const tabButton = document.createElement('button') as HTMLButtonElement;
-    tabButton.textContent = tab.label;
-    tabButton.dataset.tab = tab.id;
-    tabButton.style.flex = '1';
-    tabButton.style.padding = '10px';
-    tabButton.style.backgroundColor = tab.id === 'toc' ? '#eee' : 'transparent';
-    tabButton.style.border = 'none';
-    tabButton.style.borderRight = '1px solid #eee';
-    tabButton.style.cursor = 'pointer';
-    tabButton.style.fontSize = '14px';
+    const sectionTitle = document.createElement('h2');
+    sectionTitle.textContent = title;
+    sectionTitle.style.fontSize = '1.5em';
+    sectionTitle.style.marginBottom = '10px';
 
-    // Create tab content
-    const tabContent = document.createElement('div') as HTMLDivElement;
-    tabContent.id = `tab-${tab.id}`;
-    tabContent.style.padding = '15px';
-    tabContent.style.display = tab.id === 'toc' ? 'block' : 'none';
-
-    tabButtons[tab.id] = tabButton;
-    tabContents[tab.id] = tabContent;
-
-    tabButton.addEventListener('click', () => {
-      // Update active tab
-      Object.values(tabButtons).forEach(btn => {
-        (btn as HTMLElement).style.backgroundColor = 'transparent';
-      });
-      Object.values(tabContents).forEach(content => {
-        (content as HTMLElement).style.display = 'none';
-      });
-
-      (tabButton as HTMLElement).style.backgroundColor = '#eee';
-      (tabContent as HTMLElement).style.display = 'block';
-    });
-
-    tabContainer.appendChild(tabButton);
+    section.appendChild(sectionTitle);
+    buildFn(section);
+    content.appendChild(section);
   });
 
-  panel.appendChild(tabContainer);
-
-  // Content container
-  const contentContainer = document.createElement('div') as HTMLElement;
-  contentContainer.style.flex = '1';
-  contentContainer.style.overflowY = 'auto';
-  contentContainer.style.padding = '0';
-
-  // 1. Table of Contents (Inhaltsverzeichnis)
-  const tocContent = buildTableOfContents();
-  (tabContents['toc'] as HTMLElement).appendChild(tocContent);
-
-  // 2. Skip Links (Sprungmarken)
-  const skipLinksContent = buildSkipLinks();
-  (tabContents['skiplinks'] as HTMLElement).appendChild(skipLinksContent);
-
-  // 3. Landmarks (Landmarken)
-  const landmarksContent = buildLandmarks();
-  (tabContents['landmarks'] as HTMLElement).appendChild(landmarksContent);
-
-  // 4. Headings (Überschriften)
-  const headingsContent = buildHeadings();
-  (tabContents['headings'] as HTMLElement).appendChild(headingsContent);
-
-  // 5. Add footer with Breadcrumbs Navigation
-  const footerContainer = document.createElement('div') as HTMLElement;
-  footerContainer.style.padding = '15px';
-  footerContainer.style.borderTop = '1px solid #eee';
-  footerContainer.style.backgroundColor = '#f8f8f8';
-
-  const breadcrumbsHeading = document.createElement('h3') as HTMLElement;
-  breadcrumbsHeading.textContent = t.breadcrumbsTitle;
-  breadcrumbsHeading.style.fontSize = '14px';
-  breadcrumbsHeading.style.margin = '0 0 10px 0';
-  breadcrumbsHeading.style.fontWeight = 'bold';
-
-  const breadcrumbsContent = buildBreadcrumbs();
-
-  footerContainer.appendChild(breadcrumbsHeading);
-  footerContainer.appendChild(breadcrumbsContent);
-
-  // 6. Add Visual Structure section
-  const structureContainer = document.createElement('div') as HTMLElement;
-  structureContainer.style.padding = '15px';
-  structureContainer.style.borderTop = '1px solid #eee';
-
-  const structureHeading = document.createElement('h3') as HTMLElement;
-  structureHeading.textContent = t.structureTitle;
-  structureHeading.style.fontSize = '14px';
-  structureHeading.style.margin = '0 0 10px 0';
-  structureHeading.style.fontWeight = 'bold';
-
-  const structureContent = buildPageStructure();
-
-  structureContainer.appendChild(structureHeading);
-  structureContainer.appendChild(structureContent);
-
-  // Assemble the panel
-  Object.values(tabContents).forEach(content => {
-    (content as HTMLElement).appendChild(content);
-  });
-
-  panel.appendChild(contentContainer);
-  panel.appendChild(footerContainer);
-  panel.appendChild(structureContainer);
-  document.body.appendChild(panel);
-
-  // Add Escape key listener
+  // Füge Event-Listener für ESC-Taste hinzu
   document.addEventListener('keydown', function handleEscKey(e) {
     if (e.key === 'Escape') {
       hidePageStructure();
       document.removeEventListener('keydown', handleEscKey);
     }
   });
+}
 
-  // Helper function to build table of contents
-  function buildTableOfContents() {
-    const container = document.createElement('div') as HTMLElement;
+function buildTableOfContents(container: HTMLElement): void {
+  const tocList = document.createElement('ul');
+  tocList.style.listStyle = 'none';
+  tocList.style.padding = '0';
 
-    const heading = document.createElement('h3') as HTMLElement;
-    heading.textContent = t.tocTitle;
-    heading.style.fontSize = '16px';
-    heading.style.margin = '0 0 15px 0';
-    heading.style.fontWeight = 'bold';
+  const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  headings.forEach((heading, index) => {
+    if (heading instanceof HTMLElement) {
+      const listItem = document.createElement('li');
+      listItem.style.margin = '5px 0';
+      listItem.style.paddingLeft = `${(parseInt(heading.tagName[1]) - 1) * 20}px`;
 
-    const headings = Array.from(document.querySelectorAll('h1, h2, h3'))
-      .filter(el => !(el as HTMLElement).closest('[data-accessibility-widget]'));
-
-    if (headings.length > 0) {
-      const list = document.createElement('ul') as HTMLElement;
-      list.style.listStyleType = 'none';
-      list.style.padding = '0';
-      list.style.margin = '0';
-
-      headings.forEach(heading => {
-        const headingElement = heading as HTMLHeadingElement;
-        const level = parseInt(headingElement.tagName.substring(1));
-
-        const item = document.createElement('li') as HTMLElement;
-        item.style.marginBottom = '8px';
-        item.style.marginLeft = `${(level - 1) * 15}px`;
-
-        const link = document.createElement('a') as HTMLAnchorElement;
-
-        // Create an ID for the heading if it doesn't have one
-        if (!headingElement.id) {
-          headingElement.id = `heading-${Math.random().toString(36).substring(2, 9)}`;
-        }
-
-        link.href = `#${headingElement.id}`;
-        link.textContent = headingElement.textContent || '';
-        link.style.color = '#0066cc';
-        link.style.textDecoration = 'none';
-        link.style.fontSize = '14px';
-        link.style.display = 'block';
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          document.getElementById(headingElement.id)?.scrollIntoView({
-            behavior: 'smooth'
-          });
-          hidePageStructure();
-        });
-
-        item.appendChild(link);
-        list.appendChild(item);
-      });
-      container.appendChild(list);
-    } else {
-      const noHeadings = document.createElement('p') as HTMLElement;
-      noHeadings.textContent = t.noHeadings;
-      noHeadings.style.fontStyle = 'italic';
-      container.appendChild(noHeadings);
-    }
-
-    return container;
-  }
-
-  // Helper function to build skip links
-  function buildSkipLinks() {
-    const container = document.createElement('div') as HTMLElement;
-
-    const heading = document.createElement('h3') as HTMLElement;
-    heading.textContent = t.skipLinksTitle;
-    heading.style.fontSize = '16px';
-    heading.style.margin = '0 0 15px 0';
-    heading.style.fontWeight = 'bold';
-
-    container.appendChild(heading);
-
-    const skipTargets = [
-      { id: 'main', label: t.skipToMain },
-      { id: 'navigation', label: t.skipToNav },
-      { id: 'search', label: t.skipToSearch },
-      { id: 'footer', label: t.skipToFooter },
-      { id: 'top', label: t.skipToTop }
-    ];
-
-    const list = document.createElement('ul') as HTMLElement;
-    list.style.listStyleType = 'none';
-    list.style.padding = '0';
-    list.style.margin = '0';
-
-    let hasTargets = false;
-
-    skipTargets.forEach(target => {
-      const targetElement = document.getElementById(target.id);
-      if (targetElement) {
-        hasTargets = true;
-        const item = document.createElement('li') as HTMLElement;
-        item.style.marginBottom = '8px';
-
-        const link = document.createElement('a') as HTMLAnchorElement;
-        link.href = `#${target.id}`;
-        link.textContent = target.label;
-        link.style.color = '#0066cc';
-        link.style.textDecoration = 'none';
-        link.style.fontSize = '14px';
-        link.style.display = 'block';
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          targetElement.scrollIntoView({
-            behavior: 'smooth'
-          });
-          hidePageStructure();
-        });
-
-        item.appendChild(link);
-        list.appendChild(item);
-      }
-    });
-
-    if (hasTargets) {
-      container.appendChild(list);
-    } else {
-      const noTargets = document.createElement('p') as HTMLElement;
-      noTargets.textContent = t.noTargets;
-      noTargets.style.fontStyle = 'italic';
-      container.appendChild(noTargets);
-    }
-
-    return container;
-  }
-
-  // Helper function to build landmarks
-  function buildLandmarks() {
-    const container = document.createElement('div') as HTMLElement;
-
-    const heading = document.createElement('h3') as HTMLElement;
-    heading.textContent = t.landmarksTitle;
-    heading.style.fontSize = '16px';
-    heading.style.margin = '0 0 15px 0';
-    heading.style.fontWeight = 'bold';
-
-    container.appendChild(heading);
-
-    const landmarks = Array.from(document.querySelectorAll('[role="main"], [role="navigation"], [role="complementary"], [role="contentinfo"], [role="banner"], [role="search"], [role="form"], [role="region"]'))
-      .filter(el => !(el as HTMLElement).closest('[data-accessibility-widget]'));
-
-    if (landmarks.length > 0) {
-      const list = document.createElement('ul') as HTMLElement;
-      list.style.listStyleType = 'none';
-      list.style.padding = '0';
-      list.style.margin = '0';
-
-      landmarks.forEach(landmark => {
-        const landmarkElement = landmark as HTMLElement;
-        const item = document.createElement('li') as HTMLElement;
-        item.style.marginBottom = '8px';
-
-        const link = document.createElement('a') as HTMLAnchorElement;
-
-        // Create an ID for the landmark if it doesn't have one
-        if (!landmarkElement.id) {
-          landmarkElement.id = `landmark-${Math.random().toString(36).substring(2, 9)}`;
-        }
-
-        link.href = `#${landmarkElement.id}`;
-        link.textContent = landmarkElement.getAttribute('aria-label') || landmarkElement.getAttribute('role') || 'Unbenannte Landmarke';
-        link.style.color = '#0066cc';
-        link.style.textDecoration = 'none';
-        link.style.fontSize = '14px';
-        link.style.display = 'block';
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          document.getElementById(landmarkElement.id)?.scrollIntoView({
-            behavior: 'smooth'
-          });
-          hidePageStructure();
-        });
-
-        item.appendChild(link);
-        list.appendChild(item);
-      });
-      container.appendChild(list);
-    } else {
-      const noLandmarks = document.createElement('p') as HTMLElement;
-      noLandmarks.textContent = t.noLandmarks;
-      noLandmarks.style.fontStyle = 'italic';
-      container.appendChild(noLandmarks);
-    }
-
-    return container;
-  }
-
-  // Helper function to build headings
-  function buildHeadings() {
-    const container = document.createElement('div') as HTMLElement;
-
-    const heading = document.createElement('h3') as HTMLElement;
-    heading.textContent = t.headingsTitle;
-    heading.style.fontSize = '16px';
-    heading.style.margin = '0 0 15px 0';
-    heading.style.fontWeight = 'bold';
-
-    container.appendChild(heading);
-
-    const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'))
-      .filter(el => !(el as HTMLElement).closest('[data-accessibility-widget]'));
-
-    if (headings.length > 0) {
-      const list = document.createElement('ul') as HTMLElement;
-      list.style.listStyleType = 'none';
-      list.style.padding = '0';
-      list.style.margin = '0';
-
-      headings.forEach(heading => {
-        const headingElement = heading as HTMLHeadingElement;
-        const level = parseInt(headingElement.tagName.substring(1));
-
-        const item = document.createElement('li') as HTMLElement;
-        item.style.marginBottom = '8px';
-        item.style.marginLeft = `${(level - 1) * 15}px`;
-
-        const link = document.createElement('a') as HTMLAnchorElement;
-
-        // Create an ID for the heading if it doesn't have one
-        if (!headingElement.id) {
-          headingElement.id = `heading-${Math.random().toString(36).substring(2, 9)}`;
-        }
-
-        link.href = `#${headingElement.id}`;
-        link.textContent = headingElement.textContent || '';
-        link.style.color = '#0066cc';
-        link.style.textDecoration = 'none';
-        link.style.fontSize = '14px';
-        link.style.display = 'block';
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          document.getElementById(headingElement.id)?.scrollIntoView({
-            behavior: 'smooth'
-          });
-          hidePageStructure();
-        });
-
-        item.appendChild(link);
-        list.appendChild(item);
-      });
-      container.appendChild(list);
-    } else {
-      const noHeadings = document.createElement('p') as HTMLElement;
-      noHeadings.textContent = t.noHeadingsFound;
-      noHeadings.style.fontStyle = 'italic';
-      container.appendChild(noHeadings);
-    }
-
-    return container;
-  }
-
-  // Helper function to build breadcrumbs
-  function buildBreadcrumbs() {
-    const container = document.createElement('div') as HTMLElement;
-    container.style.fontSize = '12px';
-
-    const breadcrumbs = [];
-    let current = window.location.pathname;
-
-    // Add home page
-    breadcrumbs.push({
-      label: t.homePage,
-      path: '/'
-    });
-
-    // Split path into segments and add to breadcrumbs
-    current.split('/').filter(segment => segment.length > 0).forEach((segment, index, array) => {
-      const path = '/' + array.slice(0, index + 1).join('/');
-      // Simple heuristic to make segment more readable
-      const label = segment.replace(/-/g, ' ').replace(/\.html$/, '').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-      breadcrumbs.push({
-        label: label,
-        path: path
-      });
-    });
-
-    const list = document.createElement('ol') as HTMLElement;
-    list.style.display = 'flex';
-    list.style.listStyleType = 'none';
-    list.style.padding = '0';
-    list.style.margin = '0';
-
-    breadcrumbs.forEach((crumb, index) => {
-      const item = document.createElement('li') as HTMLElement;
-      item.style.display = 'flex';
-      item.style.alignItems = 'center';
-
-      const link = document.createElement('a') as HTMLAnchorElement;
-      link.href = crumb.path;
-      link.textContent = crumb.label;
+      const link = document.createElement('a');
+      link.textContent = heading.textContent || `Überschrift ${index + 1}`;
+      link.href = '#';
       link.style.color = '#0066cc';
       link.style.textDecoration = 'none';
-      link.style.whiteSpace = 'nowrap';
 
-      item.appendChild(link);
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        heading.scrollIntoView({ behavior: 'smooth' });
+      });
 
-      if (index < breadcrumbs.length - 1) {
-        const separator = document.createElement('span') as HTMLElement;
-        separator.textContent = ' / ';
+      listItem.appendChild(link);
+      tocList.appendChild(listItem);
+    }
+  });
+
+  container.appendChild(tocList);
+}
+
+function buildSkipLinks(container: HTMLElement): void {
+  const skipLinksList = document.createElement('ul');
+  skipLinksList.style.listStyle = 'none';
+  skipLinksList.style.padding = '0';
+
+  const skipPoints = [
+    { text: 'Zum Hauptinhalt', selector: 'main, [role="main"]' },
+    { text: 'Zur Navigation', selector: 'nav, [role="navigation"]' },
+    { text: 'Zur Suche', selector: 'form[role="search"], input[type="search"]' },
+    { text: 'Zum Footer', selector: 'footer, [role="contentinfo"]' }
+  ];
+
+  skipPoints.forEach(({ text, selector }) => {
+    const element = document.querySelector(selector);
+    if (element) {
+      const listItem = document.createElement('li');
+      listItem.style.margin = '5px 0';
+
+      const link = document.createElement('a');
+      link.textContent = text;
+      link.href = '#';
+      link.style.color = '#0066cc';
+      link.style.textDecoration = 'none';
+
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        element.scrollIntoView({ behavior: 'smooth' });
+        if (element instanceof HTMLElement) {
+          element.focus();
+        }
+      });
+
+      listItem.appendChild(link);
+      skipLinksList.appendChild(listItem);
+    }
+  });
+
+  container.appendChild(skipLinksList);
+}
+
+function buildLandmarks(container: HTMLElement): void {
+  const landmarksList = document.createElement('ul');
+  landmarksList.style.listStyle = 'none';
+  landmarksList.style.padding = '0';
+
+  const landmarks = [
+    { text: 'Header', selector: 'header, [role="banner"]' },
+    { text: 'Navigation', selector: 'nav, [role="navigation"]' },
+    { text: 'Hauptinhalt', selector: 'main, [role="main"]' },
+    { text: 'Seitenleiste', selector: 'aside, [role="complementary"]' },
+    { text: 'Footer', selector: 'footer, [role="contentinfo"]' },
+    { text: 'Suche', selector: 'form[role="search"]' }
+  ];
+
+  landmarks.forEach(({ text, selector }) => {
+    const element = document.querySelector(selector);
+    if (element) {
+      const listItem = document.createElement('li');
+      listItem.style.margin = '5px 0';
+
+      const link = document.createElement('a');
+      link.textContent = text;
+      link.href = '#';
+      link.style.color = '#0066cc';
+      link.style.textDecoration = 'none';
+
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        element.scrollIntoView({ behavior: 'smooth' });
+      });
+
+      listItem.appendChild(link);
+      landmarksList.appendChild(listItem);
+    }
+  });
+
+  container.appendChild(landmarksList);
+}
+
+function buildHeadings(container: HTMLElement): void {
+  const headingsList = document.createElement('ul');
+  headingsList.style.listStyle = 'none';
+  headingsList.style.padding = '0';
+
+  const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  headings.forEach((heading, index) => {
+    if (heading instanceof HTMLElement) {
+      const listItem = document.createElement('li');
+      listItem.style.margin = '5px 0';
+      listItem.style.paddingLeft = `${(parseInt(heading.tagName[1]) - 1) * 20}px`;
+
+      const link = document.createElement('a');
+      link.textContent = heading.textContent || `Überschrift ${index + 1}`;
+      link.href = '#';
+      link.style.color = '#0066cc';
+      link.style.textDecoration = 'none';
+
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        heading.scrollIntoView({ behavior: 'smooth' });
+      });
+
+      listItem.appendChild(link);
+      headingsList.appendChild(listItem);
+    }
+  });
+
+  container.appendChild(headingsList);
+}
+
+function buildBreadcrumbs(container: HTMLElement): void {
+  const breadcrumbsList = document.createElement('ul');
+  breadcrumbsList.style.listStyle = 'none';
+  breadcrumbsList.style.padding = '0';
+
+  const breadcrumbs = document.querySelector('nav[aria-label="breadcrumb"], [role="navigation"][aria-label="breadcrumb"]');
+  if (breadcrumbs) {
+    const links = breadcrumbs.querySelectorAll('a');
+    links.forEach((link, index) => {
+      const listItem = document.createElement('li');
+      listItem.style.margin = '5px 0';
+      listItem.style.display = 'inline';
+
+      const breadcrumbLink = document.createElement('a');
+      breadcrumbLink.textContent = link.textContent || `Link ${index + 1}`;
+      breadcrumbLink.href = link.href;
+      breadcrumbLink.style.color = '#0066cc';
+      breadcrumbLink.style.textDecoration = 'none';
+
+      listItem.appendChild(breadcrumbLink);
+      breadcrumbsList.appendChild(listItem);
+
+      if (index < links.length - 1) {
+        const separator = document.createElement('span');
+        separator.textContent = ' > ';
         separator.style.margin = '0 5px';
         separator.style.color = '#666';
-        item.appendChild(separator);
+        breadcrumbsList.appendChild(separator);
       }
-      list.appendChild(item);
     });
-
-    container.appendChild(list);
-    return container;
+  } else {
+    const listItem = document.createElement('li');
+    listItem.textContent = 'Keine Breadcrumbs gefunden';
+    listItem.style.color = '#666';
+    breadcrumbsList.appendChild(listItem);
   }
 
-  // Helper function to build page structure
-  function buildPageStructure() {
-    const container = document.createElement('div') as HTMLElement;
-    container.style.display = 'grid';
-    container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(120px, 1fr))';
-    container.style.gap = '10px';
+  container.appendChild(breadcrumbsList);
+}
 
-    const structureMap = [
-      { selector: 'header, [role="banner"]', label: t.header },
-      { selector: 'main, [role="main"]', label: t.main },
-      { selector: 'nav, [role="navigation"]', label: t.navigation },
-      { selector: 'aside, [role="complementary"]', label: t.sidebar },
-      { selector: 'footer, [role="contentinfo"]', label: t.footer },
-    ];
+function buildPageStructure(container: HTMLElement): void {
+  const structureList = document.createElement('ul');
+  structureList.style.listStyle = 'none';
+  structureList.style.padding = '0';
 
-    structureMap.forEach(item => {
-      const elements = document.querySelectorAll(item.selector);
-      if (elements.length > 0) {
-        const count = elements.length;
-        const section = document.createElement('div') as HTMLElement;
-        section.style.border = '1px solid #eee';
-        section.style.borderRadius = '5px';
-        section.style.padding = '10px';
-        section.style.textAlign = 'center';
-        section.style.backgroundColor = '#f9f9f9';
+  function buildStructure(element: Element, level: number = 0): void {
+    if (element instanceof HTMLElement) {
+      const listItem = document.createElement('li');
+      listItem.style.margin = '5px 0';
+      listItem.style.paddingLeft = `${level * 20}px`;
 
-        const label = document.createElement('div') as HTMLElement;
-        label.textContent = item.label;
-        label.style.fontWeight = 'bold';
-        label.style.fontSize = '14px';
-        section.appendChild(label);
+      const link = document.createElement('a');
+      link.textContent = `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}${element.className ? `.${element.className.split(' ').join('.')}` : ''}`;
+      link.href = '#';
+      link.style.color = '#0066cc';
+      link.style.textDecoration = 'none';
 
-        const countText = document.createElement('div') as HTMLElement;
-        countText.textContent = `(${count})`;
-        countText.style.fontSize = '12px';
-        countText.style.color = '#666';
-        section.appendChild(countText);
-
-        section.addEventListener('click', () => {
-          (elements[0] as HTMLElement).scrollIntoView({
-            behavior: 'smooth'
-          });
-          hidePageStructure();
-        });
-
-        container.appendChild(section);
-      }
-    });
-
-    // Columns detection (simple heuristic)
-    const columnElements = document.querySelectorAll('[class*="col-"], [class*="grid-"]');
-    if (columnElements.length > 0) {
-      const section = document.createElement('div') as HTMLElement;
-      section.style.border = '1px solid #eee';
-      section.style.borderRadius = '5px';
-      section.style.padding = '10px';
-      section.style.textAlign = 'center';
-      section.style.backgroundColor = '#f9f9f9';
-
-      const label = document.createElement('div') as HTMLElement;
-      label.textContent = t.columns;
-      label.style.fontWeight = 'bold';
-      label.style.fontSize = '14px';
-      section.appendChild(label);
-
-      const countText = document.createElement('div') as HTMLElement;
-      countText.textContent = `(${columnElements.length})`;
-      countText.style.fontSize = '12px';
-      countText.style.color = '#666';
-      section.appendChild(countText);
-
-      section.addEventListener('click', () => {
-        (columnElements[0] as HTMLElement).scrollIntoView({
-          behavior: 'smooth'
-        });
-        hidePageStructure();
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        element.scrollIntoView({ behavior: 'smooth' });
       });
-      container.appendChild(section);
+
+      listItem.appendChild(link);
+      structureList.appendChild(listItem);
+
+      Array.from(element.children).forEach(child => {
+        buildStructure(child, level + 1);
+      });
     }
-
-    // Current Viewport
-    const viewportSection = document.createElement('div') as HTMLElement;
-    viewportSection.style.border = '1px solid #eee';
-    viewportSection.style.borderRadius = '5px';
-    viewportSection.style.padding = '10px';
-    viewportSection.style.textAlign = 'center';
-    viewportSection.style.backgroundColor = '#f9f9f9';
-
-    const viewportLabel = document.createElement('div') as HTMLElement;
-    viewportLabel.textContent = t.currentView;
-    viewportLabel.style.fontWeight = 'bold';
-    viewportLabel.style.fontSize = '14px';
-    viewportSection.appendChild(viewportLabel);
-
-    const viewportSize = document.createElement('div') as HTMLElement;
-    viewportSize.textContent = `${window.innerWidth}px x ${window.innerHeight}px`;
-    viewportSize.style.fontSize = '12px';
-    viewportSize.style.color = '#666';
-    viewportSection.appendChild(viewportSize);
-
-    container.appendChild(viewportSection);
-
-    return container;
   }
+
+  buildStructure(document.body);
+  container.appendChild(structureList);
 }
 
 // Helper function to hide page structure
