@@ -1237,6 +1237,26 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     `;
   }
 
+  // Highlight Focus auch im ShadowRoot des Widgets anzeigen
+  if (shadowRoot) {
+    // Vorheriges Style-Tag entfernen
+    const existingWidgetFocusStyle = shadowRoot.getElementById('widget-highlight-focus-style');
+    if (existingWidgetFocusStyle) existingWidgetFocusStyle.remove();
+
+    if (settings.highlightFocus) {
+      const widgetFocusStyle = document.createElement('style');
+      widgetFocusStyle.id = 'widget-highlight-focus-style';
+      widgetFocusStyle.textContent = `
+        *:focus {
+          outline: 3px solid #FF9900 !important;
+          outline-offset: 3px !important;
+          box-shadow: 0 0 0 2px #fff, 0 0 0 5px #FF9900 !important;
+        }
+      `;
+      shadowRoot.appendChild(widgetFocusStyle);
+    }
+  }
+
   // Set the CSS rules
   styleElement.textContent = cssRules;
 
