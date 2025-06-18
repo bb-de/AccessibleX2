@@ -20,7 +20,8 @@ function enableKeyboardNavigation(): void {
   navHelper.id = 'keyboard-nav-helpers';
   navHelper.style.position = 'fixed';
   navHelper.style.bottom = '20px';
-  navHelper.style.right = '20px';
+  navHelper.style.right = '380px';
+  navHelper.style.left = 'auto';
   navHelper.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
   navHelper.style.color = 'white';
   navHelper.style.padding = '15px';
