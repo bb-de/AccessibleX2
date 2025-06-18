@@ -52,9 +52,13 @@ function enableKeyboardNavigation(): void {
   });
 
   // Add close button event listener
-  const closeButton = document.getElementById('close-keyboard-nav');
+  const closeButton = document.getElementById('close-keyboard-nav') || navHelper.querySelector('#close-keyboard-nav');
   if (closeButton) {
-    closeButton.addEventListener('click', disableKeyboardNavigation);
+    closeButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      disableKeyboardNavigation();
+    });
   }
 
   // Add keyboard listener for enhanced keyboard navigation
