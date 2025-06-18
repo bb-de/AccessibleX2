@@ -1248,6 +1248,13 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
         (el as any).getAnimations().forEach((anim: Animation) => anim.cancel());
       }
     });
+  } else {
+    // Beim Deaktivieren: Inline-Styles zurücksetzen
+    const allElements = document.querySelectorAll('html *');
+    allElements.forEach(el => {
+      (el as HTMLElement).style.animation = '';
+      (el as HTMLElement).style.transition = '';
+    });
   }
 
   // Filter für alle Features kombinieren
