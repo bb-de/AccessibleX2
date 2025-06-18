@@ -416,15 +416,24 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
       }
     };
 
+    // NEU: Keyboard Navigation Overlay geschlossen
+    const handleKeyboardNavigationClose = () => {
+      if (settings.keyboardNavigation) {
+        updateSetting('keyboardNavigation', false);
+      }
+    };
+
     // Listen for our custom events
     document.addEventListener('accessibility:page-structure-closed', handlePageStructureClose);
     document.addEventListener('accessibility:virtual-keyboard-closed', handleVirtualKeyboardClose);
+    document.addEventListener('accessibility:keyboard-navigation-closed', handleKeyboardNavigationClose);
 
     return () => {
       document.removeEventListener('accessibility:page-structure-closed', handlePageStructureClose);
       document.removeEventListener('accessibility:virtual-keyboard-closed', handleVirtualKeyboardClose);
+      document.removeEventListener('accessibility:keyboard-navigation-closed', handleKeyboardNavigationClose);
     };
-  }, [settings.pageStructure, settings.virtualKeyboard, updateSetting]);
+  }, [settings.pageStructure, settings.virtualKeyboard, settings.keyboardNavigation, updateSetting]);
 
   return (
     <AccessibilityContext.Provider

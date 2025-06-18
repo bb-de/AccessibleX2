@@ -98,6 +98,10 @@ function disableKeyboardNavigation(): void {
 
   // Remove event listener
   document.removeEventListener('keydown', handleKeyboardNavigation);
+
+  // Dispatch custom event, damit React den State zurücksetzen kann
+  const event = new CustomEvent('accessibility:keyboard-navigation-closed');
+  document.dispatchEvent(event);
 }
 
 // Helper function to show virtual keyboard
