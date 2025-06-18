@@ -1203,6 +1203,25 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     `;
   }
 
+  // Saturation und Monochrome: Immer Filter-Regel schreiben
+  const filterValues = [];
+  if (settings.saturation !== 100) {
+    filterValues.push(`saturate(${settings.saturation}%)`);
+  }
+  if (settings.monochrome > 0) {
+    filterValues.push(`grayscale(${settings.monochrome}%)`);
+  }
+  const filterValue = filterValues.length > 0 ? filterValues.join(' ') : 'none';
+
+  cssRules += `
+    html {
+      filter: ${filterValue} !important;
+    }
+    img, video {
+      filter: ${filterValue} !important;
+    }
+  `;
+
   // Set the CSS rules
   styleElement.textContent = cssRules;
 
