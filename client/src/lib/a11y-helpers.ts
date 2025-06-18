@@ -1011,6 +1011,15 @@ function getFontFamilyStyles(fontFamily: string): string {
   }
 }
 
+// Hilfsfunktion: Prüft, ob die Seite hell ist
+function isPageBright() {
+  const bg = window.getComputedStyle(document.body).backgroundColor;
+  const rgb = bg.match(/\d+/g);
+  if (!rgb) return true; // Standard: hell
+  const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
+  return brightness > 180; // Schwellenwert: >180 = hell
+}
+
 // Apply multiple style adjustments based on the active settings
 export function applyAccessibilityStyles(settings: AccessibilitySettings, shadowRoot: ShadowRoot | null | undefined): void {
   // Entferne das alte Style-Tag IMMER, bevor ein neues eingefügt wird
@@ -1229,7 +1238,7 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   if (settings.monochrome > 0) {
     filterValues.push(`grayscale(${settings.monochrome}%)`);
   }
-  if (settings.darkMode) {
+  if (settings.darkMode && isPageBright()) {
     cssRules += `
       html, body {
         background: #181818 !important;
@@ -1244,7 +1253,7 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
         color: #8ab4f8 !important;
       }
       img, video {
-        filter: none !important;
+        filter: brightness(0.7) contrast(1.1) !important;
       }
     `;
   }
