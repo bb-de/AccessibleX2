@@ -1020,6 +1020,22 @@ function isPageBright() {
   return brightness > 180; // Schwellenwert: >180 = hell
 }
 
+// Selektiver Darkmode: Nur helle Hintergründe abdunkeln
+function applySelectiveDarkmode() {
+  const allElements = document.querySelectorAll<HTMLElement>('body *');
+  allElements.forEach(el => {
+    const bg = window.getComputedStyle(el).backgroundColor;
+    const rgb = bg.match(/\d+/g);
+    if (!rgb) return;
+    const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
+    if (brightness > 180) {
+      el.style.backgroundColor = '#181818';
+      el.style.color = '#f0f0f0';
+    }
+    // Dunkle Farbe → nichts tun
+  });
+}
+
 // Apply multiple style adjustments based on the active settings
 export function applyAccessibilityStyles(settings: AccessibilitySettings, shadowRoot: ShadowRoot | null | undefined): void {
   // Entferne das alte Style-Tag IMMER, bevor ein neues eingefügt wird
@@ -1298,6 +1314,11 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
       `;
       shadowRoot.appendChild(widgetFocusStyle);
     }
+  }
+
+  // Darkmode: gezielte Styles statt Invertierung, nur wenn Seite hell ist
+  if (settings.darkMode) {
+    applySelectiveDarkmode();
   }
 
   // Set the CSS rules
