@@ -1034,7 +1034,7 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
 
     // Apply size increase only to site content (not widget)
     cssRules += `
-      html {
+      :root {
         --text-size-factor: ${adjustment}%;
       }
 
@@ -1064,16 +1064,11 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   // Apply line height
   if (settings.lineHeight !== 0) {
     cssRules += `
-      p, div, span, li {
+      p:not([data-accessibility-widget] p),
+      div:not([data-accessibility-widget]):not([data-accessibility-widget] div),
+      span:not([data-accessibility-widget] span),
+      li:not([data-accessibility-widget] li) {
         line-height: ${1.5 + (settings.lineHeight * 0.15)} !important;
-      }
-
-      /* Exclude accessibility widget */
-      [data-accessibility-widget] p,
-      [data-accessibility-widget] div,
-      [data-accessibility-widget] span,
-      [data-accessibility-widget] li {
-        line-height: initial !important;
       }
     `;
   }
@@ -1081,14 +1076,22 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   // Apply letter spacing
   if (settings.letterSpacing !== 0) {
     cssRules += `
-      body, p, div, span, li, a, h1, h2, h3, h4, h5, h6, button, input, textarea, select {
+      body:not([data-accessibility-widget]) p,
+      body:not([data-accessibility-widget]) div,
+      body:not([data-accessibility-widget]) span,
+      body:not([data-accessibility-widget]) li,
+      body:not([data-accessibility-widget]) a,
+      body:not([data-accessibility-widget]) h1,
+      body:not([data-accessibility-widget]) h2,
+      body:not([data-accessibility-widget]) h3,
+      body:not([data-accessibility-widget]) h4,
+      body:not([data-accessibility-widget]) h5,
+      body:not([data-accessibility-widget]) h6,
+      body:not([data-accessibility-widget]) button,
+      body:not([data-accessibility-widget]) input,
+      body:not([data-accessibility-widget]) textarea,
+      body:not([data-accessibility-widget]) select {
         letter-spacing: ${settings.letterSpacing * 0.05}em !important;
-      }
-
-      /* Exclude accessibility widget */
-      [data-accessibility-widget],
-      [data-accessibility-widget] * {
-        letter-spacing: normal !important;
       }
     `;
   }
@@ -1096,14 +1099,22 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   // Apply word spacing
   if (settings.wordSpacing > 0) {
     cssRules += `
-      body, p, div, span, li, a, h1, h2, h3, h4, h5, h6, button, input, textarea, select {
+      body:not([data-accessibility-widget]) p,
+      body:not([data-accessibility-widget]) div,
+      body:not([data-accessibility-widget]) span,
+      body:not([data-accessibility-widget]) li,
+      body:not([data-accessibility-widget]) a,
+      body:not([data-accessibility-widget]) h1,
+      body:not([data-accessibility-widget]) h2,
+      body:not([data-accessibility-widget]) h3,
+      body:not([data-accessibility-widget]) h4,
+      body:not([data-accessibility-widget]) h5,
+      body:not([data-accessibility-widget]) h6,
+      body:not([data-accessibility-widget]) button,
+      body:not([data-accessibility-widget]) input,
+      body:not([data-accessibility-widget]) textarea,
+      body:not([data-accessibility-widget]) select {
         word-spacing: ${settings.wordSpacing * 0.05}em !important;
-      }
-
-      /* Exclude accessibility widget */
-      [data-accessibility-widget],
-      [data-accessibility-widget] * {
-        word-spacing: normal !important;
       }
     `;
   }
@@ -1119,16 +1130,15 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     }
 
     cssRules += `
-      /* Apply text alignment to all content elements EXCEPT the widget */
-      html body p:not([data-accessibility-widget="true"] p):not([data-accessibility-widget="true"] *),
-      html body div:not([data-accessibility-widget="true"]):not([data-accessibility-widget="true"] *),
-      html body li:not([data-accessibility-widget="true"] li):not([data-accessibility-widget="true"] *),
-      html body h1:not([data-accessibility-widget="true"] h1):not([data-accessibility-widget="true"] *),
-      html body h2:not([data-accessibility-widget="true"] h2):not([data-accessibility-widget="true"] *),
-      html body h3:not([data-accessibility-widget="true"] h3):not([data-accessibility-widget="true"] *),
-      html body h4:not([data-accessibility-widget="true"] h4):not([data-accessibility-widget="true"] *),
-      html body h5:not([data-accessibility-widget="true"] h5):not([data-accessibility-widget="true"] *),
-      html body h6:not([data-accessibility-widget="true"] h6):not([data-accessibility-widget="true"] *) {
+      body:not([data-accessibility-widget]) p,
+      body:not([data-accessibility-widget]) div,
+      body:not([data-accessibility-widget]) li,
+      body:not([data-accessibility-widget]) h1,
+      body:not([data-accessibility-widget]) h2,
+      body:not([data-accessibility-widget]) h3,
+      body:not([data-accessibility-widget]) h4,
+      body:not([data-accessibility-widget]) h5,
+      body:not([data-accessibility-widget]) h6 {
         text-align: ${alignValue} !important;
       }
     `;
@@ -1137,13 +1147,12 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   // Apply highlight titles
   if (settings.highlightTitles) {
     cssRules += `
-      /* Apply only to heading elements EXCEPT the widget */
-      html body h1:not([data-accessibility-widget="true"] h1):not([data-accessibility-widget="true"] *),
-      html body h2:not([data-accessibility-widget="true"] h2):not([data-accessibility-widget="true"] *),
-      html body h3:not([data-accessibility-widget="true"] h3):not([data-accessibility-widget="true"] *),
-      html body h4:not([data-accessibility-widget="true"] h4):not([data-accessibility-widget="true"] *),
-      html body h5:not([data-accessibility-widget="true"] h5):not([data-accessibility-widget="true"] *),
-      html body h6:not([data-accessibility-widget="true"] h6):not([data-accessibility-widget="true"] *) {
+      body:not([data-accessibility-widget]) h1,
+      body:not([data-accessibility-widget]) h2,
+      body:not([data-accessibility-widget]) h3,
+      body:not([data-accessibility-widget]) h4,
+      body:not([data-accessibility-widget]) h5,
+      body:not([data-accessibility-widget]) h6 {
         background-color: #ffffcc !important;
         border: 1px solid #e6e600 !important;
         padding: 2px 5px !important;
@@ -1154,11 +1163,10 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   // Apply highlight links
   if (settings.highlightLinks) {
     cssRules += `
-      /* Apply only to content elements EXCEPT the widget */
-      html body a:not([data-accessibility-widget="true"] a):not([data-accessibility-widget="true"] *),
-      html body button:not([data-accessibility-widget="true"] button):not([data-accessibility-widget="true"] *),
-      html body [role="button"]:not([data-accessibility-widget="true"] [role="button"]):not([data-accessibility-widget="true"] *),
-      html body [role="link"]:not([data-accessibility-widget="true"] [role="link"]):not([data-accessibility-widget="true"] *) {
+      body:not([data-accessibility-widget]) a,
+      body:not([data-accessibility-widget]) button,
+      body:not([data-accessibility-widget]) [role="button"],
+      body:not([data-accessibility-widget]) [role="link"] {
         background-color: #ffff00 !important;
         color: #000000 !important;
         border: 1px solid #e6e600 !important;
@@ -1172,18 +1180,13 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   // Apply hide images
   if (settings.hideImages) {
     cssRules += `
-      img, svg, picture, video, canvas, [role="img"] {
+      body:not([data-accessibility-widget]) img,
+      body:not([data-accessibility-widget]) svg,
+      body:not([data-accessibility-widget]) picture,
+      body:not([data-accessibility-widget]) video,
+      body:not([data-accessibility-widget]) canvas,
+      body:not([data-accessibility-widget]) [role="img"] {
         display: none !important;
-      }
-
-      /* Exclude accessibility widget */
-      [data-accessibility-widget] img,
-      [data-accessibility-widget] svg,
-      [data-accessibility-widget] picture,
-      [data-accessibility-widget] video,
-      [data-accessibility-widget] canvas,
-      [data-accessibility-widget] [role="img"] {
-        display: initial !important;
       }
     `;
   }
@@ -1191,159 +1194,59 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   // Apply stop animations
   if (settings.stopAnimations) {
     cssRules += `
-      *, *::before, *::after {
+      body:not([data-accessibility-widget]) *,
+      body:not([data-accessibility-widget]) *::before,
+      body:not([data-accessibility-widget]) *::after {
         animation: none !important;
         transition: none !important;
       }
-
-      /* Exclude accessibility widget */
-      [data-accessibility-widget],
-      [data-accessibility-widget] *,
-      [data-accessibility-widget] *::before,
-      [data-accessibility-widget] *::after {
-        animation: initial !important;
-        transition: initial !important;
-      }
     `;
   }
 
-  // Apply highlight focus
-  if (settings.highlightFocus) {
-    cssRules += `
-      *:focus {
-        outline: 3px solid #ff6600 !important;
-        outline-offset: 2px !important;
-      }
-    `;
+  // Set the CSS rules
+  styleElement.textContent = cssRules;
+
+  // Insert the style element into the appropriate root
+  if (shadowRoot) {
+    shadowRoot.appendChild(styleElement);
+  } else {
+    document.head.appendChild(styleElement);
   }
 
-  // Apply keyboard navigation
+  // Apply additional features that require JavaScript
   if (settings.keyboardNavigation) {
-    // Add keyboard navigation helpers
-    const keyboardNavHelpers = (shadowRoot || document).getElementById('keyboard-nav-helpers');
-    if (!keyboardNavHelpers) {
-      enableKeyboardNavigation();
-    }
+    enableKeyboardNavigation();
   } else {
     disableKeyboardNavigation();
   }
 
-  // Apply virtual keyboard
-  if (settings.virtualKeyboard) {
-    // Add virtual keyboard
-    const virtualKeyboard = (shadowRoot || document).getElementById('virtual-keyboard');
-    if (!virtualKeyboard) {
-      showVirtualKeyboard(shadowRoot);
-    }
-  } else {
-    hideVirtualKeyboard(shadowRoot);
-  }
-
-  // Apply page structure
-  if (settings.pageStructure) {
-    // Add page structure panel
-    const pageStructurePanel = (shadowRoot || document).getElementById('page-structure-panel');
-    if (!pageStructurePanel) {
-      showPageStructure();
-    }
-  } else {
-    hidePageStructure();
-  }
-
-  // Apply custom cursor styles
   if (settings.customCursor) {
-    // Handle the custom cursor implementation
     handleCustomCursor(settings);
-
-    // Hide original cursor on content (but not on the widget)
-    cssRules += `
-      body *:not([data-accessibility-widget]):not([data-accessibility-widget] *) {
-        cursor: none !important;
-      }
-
-      [data-accessibility-widget],
-      [data-accessibility-widget] * {
-        cursor: default !important;
-      }
-    `;
   } else {
-    // Remove custom cursor if setting is turned off
     removeCustomCursor();
-
-    // Reset cursor styles
-    cssRules += `
-      * {
-        cursor: default;
-      }
-
-      a, button, [role="button"] {
-        cursor: pointer;
-      }
-    `;
   }
 
-  // Apply saturation and monochrome filters
-  if (settings.saturation !== 100 || settings.monochrome > 0) {
-    const filterValues = [];
-
-    if (settings.saturation !== 100) {
-      filterValues.push(`saturate(${settings.saturation}%)`);
-    }
-
-    if (settings.monochrome > 0) {
-      filterValues.push(`grayscale(${settings.monochrome}%)`);
-    }
-
-    const filterValue = filterValues.join(' ');
-
-    cssRules += `
-      html, img, video {
-        filter: ${filterValue} !important;
-      }
-    `;
-  }
-
-  // Apply dark mode
-  if (settings.darkMode) {
-    cssRules += `
-      html {
-        filter: invert(100%) hue-rotate(180deg) !important;
-      }
-      img, video {
-        filter: invert(100%) hue-rotate(180deg) !important;
-      }
-
-      /* Exclude accessibility widget */
-      [data-accessibility-widget],
-      [data-accessibility-widget] * {
-        filter: none !important;
-      }
-      [data-accessibility-widget] img,
-      [data-accessibility-widget] video {
-        filter: none !important;
-      }
-    `;
-  }
-
-  // Apply reading mask
   if (settings.readingMask) {
     handleReadingMask();
   } else {
     removeReadingMask();
   }
 
-  // Apply reading guide
   if (settings.readingGuide) {
     handleReadingGuide();
   } else {
     removeReadingGuide();
   }
 
-  // Apply all CSS rules
-  styleElement.textContent = cssRules;
-  if (shadowRoot) {
-    shadowRoot.appendChild(styleElement);
+  if (settings.virtualKeyboard) {
+    showVirtualKeyboard(shadowRoot);
   } else {
-    document.head.appendChild(styleElement);
+    hideVirtualKeyboard(shadowRoot);
+  }
+
+  if (settings.pageStructure) {
+    showPageStructure();
+  } else {
+    hidePageStructure();
   }
 }

@@ -59,6 +59,7 @@ export interface AccessibilitySettings {
   cursorSize: CursorType;
   cursorColor: CursorColor;
   virtualKeyboard: boolean;
+  pageStructure: boolean;
 }
 
 export const defaultSettings: AccessibilitySettings = {
@@ -90,6 +91,7 @@ export const defaultSettings: AccessibilitySettings = {
   cursorSize: 'default',
   cursorColor: 'black',
   virtualKeyboard: false,
+  pageStructure: false,
 };
 
 interface AccessibilityContextType {
