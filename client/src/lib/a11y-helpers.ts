@@ -1020,19 +1020,23 @@ function isPageBright() {
   return brightness > 180; // Schwellenwert: >180 = hell
 }
 
-// Selektiver Darkmode: Nur helle Hintergründe abdunkeln
-function applySelectiveDarkmode() {
+// Selektiver Darkmode: Nur helle Hintergründe abdunkeln oder zurücksetzen
+function applySelectiveDarkmode(active: boolean) {
   const allElements = document.querySelectorAll<HTMLElement>('body *');
   allElements.forEach(el => {
-    const bg = window.getComputedStyle(el).backgroundColor;
-    const rgb = bg.match(/\d+/g);
-    if (!rgb) return;
-    const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
-    if (brightness > 180) {
-      el.style.backgroundColor = '#181818';
-      el.style.color = '#f0f0f0';
+    if (active) {
+      const bg = window.getComputedStyle(el).backgroundColor;
+      const rgb = bg.match(/\d+/g);
+      if (!rgb) return;
+      const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
+      if (brightness > 180) {
+        el.style.backgroundColor = '#181818';
+        el.style.color = '#f0f0f0';
+      }
+    } else {
+      el.style.backgroundColor = '';
+      el.style.color = '';
     }
-    // Dunkle Farbe → nichts tun
   });
 }
 
@@ -1316,10 +1320,8 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     }
   }
 
-  // Darkmode: gezielte Styles statt Invertierung, nur wenn Seite hell ist
-  if (settings.darkMode) {
-    applySelectiveDarkmode();
-  }
+  // Selektiver Darkmode anwenden oder zurücksetzen
+  applySelectiveDarkmode(!!settings.darkMode);
 
   // Set the CSS rules
   styleElement.textContent = cssRules;
