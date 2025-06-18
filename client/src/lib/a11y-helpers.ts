@@ -1229,9 +1229,9 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   if (settings.highlightFocus) {
     cssRules += `
       *:focus {
-        outline: 3px solid #2196F3 !important;
+        outline: 3px solid #FF9900 !important;
         outline-offset: 3px !important;
-        box-shadow: 0 0 0 2px #fff, 0 0 0 5px #2196F3 !important;
+        box-shadow: 0 0 0 2px #fff, 0 0 0 5px #FF9900 !important;
       }
     `;
   }
