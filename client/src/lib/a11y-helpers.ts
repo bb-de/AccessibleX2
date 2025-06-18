@@ -1206,12 +1206,8 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   // Set the CSS rules
   styleElement.textContent = cssRules;
 
-  // Insert the style element into the appropriate root
-  if (shadowRoot) {
-    shadowRoot.appendChild(styleElement);
-  } else {
-    document.head.appendChild(styleElement);
-  }
+  // Style-Tag immer im <head> der Host-Seite einfügen
+  document.head.appendChild(styleElement);
 
   // Apply additional features that require JavaScript
   if (settings.keyboardNavigation) {
