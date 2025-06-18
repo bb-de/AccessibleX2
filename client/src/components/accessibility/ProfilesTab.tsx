@@ -112,8 +112,8 @@ export function ProfilesTab() {
               key={profile.id}
               className={`relative border rounded-lg p-3 cursor-pointer transition-colors ${
                 isActive
-                  ? 'border-blue-600 bg-blue-600 text-white'
-                  : 'border-gray-200 bg-gray-100 text-gray-800 hover:border-gray-300 hover:bg-gray-200'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-gray-100 text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-gray-200'
               }`}
               onClick={(e) => {
                 e.stopPropagation(); // Prevent event from bubbling up
@@ -141,9 +141,9 @@ export function ProfilesTab() {
               }`}>
                 {profile.icon(isActive ? 'text-white' : 'text-gray-800')}
               </div>
-              <h4 className="text-sm font-medium ${
+              <h4 className={`text-sm font-medium ${
                 isActive ? 'text-white' : 'text-gray-800'
-              }">{translations[profile.id]}</h4>
+              }`}>{translations[profile.id]}</h4>
             </div>
           );
         })}
