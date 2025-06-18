@@ -1212,7 +1212,23 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     filterValues.push(`grayscale(${settings.monochrome}%)`);
   }
   if (settings.darkMode) {
-    filterValues.push('invert(100%) hue-rotate(180deg)');
+    cssRules += `
+      html, body {
+        background: #181818 !important;
+        color: #f0f0f0 !important;
+      }
+      a, button, input, textarea, select {
+        color: #f0f0f0 !important;
+        background: #222 !important;
+        border-color: #333 !important;
+      }
+      a {
+        color: #8ab4f8 !important;
+      }
+      img, video {
+        filter: none !important;
+      }
+    `;
   }
   const filterValue = filterValues.length > 0 ? filterValues.join(' ') : 'none';
 
