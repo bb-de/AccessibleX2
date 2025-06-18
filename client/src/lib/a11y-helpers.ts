@@ -1004,13 +1004,13 @@ function getFontFamilyStyles(fontFamily: string): string {
 
 // Apply multiple style adjustments based on the active settings
 export function applyAccessibilityStyles(settings: AccessibilitySettings, shadowRoot: ShadowRoot | null | undefined): void {
-  // Remove any existing accessibility styles
-  const existingStyle = (shadowRoot || document).getElementById('accessibility-styles');
+  // Entferne das alte Style-Tag IMMER, bevor ein neues eingefügt wird
+  const existingStyle = document.getElementById('accessibility-styles');
   if (existingStyle) {
     existingStyle.remove();
   }
 
-  // Create a new style element for all accessibility adjustments
+  // Neues Style-Tag erzeugen
   const styleElement = document.createElement('style');
   styleElement.id = 'accessibility-styles';
 
