@@ -187,14 +187,6 @@ export function NavigationTab() {
               aria-label={translations.toggleVirtualKeyboard}
             />
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">{translations.pageStructure}</span>
-            <Switch 
-              checked={settings.pageStructure}
-              onCheckedChange={(checked) => updateSetting('pageStructure', checked)}
-              aria-label={translations.togglePageStructure}
-            />
-          </div>
         </div>
       </div>
     </div>

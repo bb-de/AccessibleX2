@@ -5,6 +5,14 @@ import { getTextColorStyles, getTitleColorStyles, getBackgroundColorStyles } fro
 let _lastActiveInput: HTMLInputElement | HTMLTextAreaElement | null = null;
 let _focusListener: ((event: FocusEvent) => void) | null = null;
 
+// Konstanten für die Seitenstruktur
+const PAGE_STRUCTURE_CONSTANTS = {
+  PANEL_ID: 'page-structure-panel',
+  PANEL_WIDTH: '320px',
+  Z_INDEX: '9999',
+  ANIMATION_DURATION: '300ms'
+};
+
 // Helper function to enable keyboard navigation
 function enableKeyboardNavigation(): void {
   // Create a container for keyboard navigation helpers
@@ -395,16 +403,185 @@ function hideVirtualKeyboard(currentShadowRoot: ShadowRoot | null | undefined): 
   }
 }
 
+// Hilfsfunktion zum Erstellen des Seitenstruktur-Panels
+function createPageStructurePanel(): HTMLElement {
+  const panel = document.createElement('div');
+  panel.id = PAGE_STRUCTURE_CONSTANTS.PANEL_ID;
+  
+  // Basis-Styling
+  Object.assign(panel.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    height: '100vh',
+    width: PAGE_STRUCTURE_CONSTANTS.PANEL_WIDTH,
+    backgroundColor: 'white',
+    boxShadow: '2px 0 5px rgba(0, 0, 0, 0.1)',
+    zIndex: PAGE_STRUCTURE_CONSTANTS.Z_INDEX,
+    overflowY: 'auto',
+    transition: `transform ${PAGE_STRUCTURE_CONSTANTS.ANIMATION_DURATION} ease-in-out`,
+    transform: 'translateX(-100%)'
+  });
+
+  // Header
+  const header = document.createElement('div');
+  Object.assign(header.style, {
+    padding: '1rem',
+    borderBottom: '1px solid #e5e7eb',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  });
+
+  const title = document.createElement('h2');
+  title.textContent = 'Seitenstruktur';
+  title.style.margin = '0';
+  title.style.fontSize = '1.25rem';
+  title.style.fontWeight = '600';
+
+  const closeButton = document.createElement('button');
+  closeButton.innerHTML = '×';
+  closeButton.style.background = 'none';
+  closeButton.style.border = 'none';
+  closeButton.style.fontSize = '1.5rem';
+  closeButton.style.cursor = 'pointer';
+  closeButton.style.padding = '0.5rem';
+  closeButton.setAttribute('aria-label', 'Schließen');
+  closeButton.onclick = () => {
+    const event = new CustomEvent('accessibility:page-structure-closed');
+    document.dispatchEvent(event);
+  };
+
+  header.appendChild(title);
+  header.appendChild(closeButton);
+  panel.appendChild(header);
+
+  // Content Container
+  const content = document.createElement('div');
+  content.style.padding = '1rem';
+  panel.appendChild(content);
+
+  return panel;
+}
+
+// Hilfsfunktion zum Analysieren der Seitenstruktur
+function analyzePageStructure(): HTMLElement[] {
+  const elements: HTMLElement[] = [];
+  const importantElements = document.querySelectorAll('header, nav, main, section, article, aside, footer, h1, h2, h3, h4, h5, h6');
+  
+  importantElements.forEach((element) => {
+    if (element instanceof HTMLElement) {
+      elements.push(element);
+    }
+  });
+
+  return elements;
+}
+
+// Hilfsfunktion zum Erstellen der Strukturansicht
+function createStructureView(elements: HTMLElement[]): HTMLElement {
+  const container = document.createElement('div');
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.gap = '0.5rem';
+
+  elements.forEach((element) => {
+    const item = document.createElement('div');
+    item.style.padding = '0.5rem';
+    item.style.border = '1px solid #e5e7eb';
+    item.style.borderRadius = '0.25rem';
+    item.style.cursor = 'pointer';
+    item.style.transition = 'background-color 0.2s';
+
+    const tagName = element.tagName.toLowerCase();
+    const text = element.textContent?.trim() || '';
+    const role = element.getAttribute('role') || '';
+    
+    item.innerHTML = `
+      <div style="font-weight: 600; color: #4b5563;">${tagName}</div>
+      ${text ? `<div style="color: #6b7280; font-size: 0.875rem;">${text.substring(0, 50)}${text.length > 50 ? '...' : ''}</div>` : ''}
+      ${role ? `<div style="color: #9ca3af; font-size: 0.75rem;">Role: ${role}</div>` : ''}
+    `;
+
+    item.onclick = () => {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.style.outline = '2px solid #3b82f6';
+      setTimeout(() => {
+        element.style.outline = 'none';
+      }, 2000);
+    };
+
+    item.onmouseover = () => {
+      item.style.backgroundColor = '#f3f4f6';
+    };
+
+    item.onmouseout = () => {
+      item.style.backgroundColor = 'transparent';
+    };
+
+    container.appendChild(item);
+  });
+
+  return container;
+}
+
 function showPageStructure(): void {
-  // Funktion zur Fehlerbehebung temporär deaktiviert
-  console.log("Seitenstruktur-Funktion ist temporär deaktiviert.");
-  // Originaler Code für showPageStructure hier auskommentiert oder entfernt.
+  try {
+    // Entferne existierendes Panel falls vorhanden
+    hidePageStructure();
+
+    // Erstelle neues Panel
+    const panel = createPageStructurePanel();
+    document.body.appendChild(panel);
+
+    // Analysiere Seitenstruktur
+    const elements = analyzePageStructure();
+    const structureView = createStructureView(elements);
+    
+    // Füge Strukturansicht zum Panel hinzu
+    const content = panel.querySelector('div:last-child');
+    if (content) {
+      content.appendChild(structureView);
+    }
+
+    // Zeige Panel mit Animation
+    requestAnimationFrame(() => {
+      panel.style.transform = 'translateX(0)';
+    });
+
+    // Füge Escape-Key-Handler hinzu
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        hidePageStructure();
+        document.removeEventListener('keydown', handleEscape);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+
+  } catch (error) {
+    console.error('Fehler beim Anzeigen der Seitenstruktur:', error);
+  }
 }
 
 function hidePageStructure(): void {
-  // Funktion zur Fehlerbehebung temporär deaktiviert
-  console.log("Seitenstruktur-Funktion ist temporär deaktiviert.");
-  // Originaler Code für hidePageStructure hier auskommentiert oder entfernt.
+  try {
+    const panel = document.getElementById(PAGE_STRUCTURE_CONSTANTS.PANEL_ID);
+    if (panel) {
+      // Animation zum Ausblenden
+      panel.style.transform = 'translateX(-100%)';
+      
+      // Entferne Panel nach Animation
+      setTimeout(() => {
+        panel.remove();
+      }, parseInt(PAGE_STRUCTURE_CONSTANTS.ANIMATION_DURATION));
+
+      // Dispatch Event
+      const event = new CustomEvent('accessibility:page-structure-closed');
+      document.dispatchEvent(event);
+    }
+  } catch (error) {
+    console.error('Fehler beim Ausblenden der Seitenstruktur:', error);
+  }
 }
 
 // Helper function to handle custom cursor
