@@ -22,18 +22,22 @@ export function ProfilesTab() {
                settings.lineHeight === 2 && 
                settings.wordSpacing === 30 && 
                settings.textAlign === 'left' && 
-               settings.highlightTitles;
+               settings.highlightTitles &&
+               settings.hideImages === false;
       case 'senior':
-        return settings.textSize === 2 && 
-               settings.contrastMode === 'increased' && 
-               settings.fontFamily === 'readable' && 
-               settings.highlightFocus && 
-               settings.highlightLinks;
+        return settings.textSize === 2 &&
+               settings.lineHeight === 2 &&
+               settings.letterSpacing === 0 &&
+               settings.highlightTitles &&
+               settings.highlightLinks &&
+               settings.customCursor &&
+               settings.cursorSize === 'bigger' &&
+               settings.keyboardNavigation;
       case 'motorImpaired':
         return settings.keyboardNavigation && 
                settings.highlightFocus && 
                settings.customCursor && 
-               settings.cursorSize !== 'default' && 
+               settings.cursorSize === 'biggest' && 
                settings.cursorColor === 'black';
       case 'adhdFriendly':
         return settings.readingMask && 
@@ -46,11 +50,10 @@ export function ProfilesTab() {
                settings.letterSpacing === 1 && 
                settings.textAlign === 'left';
       case 'efficiencyMode':
-        return settings.stopAnimations && 
-               settings.darkMode && 
-               settings.highlightLinks && 
-               settings.highlightFocus && 
-               settings.pageStructure &&
+        return settings.stopAnimations &&
+               settings.darkMode &&
+               settings.highlightLinks &&
+               settings.highlightFocus &&
                settings.customCursor &&
                settings.cursorSize === 'bigger' &&
                settings.cursorColor === 'red';
