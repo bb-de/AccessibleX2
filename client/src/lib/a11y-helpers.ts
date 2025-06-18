@@ -1200,14 +1200,13 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     `;
   }
 
-  // Apply stop animations
+  // Stop Animations: Alle Animationen und Transitionen deaktivieren
   if (settings.stopAnimations) {
     cssRules += `
-      body:not([data-accessibility-widget]) *,
-      body:not([data-accessibility-widget]) *::before,
-      body:not([data-accessibility-widget]) *::after {
+      *, *::before, *::after {
         animation: none !important;
         transition: none !important;
+        scroll-behavior: auto !important;
       }
     `;
   }
