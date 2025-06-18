@@ -51,8 +51,8 @@ function enableKeyboardNavigation(): void {
     }
   });
 
-  // Add close button event listener
-  const closeButton = document.getElementById('close-keyboard-nav') || navHelper.querySelector('#close-keyboard-nav');
+  // Add close button event listener (IMMER im navHelper suchen!)
+  const closeButton = navHelper.querySelector('#close-keyboard-nav');
   if (closeButton) {
     closeButton.addEventListener('click', (e) => {
       e.preventDefault();
