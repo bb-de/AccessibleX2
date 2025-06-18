@@ -1203,13 +1203,16 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     `;
   }
 
-  // Saturation und Monochrome: Immer Filter-Regel schreiben
+  // Filter für alle Features kombinieren
   const filterValues = [];
   if (settings.saturation !== 100) {
     filterValues.push(`saturate(${settings.saturation}%)`);
   }
   if (settings.monochrome > 0) {
     filterValues.push(`grayscale(${settings.monochrome}%)`);
+  }
+  if (settings.darkMode) {
+    filterValues.push('invert(100%) hue-rotate(180deg)');
   }
   const filterValue = filterValues.length > 0 ? filterValues.join(' ') : 'none';
 
