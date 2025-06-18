@@ -19,24 +19,30 @@ function AppRouter() {
 }
 
 function App() {
-  const { settings } = useAccessibility();
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter>
-          <div className="min-h-screen">
-            <AppRouter />
-          </div>
-        </WouterRouter>
-        <Toaster />
-        {settings.textToSpeech && (
-          <div className="fixed bottom-5 right-[120px] z-[10000]">
-            <SpeechControls />
-          </div>
-        )}
+        <AccessibilityProvider shadowRoot={null}>
+          <WouterRouter>
+            <div className="min-h-screen">
+              <AppRouter />
+            </div>
+          </WouterRouter>
+          <Toaster />
+          <SpeechControlsWrapper />
+        </AccessibilityProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
+}
+
+function SpeechControlsWrapper() {
+  const { settings } = useAccessibility();
+  return settings.textToSpeech ? (
+    <div className="fixed bottom-5 right-[120px] z-[10000]">
+      <SpeechControls />
+    </div>
+  ) : null;
 }
 
 export default App;
