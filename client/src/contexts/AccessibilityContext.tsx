@@ -354,6 +354,9 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
   const resetSettings = useCallback(() => {
     setSettings(defaultSettings);
 
+    // Styles sofort zurücksetzen!
+    applyAccessibilityStyles(defaultSettings, null);
+
     // Log analytics
     try {
       apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, {
