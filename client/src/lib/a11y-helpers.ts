@@ -1225,6 +1225,17 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     }
   `;
 
+  // Highlight Focus: Sichtbaren Fokus-Rahmen setzen
+  if (settings.highlightFocus) {
+    cssRules += `
+      *:focus {
+        outline: 3px solid #2196F3 !important;
+        outline-offset: 3px !important;
+        box-shadow: 0 0 0 2px #fff, 0 0 0 5px #2196F3 !important;
+      }
+    `;
+  }
+
   // Set the CSS rules
   styleElement.textContent = cssRules;
 
