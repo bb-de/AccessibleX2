@@ -1228,7 +1228,8 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   // Highlight Focus: Sichtbaren Fokus-Rahmen setzen
   if (settings.highlightFocus) {
     cssRules += `
-      *:focus {
+      *:focus,
+      [data-accessibility-widget] *:focus {
         outline: 3px solid #FF9900 !important;
         outline-offset: 3px !important;
         box-shadow: 0 0 0 2px #fff, 0 0 0 5px #FF9900 !important;
