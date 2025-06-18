@@ -1200,15 +1200,25 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     `;
   }
 
-  // Stop Animations: Alle Animationen und Transitionen deaktivieren
+  // Stop Animations: Alle Animationen und Transitionen deaktivieren (CSS + JS)
   if (settings.stopAnimations) {
     cssRules += `
-      *, *::before, *::after {
+      html *, html *::before, html *::after {
         animation: none !important;
         transition: none !important;
         scroll-behavior: auto !important;
       }
     `;
+    // Zusätzlich: Alle Inline-Animationen und Web-Animations stoppen
+    const allElements = document.querySelectorAll('html *');
+    allElements.forEach(el => {
+      (el as HTMLElement).style.animation = 'none';
+      (el as HTMLElement).style.transition = 'none';
+      // Web Animations API stoppen
+      if (typeof (el as any).getAnimations === 'function') {
+        (el as any).getAnimations().forEach((anim: Animation) => anim.cancel());
+      }
+    });
   }
 
   // Filter für alle Features kombinieren
