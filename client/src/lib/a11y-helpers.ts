@@ -106,15 +106,12 @@ function disableKeyboardNavigation(): void {
 
 // Helper function to show virtual keyboard
 function showVirtualKeyboard(shadowRoot: ShadowRoot | null | undefined): void {
-  console.log("Debug: showVirtualKeyboard called.");
   // Store the currently active element if it's an input or textarea
   const currentActiveElementOnShow = getActiveElement(document);
   if (currentActiveElementOnShow instanceof HTMLInputElement || currentActiveElementOnShow instanceof HTMLTextAreaElement) {
     _lastActiveInput = currentActiveElementOnShow;
-    console.log("Debug: Stored _lastActiveInput on show (initial):", _lastActiveInput);
   } else {
     // Do NOT set to null here. We rely on the focusin listener to find the correct input.
-    console.log("Debug: No active input/textarea initially. Will rely on focusin. Current active element:", currentActiveElementOnShow);
   }
 
   // Add a focus listener to update _lastActiveInput dynamically
@@ -123,13 +120,9 @@ function showVirtualKeyboard(shadowRoot: ShadowRoot | null | undefined): void {
       const target = event.target;
       if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
         _lastActiveInput = target;
-        console.log("Debug: Updated _lastActiveInput on focusin event:", _lastActiveInput);
-      } else {
-        console.log("Debug: focusin event on non-input/textarea element:", target);
       }
     };
     document.addEventListener('focusin', _focusListener, { capture: true });
-    console.log("Debug: Added focusin listener for dynamic _lastActiveInput updates.");
   }
 
   // Create a keyboard container
@@ -183,7 +176,6 @@ function showVirtualKeyboard(shadowRoot: ShadowRoot | null | undefined): void {
   closeButton.style.alignItems = 'center';
   closeButton.style.justifyContent = 'center';
   closeButton.addEventListener('click', (event) => {
-    console.log("Debug: Virtual Keyboard Close Button clicked.", event.target);
     event.stopPropagation(); // Prevent event from bubbling up
     event.preventDefault(); // Prevent any default browser action
     hideVirtualKeyboard(shadowRoot);
@@ -232,12 +224,6 @@ function showVirtualKeyboard(shadowRoot: ShadowRoot | null | undefined): void {
       });
 
       rowElement.appendChild(keyButton);
-
-      // Log key button text content for debugging
-      if (key === 'q') {
-        console.log(`Debug: 'q' key textContent: ${keyButton.textContent}`);
-        console.log(`Debug: 'q' key computed style:`, window.getComputedStyle(keyButton));
-      }
     });
 
     keyboard.appendChild(rowElement);
@@ -260,19 +246,15 @@ function showVirtualKeyboard(shadowRoot: ShadowRoot | null | undefined): void {
   `;
   if (shadowRoot) {
     shadowRoot.appendChild(keyboardStyle);
-    console.log('Debug: Keyboard style appended to shadowRoot');
   } else {
     document.head.appendChild(keyboardStyle);
-    console.log('Debug: Keyboard style appended to document.head');
   }
 
   // Add to the document or shadow DOM
   if (shadowRoot) {
     shadowRoot.appendChild(keyboard);
-    console.log('Debug: Virtual keyboard appended to shadowRoot');
   } else {
     document.body.appendChild(keyboard);
-    console.log('Debug: Virtual keyboard appended to document.body');
   }
 
   // Explicitly focus on the last active input if it exists
@@ -281,7 +263,6 @@ function showVirtualKeyboard(shadowRoot: ShadowRoot | null | undefined): void {
     // Re-set selection range to ensure cursor is at the end or where it was
     const val = _lastActiveInput.value;
     _lastActiveInput.selectionStart = _lastActiveInput.selectionEnd = val.length;
-    console.log("Debug: Explicitly focused on _lastActiveInput after keyboard shown:", _lastActiveInput);
   }
 
   // Shift state
@@ -304,7 +285,6 @@ function showVirtualKeyboard(shadowRoot: ShadowRoot | null | undefined): void {
   // Helper function to get the currently focused element, even if it's inside a shadow DOM
   function getActiveElement(root: Document | ShadowRoot = document): Element | null {
     const activeElement = root.activeElement;
-    console.log("Debug: getActiveElement - current root:", root, "activeElement:", activeElement);
     if (!activeElement || !activeElement.shadowRoot) {
       return activeElement;
     }
@@ -314,17 +294,13 @@ function showVirtualKeyboard(shadowRoot: ShadowRoot | null | undefined): void {
   // Insert text at cursor position
   function insertTextAtCursor(text: string) {
     const activeElement = _lastActiveInput;
-    console.log("Debug: insertTextAtCursor - activeElement (using _lastActiveInput):", activeElement);
 
     if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
-      console.log("Debug: insertTextAtCursor - activeElement is input/textarea.");
       const start = activeElement.selectionStart || 0;
       const end = activeElement.selectionEnd || 0;
       const value = activeElement.value;
-      console.log(`Debug: insertTextAtCursor - start: ${start}, end: ${end}, value: ${value}`);
 
       activeElement.value = value.substring(0, start) + (shiftEnabled && text.length === 1 ? text.toUpperCase() : text) + value.substring(end);
-      console.log("Debug: insertTextAtCursor - new value:", activeElement.value);
 
       // Set cursor position after inserted text
       activeElement.selectionStart = activeElement.selectionEnd = start + 1;
@@ -332,83 +308,60 @@ function showVirtualKeyboard(shadowRoot: ShadowRoot | null | undefined): void {
       // Trigger input event for form validation
       const event = new Event('input', { bubbles: true });
       activeElement.dispatchEvent(event);
-      console.log("Debug: insertTextAtCursor - input event dispatched.");
-    } else {
-      console.log("Debug: insertTextAtCursor - _lastActiveInput is NOT input/textarea or is null.", activeElement);
     }
   }
 
   // Delete text at cursor position
   function deleteTextAtCursor() {
     const activeElement = _lastActiveInput;
-    console.log("Debug: deleteTextAtCursor - activeElement (using _lastActiveInput):", activeElement);
 
     if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
-      console.log("Debug: deleteTextAtCursor - activeElement is input/textarea.");
       const start = activeElement.selectionStart || 0;
       const end = activeElement.selectionEnd || 0;
       const value = activeElement.value;
-      console.log(`Debug: deleteTextAtCursor - start: ${start}, end: ${end}, value: ${value}`);
 
       if (start === end && start > 0) {
         // No selection, delete character before cursor
         activeElement.value = value.substring(0, start - 1) + value.substring(end);
         activeElement.selectionStart = activeElement.selectionEnd = start - 1;
-        console.log("Debug: deleteTextAtCursor - new value (delete before cursor):", activeElement.value);
       } else if (start !== end) {
         // Delete selected text
         activeElement.value = value.substring(0, start) + value.substring(end);
         activeElement.selectionStart = activeElement.selectionEnd = start;
-        console.log("Debug: deleteTextAtCursor - new value (delete selected):", activeElement.value);
       }
 
       // Trigger input event for form validation
       const event = new Event('input', { bubbles: true });
       activeElement.dispatchEvent(event);
-      console.log("Debug: deleteTextAtCursor - input event dispatched.");
-    } else {
-      console.log("Debug: deleteTextAtCursor - _lastActiveInput is NOT input/textarea or is null.", activeElement);
     }
   }
 }
 
 // Helper function to hide virtual keyboard
 function hideVirtualKeyboard(currentShadowRoot: ShadowRoot | null | undefined): void {
-  console.log("Debug: hideVirtualKeyboard called.");
-  console.log("Debug: hideVirtualKeyboard - currentShadowRoot received:", currentShadowRoot);
   let keyboard: HTMLElement | null = null;
 
   if (currentShadowRoot) {
     keyboard = currentShadowRoot.getElementById('virtual-keyboard');
-    console.log("Debug: Keyboard search in currentShadowRoot:", keyboard);
-    if (keyboard) {
-        console.log("Debug: Keyboard found in currentShadowRoot. Its parent is:", keyboard.parentNode);
-    }
   }
 
   // If not found in currentShadowRoot or no currentShadowRoot, check document body
   if (!keyboard) {
     keyboard = document.body.querySelector('#virtual-keyboard');
-    console.log("Debug: Keyboard search in document.body:", keyboard);
   }
 
   if (keyboard) {
     keyboard.remove();
-    console.log("Virtual keyboard removed");
 
     // Remove focus listener when keyboard is hidden
     if (_focusListener) {
       document.removeEventListener('focusin', _focusListener, { capture: true });
       _focusListener = null;
-      console.log("Debug: Removed focusin listener.");
     }
 
     // Reset virtual keyboard setting
     const event = new CustomEvent('accessibility:virtual-keyboard-closed');
     document.dispatchEvent(event);
-    console.log("Debug: accessibility:virtual-keyboard-closed event dispatched");
-  } else {
-    console.log("Debug: Virtual keyboard not found to remove.");
   }
 }
 

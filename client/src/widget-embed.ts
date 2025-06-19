@@ -29,7 +29,6 @@
   // Function to load CSS
   function loadStyles() {
     if (document.getElementById('accessibility-widget-styles')) {
-      console.log('Accessibility widget styles already loaded.');
       return;
     }
     const styleTag = document.createElement('style');
@@ -95,7 +94,6 @@
   // Widget button HTML with SVG icon
   function createWidgetButton() {
     if (document.getElementById('accessibility-widget-container')) {
-      console.log('Accessibility widget container already exists.');
       return document.getElementById('accessibility-widget-button') as HTMLButtonElement;
     }
 
@@ -124,7 +122,6 @@
   // Create iframe to load the widget panel
   function createWidgetIframe() {
     if (document.getElementById('accessibility-widget-iframe')) {
-      console.log('Accessibility widget iframe already exists.');
       return document.getElementById('accessibility-widget-iframe') as HTMLIFrameElement;
     }
 
@@ -188,7 +185,6 @@
     // Toggle widget panel
     function toggleWidget() {
       isOpen = !isOpen;
-      console.log(`Debug: Parent toggleWidget called. Setting isOpen to ${isOpen}.`);
 
       if (isOpen) {
         iframe.style.display = 'block'; // Set display to block before setting opacity
@@ -224,12 +220,7 @@
     
     // Setup cross-window communication
     window.addEventListener('message', (event: MessageEvent) => {
-      console.log('Debug: Message received in parent window:', event.data);
-      // Überprüfen, ob die Nachricht von der erwarteten Quelle stammt (optional, aber empfohlen)
-      // Hier verwenden wir '*' als origin, aber in einer Produktionsumgebung sollte event.origin überprüft werden
-
       if (event.data.type === 'accessibility-widget-closed') {
-        console.log('Debug: Received widget-closed message from iframe. Hiding iframe.');
         isOpen = false; // Zustand im übergeordneten Skript aktualisieren
         iframe.style.opacity = '0';
         setTimeout(() => {
@@ -241,7 +232,6 @@
       } else if (event.data.type === 'accessibility-widget-toggle') {
         // Dies ist der bereits vorhandene Listener für Toggle-Nachrichten
         isOpen = event.data.isOpen;
-        console.log(`Debug: Message listener in parent processed accessibility-widget-toggle. isOpen: ${isOpen}`);
 
         if (isOpen) {
           iframe.style.display = 'block'; // Set display to block before setting opacity
@@ -399,12 +389,10 @@
 
   // Update a single accessibility setting
   function updateAccessibilitySetting(setting: any, value: any) { // Type 'any' for simplicity in embed script
-    console.log(`Debug: External script received setting update: ${setting} = ${value}`);
   }
 
   // Enable keyboard navigation (dummy implementation for now)
   function enableKeyboardNavigation() {
-    console.log("Debug: Keyboard navigation enabled.");
     const navHelpers = document.createElement('div');
     navHelpers.id = 'keyboard-nav-helpers';
     navHelpers.textContent = 'Keyboard Navigation Enabled';
@@ -413,7 +401,6 @@
 
   // Disable keyboard navigation (dummy implementation for now)
   function disableKeyboardNavigation() {
-    console.log("Debug: Keyboard navigation disabled.");
     const navHelpers = document.getElementById('keyboard-nav-helpers');
     if (navHelpers) {
       navHelpers.remove();

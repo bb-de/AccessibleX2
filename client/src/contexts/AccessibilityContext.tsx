@@ -155,7 +155,6 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
       // Stellen Sie sicher, dass die Nachricht von einer vertrauenswürdigen Quelle stammt, falls möglich
       // Für diese Implementierung verwenden wir '*' als origin, aber in einer Produktionsumgebung sollte event.origin überprüft werden.
       if (event.data.type === 'accessibility-widget-toggle') {
-        console.log(`Debug: Iframe received message from parent. isOpen: ${event.data.isOpen}`);
         setIsOpen(event.data.isOpen);
       }
     };
@@ -170,9 +169,7 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
   // Toggle widget visibility
   const toggleWidget = useCallback(() => {
     setIsOpen(prev => {
-      console.log(`Debug: Inside setIsOpen callback. Previous isOpen (prev): ${prev}`);
       const newState = !prev;
-      console.log(`Debug: toggleWidget called. Setting isOpen to ${newState}.`);
       // Sende eine Nachricht an das übergeordnete Fenster, um den Status zu synchronisieren
       // Dies ist wichtig, wenn das Widget von innen geschlossen wird (z.B. durch das 'X' oder 'Klick außerhalb')
       window.parent.postMessage({
@@ -205,8 +202,6 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
     } catch (error) {
       console.error('Failed to log setting change', error);
     }
-
-    console.log(`Debug: Setting '${key}' updated to '${value}'`);
   }, []);
 
   // Increment numeric settings
