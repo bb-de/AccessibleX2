@@ -14,6 +14,13 @@ export function ContentTab() {
     return () => exportSpeechControlsOverlay(false);
   }, [settings.textToSpeech]);
 
+  // Synchronisiere das Setting, wenn das Overlay per X geschlossen wird
+  useEffect(() => {
+    const handler = () => updateSetting('textToSpeech', false);
+    window.addEventListener('speechControlsClosed', handler);
+    return () => window.removeEventListener('speechControlsClosed', handler);
+  }, [updateSetting]);
+
   return (
     <div className="py-4 px-5 space-y-5">
       {/* Content Adjustments */}

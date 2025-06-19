@@ -221,6 +221,8 @@ export function exportSpeechControlsOverlay(show: boolean) {
     }
     function handleClose() {
       handleStop();
+      // Dispatch CustomEvent, damit das Widget das Setting zurücksetzt
+      window.dispatchEvent(new CustomEvent('speechControlsClosed'));
       document.body.removeChild(container);
     }
     (container.querySelector('#speech-controls-start') as HTMLButtonElement | null)!.onclick = handleStart;
