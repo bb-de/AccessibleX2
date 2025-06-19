@@ -76,10 +76,40 @@ export function SpeechControls({ initialText = '' }: { initialText?: string }) {
     }
   };
 
-  // DEBUG: Sichtbarkeitstest
   return (
-    <div style={{ background: 'red', color: 'white', padding: 20, fontSize: 24, zIndex: 99999 }}>
-      TEST: Speech Controls Overlay
+    <div style={{ background: '#222', color: 'white', padding: 20, fontSize: 18, zIndex: 99999, borderRadius: 12, minWidth: 340, boxShadow: '0 4px 24px rgba(0,0,0,0.2)' }}>
+      <div style={{ marginBottom: 12, fontWeight: 'bold', fontSize: 20 }}>Vorlesefunktion</div>
+      <div style={{ marginBottom: 8 }}>
+        <textarea
+          value={currentText}
+          onChange={e => setCurrentText(e.target.value)}
+          rows={3}
+          style={{ width: '100%', borderRadius: 6, padding: 8, fontSize: 16, color: '#222' }}
+          placeholder="Text zum Vorlesen eingeben oder markieren..."
+        />
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+        <button onClick={handleStart} style={{ padding: '6px 14px', borderRadius: 6, background: '#2563eb', color: 'white', border: 'none', fontWeight: 'bold' }}>Start</button>
+        <button onClick={handlePause} style={{ padding: '6px 14px', borderRadius: 6, background: '#f59e42', color: 'white', border: 'none', fontWeight: 'bold' }}>Pause</button>
+        <button onClick={handleStop} style={{ padding: '6px 14px', borderRadius: 6, background: '#ef4444', color: 'white', border: 'none', fontWeight: 'bold' }}>Stopp</button>
+        <button onClick={handleUseSelection} style={{ padding: '6px 14px', borderRadius: 6, background: '#10b981', color: 'white', border: 'none', fontWeight: 'bold' }}>Markierten Text übernehmen</button>
+      </div>
+      <div style={{ marginBottom: 8 }}>
+        <label style={{ marginRight: 8 }}>Geschwindigkeit: {rate.toFixed(2)}x</label>
+        <input
+          type="range"
+          min="0.5"
+          max="2"
+          step="0.05"
+          value={rate}
+          onChange={handleRateChange}
+          style={{ verticalAlign: 'middle' }}
+        />
+      </div>
+      <div style={{ marginBottom: 4 }}>
+        <span>Status: <b>{STATUS[status]}</b></span>
+      </div>
+      {error && <div style={{ color: '#f87171', marginTop: 4 }}>{error}</div>}
     </div>
   );
 } 
