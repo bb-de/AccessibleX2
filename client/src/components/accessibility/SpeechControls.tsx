@@ -121,19 +121,20 @@ export function exportSpeechControlsOverlay(show: boolean) {
     if (document.getElementById(overlayId)) return; // Schon vorhanden
     const container = document.createElement('div');
     container.id = overlayId;
-    container.style.position = 'fixed';
-    container.style.bottom = '20px';
-    container.style.right = '140px';
-    container.style.zIndex = '1000001';
-    container.style.background = '#222';
-    container.style.color = 'white';
-    container.style.padding = '20px';
-    container.style.fontSize = '18px';
-    container.style.borderRadius = '12px';
-    container.style.minWidth = '340px';
-    container.style.boxShadow = '0 4px 24px rgba(0,0,0,0.2)';
     container.innerHTML = `
       <style>
+        #speech-controls-plain-overlay {
+          background: #222;
+          color: white;
+          border-radius: 12px;
+          min-width: 340px;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+          padding: 20px;
+          position: fixed;
+          bottom: 20px;
+          right: 140px;
+          z-index: 1000001;
+        }
         #speech-controls-plain-overlay textarea {
           width: 100%; border-radius: 6px; padding: 8px; font-size: 16px; color: #222;
         }
