@@ -133,23 +133,42 @@ export function exportSpeechControlsOverlay(show: boolean) {
     container.style.minWidth = '340px';
     container.style.boxShadow = '0 4px 24px rgba(0,0,0,0.2)';
     container.innerHTML = `
-      <div style="margin-bottom: 12px; font-weight: bold; font-size: 20px;">Vorlesefunktion</div>
-      <textarea id="speech-controls-textarea" rows="3" style="width: 100%; border-radius: 6px; padding: 8px; font-size: 16px; color: #222;" placeholder="Text zum Vorlesen eingeben oder markieren..."></textarea>
-      <div style="display: flex; gap: 8px; margin-bottom: 8px; margin-top: 8px;">
-        <button id="speech-controls-start" style="padding: 6px 14px; border-radius: 6px; background: #2563eb; color: white; border: none; font-weight: bold;">Start</button>
-        <button id="speech-controls-pause" style="padding: 6px 14px; border-radius: 6px; background: #f59e42; color: white; border: none; font-weight: bold;">Pause</button>
-        <button id="speech-controls-stop" style="padding: 6px 14px; border-radius: 6px; background: #ef4444; color: white; border: none; font-weight: bold;">Stopp</button>
-        <button id="speech-controls-selection" style="padding: 6px 14px; border-radius: 6px; background: #10b981; color: white; border: none; font-weight: bold;">Markierten Text übernehmen</button>
+      <style>
+        #speech-controls-plain-overlay textarea {
+          width: 100%; border-radius: 6px; padding: 8px; font-size: 16px; color: #222;
+        }
+        #speech-controls-plain-overlay button {
+          padding: 6px 14px; border-radius: 6px; border: none; font-weight: bold;
+          margin-right: 4px; margin-bottom: 2px; cursor: pointer;
+        }
+        #speech-controls-plain-overlay #speech-controls-start { background: #2563eb; color: white; }
+        #speech-controls-plain-overlay #speech-controls-pause { background: #f59e42; color: white; }
+        #speech-controls-plain-overlay #speech-controls-stop { background: #ef4444; color: white; }
+        #speech-controls-plain-overlay #speech-controls-selection { background: #10b981; color: white; }
+        #speech-controls-plain-overlay #speech-controls-close { position: absolute; top: 8px; right: 12px; background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
+        #speech-controls-plain-overlay label { font-weight: normal; }
+        #speech-controls-plain-overlay .speech-controls-row { display: flex; gap: 8px; margin-bottom: 8px; margin-top: 8px; }
+        #speech-controls-plain-overlay .speech-controls-title { margin-bottom: 12px; font-weight: bold; font-size: 20px; }
+        #speech-controls-plain-overlay .speech-controls-status { margin-bottom: 4px; }
+        #speech-controls-plain-overlay .speech-controls-error { color: #f87171; margin-top: 4px; }
+      </style>
+      <div class="speech-controls-title">Vorlesefunktion</div>
+      <textarea id="speech-controls-textarea" rows="3" placeholder="Text zum Vorlesen eingeben oder markieren..."></textarea>
+      <div class="speech-controls-row">
+        <button id="speech-controls-start">Start</button>
+        <button id="speech-controls-pause">Pause</button>
+        <button id="speech-controls-stop">Stopp</button>
+        <button id="speech-controls-selection">Markierten Text übernehmen</button>
       </div>
       <div style="margin-bottom: 8px;">
         <label style="margin-right: 8px;">Geschwindigkeit: <span id="speech-controls-rate-label">1.00x</span></label>
         <input id="speech-controls-rate" type="range" min="0.5" max="2" step="0.05" value="1" style="vertical-align: middle;" />
       </div>
-      <div style="margin-bottom: 4px;">
+      <div class="speech-controls-status">
         <span>Status: <b id="speech-controls-status">Bereit</b></span>
       </div>
-      <div id="speech-controls-error" style="color: #f87171; margin-top: 4px;"></div>
-      <button id="speech-controls-close" style="position: absolute; top: 8px; right: 12px; background: none; border: none; color: #fff; font-size: 22px; cursor: pointer;">×</button>
+      <div id="speech-controls-error" class="speech-controls-error"></div>
+      <button id="speech-controls-close">×</button>
     `;
     document.body.appendChild(container);
 
