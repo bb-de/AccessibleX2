@@ -20,7 +20,7 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
   
   // Event-Listener für Klicks außerhalb des Widgets
   useEffect(() => {
-    if (!isOpen) {
+    if (!(isOpen || isClosing)) {
       return;
     }
 
@@ -47,7 +47,7 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
     return () => {
       document.body.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, shadowRootElement, widgetRef, settings.virtualKeyboard]);
+  }, [isOpen, isClosing, shadowRootElement, widgetRef, settings.virtualKeyboard]);
 
   // Reset isClosing wenn geöffnet
   useEffect(() => {
