@@ -22,7 +22,15 @@ export function WidgetFooter() {
       </div>
       
       <p className="text-xs text-gray-500 text-center font-medium">
-        {translations.footerText}
+        <a
+          href="https://www.brandingbrothers.de"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline focus:underline outline-none"
+          tabIndex={0}
+        >
+          {translations.footerText}
+        </a>
       </p>
 
       <div className="flex justify-center mt-2">
