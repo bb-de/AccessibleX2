@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Router as WouterRouter, Route, Switch } from 'wouter';
 import { AccessibilityProvider } from '@/contexts/AccessibilityContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -8,6 +8,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useAccessibility } from "@/hooks/useAccessibility";
 import { SpeechControls } from "@/components/accessibility/SpeechControls";
+import { createPortal } from "react-dom";
 
 function AppRouter() {
   return (
@@ -15,6 +16,32 @@ function AppRouter() {
       <Route path="/" component={WidgetDemo} />
       <Route component={WidgetDemo} />
     </Switch>
+  );
+}
+
+function SpeechControlsPortal() {
+  const { settings } = useAccessibility();
+  const [container, setContainer] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (settings.textToSpeech) {
+      const el = document.createElement("div");
+      el.id = "speech-controls-portal";
+      document.body.appendChild(el);
+      setContainer(el);
+      return () => {
+        document.body.removeChild(el);
+        setContainer(null);
+      };
+    }
+  }, [settings.textToSpeech]);
+
+  if (!settings.textToSpeech || !container) return null;
+  return createPortal(
+    <div style={{ position: "fixed", bottom: 20, right: 140, zIndex: 1000001 }}>
+      <SpeechControls />
+    </div>,
+    container
   );
 }
 
@@ -29,20 +56,11 @@ function App() {
             </div>
           </WouterRouter>
           <Toaster />
-          <SpeechControlsWrapper />
+          <SpeechControlsPortal />
         </AccessibilityProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
-}
-
-function SpeechControlsWrapper() {
-  const { settings } = useAccessibility();
-  return settings.textToSpeech ? (
-    <div className="fixed bottom-5 right-[120px] z-[10000]">
-      <SpeechControls />
-    </div>
-  ) : null;
 }
 
 export default App;
