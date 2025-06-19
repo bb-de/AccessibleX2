@@ -15,10 +15,11 @@ interface AccessibilityWidgetProps {
 export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetProps) {
   const { isOpen, toggleWidget, settings } = useAccessibility();
   const widgetRef = useRef<HTMLDivElement>(null);
+  const [isClosing, setIsClosing] = React.useState(false);
+  const closeTimeout = React.useRef<NodeJS.Timeout | null>(null);
   
   // Event-Listener für Klicks außerhalb des Widgets
   useEffect(() => {
-    // Nur hinzufügen, wenn das Widget geöffnet ist
     if (!isOpen) {
       return;
     }
@@ -26,49 +27,62 @@ export function AccessibilityWidget({ shadowRootElement }: AccessibilityWidgetPr
     const handleClickOutside = (event: MouseEvent) => {
       if (!widgetRef.current) return;
       const currentWidgetRef = widgetRef.current;
-
       const path = event.composedPath();
       const widgetContainer = shadowRootElement?.host;
-
-      // Überprüfen, ob der Klick innerhalb des Widget-Containers (Shadow Host) erfolgte
-      // Oder innerhalb des Panels oder des Toggle-Buttons, die sich im Shadow DOM befinden
       const isClickInsideWidgetOrToggleButton = path.some(node => 
         (node === currentWidgetRef) ||
         (node instanceof Node && currentWidgetRef.contains(node)) ||
         ((node instanceof Element) && node.id === 'accessibility-toggle') ||
         (node === widgetContainer)
       );
-      
-      // Überprüfen, ob der Klick innerhalb der virtuellen Tastatur erfolgte (diese ist im Haupt-DOM)
       const isClickInsideVirtualKeyboard = path.some(node => (node instanceof Element) && node.id === 'virtual-keyboard');
-
       if (isClickInsideVirtualKeyboard) {
         return; 
       }
-
       if (!isClickInsideWidgetOrToggleButton) {
-        toggleWidget();
+        handleCloseWidget();
       }
     };
-    
-    // Event-Listener zum gesamten Dokument hinzufügen, um Klicks überall zu erfassen
     document.body.addEventListener('mousedown', handleClickOutside);
-    
-    // Cleanup beim Unmounten oder Ändern der Dependencies
     return () => {
       document.body.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, toggleWidget, shadowRootElement, widgetRef, settings.virtualKeyboard]);
-  
+  }, [isOpen, shadowRootElement, widgetRef, settings.virtualKeyboard]);
+
+  // Reset isClosing wenn geöffnet
+  useEffect(() => {
+    if (isOpen) {
+      setIsClosing(false);
+      if (closeTimeout.current) {
+        clearTimeout(closeTimeout.current);
+        closeTimeout.current = null;
+      }
+    }
+    return () => {
+      if (closeTimeout.current) {
+        clearTimeout(closeTimeout.current);
+      }
+    };
+  }, [isOpen]);
+
+  const handleCloseWidget = React.useCallback(() => {
+    if (!isClosing) {
+      setIsClosing(true);
+      closeTimeout.current = setTimeout(() => {
+        toggleWidget();
+      }, 300);
+    }
+  }, [isClosing, toggleWidget]);
+
   return (
     <AccessibilityProvider shadowRoot={shadowRootElement}>
       {/* Widget Button - Always fixed at bottom-5 right-5 */}
       <div className="fixed bottom-5 right-5 z-[9999]">
-        <WidgetButton onClick={toggleWidget} isOpen={isOpen} />
+        <WidgetButton onClick={isOpen ? handleCloseWidget : toggleWidget} isOpen={isOpen || isClosing} />
       </div>
       
       {/* Widget Panel - Position adjusted dynamically */}
-      <WidgetPanel isOpen={isOpen} ref={widgetRef} />
+      <WidgetPanel isOpen={isOpen} isClosing={isClosing} handleCloseWidget={handleCloseWidget} ref={widgetRef} />
     </AccessibilityProvider>
   );
 }

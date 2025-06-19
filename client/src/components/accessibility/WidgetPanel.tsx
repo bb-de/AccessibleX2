@@ -19,31 +19,15 @@ import {
 
 interface WidgetPanelProps {
   isOpen: boolean;
+  isClosing?: boolean;
+  handleCloseWidget?: () => void;
 }
 
 type TabType = "profiles" | "vision" | "content" | "navigation";
 
-export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpen }, ref) => {
+export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpen, isClosing = false, handleCloseWidget }, ref) => {
   const [activeTab, setActiveTab] = useState<TabType>("profiles");
   const { toggleWidget, resetSettings, translations, settings } = useAccessibility();
-  const [isClosing, setIsClosing] = useState(false);
-  const closeTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setIsClosing(false);
-      if (closeTimeout.current) {
-        clearTimeout(closeTimeout.current);
-        closeTimeout.current = null;
-      }
-    }
-    // Cleanup bei Unmount
-    return () => {
-      if (closeTimeout.current) {
-        clearTimeout(closeTimeout.current);
-      }
-    };
-  }, [isOpen]);
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
@@ -101,12 +85,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
               aria-label={translations.closeAccessibilityMenu}
               className="text-gray-500 hover:text-gray-700 p-1 rounded flex items-center"
               onClick={(e) => {
-                if (!isClosing) {
-                  setIsClosing(true);
-                  closeTimeout.current = setTimeout(() => {
-                    toggleWidget();
-                  }, 300);
-                }
+                handleCloseWidget && handleCloseWidget();
                 e.currentTarget.blur(); // Fokus entfernen, um Warnung zu vermeiden
               }}
             >
