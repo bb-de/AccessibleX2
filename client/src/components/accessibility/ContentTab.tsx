@@ -1,3 +1,4 @@
+// Copyright (c) 2024 brandingbrothers.de. All rights reserved.
 import { useAccessibility } from "@/hooks/useAccessibility";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";

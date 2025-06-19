@@ -1,3 +1,4 @@
+// Copyright (c) 2024 brandingbrothers.de. All rights reserved.
 import React, { createContext, useCallback, useEffect, useState, useContext } from 'react';
 import { translations } from '@/lib/translation';
 import { applyAccessibilityStyles } from '@/lib/a11y-helpers';

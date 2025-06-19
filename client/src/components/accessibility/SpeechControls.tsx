@@ -1,3 +1,4 @@
+// Copyright (c) 2024 brandingbrothers.de. All rights reserved.
 import React, { useState, useRef } from 'react';
 
 const STATUS = {

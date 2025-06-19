@@ -1,3 +1,4 @@
+// Copyright (c) 2024 brandingbrothers.de. All rights reserved.
 import { AccessibilitySettings } from '@/contexts/AccessibilityContext';
 import { getTextColorStyles, getTitleColorStyles, getBackgroundColorStyles } from './color-helpers';
 

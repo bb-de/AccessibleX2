@@ -26,6 +26,24 @@ type TabType = "profiles" | "vision" | "content" | "navigation";
 export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpen }, ref) => {
   const [activeTab, setActiveTab] = useState<TabType>("profiles");
   const { toggleWidget, resetSettings, translations, settings } = useAccessibility();
+  const [isClosing, setIsClosing] = useState(false);
+  const closeTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsClosing(false);
+      if (closeTimeout.current) {
+        clearTimeout(closeTimeout.current);
+        closeTimeout.current = null;
+      }
+    }
+    // Cleanup bei Unmount
+    return () => {
+      if (closeTimeout.current) {
+        clearTimeout(closeTimeout.current);
+      }
+    };
+  }, [isOpen]);
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
@@ -34,13 +52,21 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
   // Calculate dynamic bottom position based on virtual keyboard status
   const dynamicBottom = settings.virtualKeyboard ? '330px' : '80px'; // 80px (original) + ~250px (keyboard height)
 
+  // Animation-Logik
+  let panelClass = "fixed right-4 bg-white rounded-xl shadow-lg transition-all duration-300 transform";
+  if (isOpen && !isClosing) {
+    panelClass += " translate-y-0 opacity-100 visible";
+  } else if (isClosing) {
+    panelClass += " translate-y-[-100%] opacity-0 visible";
+  } else {
+    panelClass += " translate-y-[-100%] opacity-0 invisible w-0 h-0 overflow-hidden pointer-events-none";
+  }
+
   return (
     <div 
       id="accessibility-panel" 
       ref={ref} 
-      className={`fixed right-4 bg-white rounded-xl shadow-lg transition-all duration-300 transform ${
-        isOpen ? 'translate-y-0 opacity-100 visible' : 'translate-y-[-100%] opacity-0 invisible w-0 h-0 overflow-hidden pointer-events-none'
-      }`}
+      className={panelClass}
       style={{
         width: '340px',
         minWidth: '340px',
@@ -51,7 +77,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         scrollBehavior: 'smooth',
         zIndex: 999999 // Höherer z-index als die virtuelle Tastatur
       }}
-      aria-hidden={!isOpen}
+      aria-hidden={!isOpen && !isClosing}
       onMouseDown={(e) => e.stopPropagation()} // Prevent clicks inside the panel from closing it
     >
       {/* Panel Header */}
@@ -75,7 +101,12 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
               aria-label={translations.closeAccessibilityMenu}
               className="text-gray-500 hover:text-gray-700 p-1 rounded flex items-center"
               onClick={(e) => {
-                toggleWidget();
+                if (!isClosing) {
+                  setIsClosing(true);
+                  closeTimeout.current = setTimeout(() => {
+                    toggleWidget();
+                  }, 300);
+                }
                 e.currentTarget.blur(); // Fokus entfernen, um Warnung zu vermeiden
               }}
             >
