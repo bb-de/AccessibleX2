@@ -1148,6 +1148,7 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
         background-color: #ffffcc !important;
         border: 1px solid #e6e600 !important;
         padding: 2px 5px !important;
+        color: #000 !important;
       }
     `;
   }
