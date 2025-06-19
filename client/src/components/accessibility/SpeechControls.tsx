@@ -148,10 +148,11 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
           min-width: 340px;
           box-shadow: 0 4px 24px rgba(0,0,0,0.2);
           padding: 20px;
-          position: fixed;
-          bottom: 20px;
-          right: 140px;
+          position: absolute;
+          top: 60px;
+          left: calc(100vw - 500px);
           z-index: 1000001;
+          user-select: none;
         }
         #speech-controls-plain-overlay textarea {
           width: 100%; border-radius: 6px; padding: 8px; font-size: 16px; color: #222;
@@ -167,7 +168,7 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
         #speech-controls-plain-overlay #speech-controls-close { position: absolute; top: 8px; right: 12px; background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
         #speech-controls-plain-overlay label { font-weight: normal; }
         #speech-controls-plain-overlay .speech-controls-row { display: flex; gap: 8px; margin-bottom: 8px; margin-top: 8px; }
-        #speech-controls-plain-overlay .speech-controls-title { margin-bottom: 12px; font-weight: bold; font-size: 20px; }
+        #speech-controls-plain-overlay .speech-controls-title { margin-bottom: 12px; font-weight: bold; font-size: 20px; cursor: move; user-select: none; }
         #speech-controls-plain-overlay .speech-controls-status { margin-bottom: 4px; }
         #speech-controls-plain-overlay .speech-controls-error { color: #f87171; margin-top: 4px; }
         #speech-controls-plain-overlay .speech-controls-lang-row { margin-bottom: 10px; }
@@ -176,7 +177,7 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
           color: #111; background: #fff; border: 1px solid #ccc;
         }
       </style>
-      <div class="speech-controls-title">${labels.title}</div>
+      <div class="speech-controls-title" id="speech-controls-drag">${labels.title}</div>
       <div class="speech-controls-lang-row">
         <label for="speech-controls-lang" style="margin-right: 8px;">${labels.language}</label>
         <select id="speech-controls-lang">
@@ -203,6 +204,32 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
       <button id="speech-controls-close">${labels.close}</button>
     `;
     document.body.appendChild(container);
+
+    // Drag & Drop Logik
+    const dragHandle = container.querySelector('#speech-controls-drag') as HTMLElement | null;
+    let isDragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    if (dragHandle) {
+      dragHandle.addEventListener('mousedown', (e: MouseEvent) => {
+        isDragging = true;
+        const rect = container.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
+        document.body.style.userSelect = 'none';
+      });
+      document.addEventListener('mousemove', (e: MouseEvent) => {
+        if (isDragging) {
+          container.style.left = `${e.clientX - dragOffsetX}px`;
+          container.style.top = `${e.clientY - dragOffsetY}px`;
+        }
+      });
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+        document.body.style.userSelect = '';
+      });
+    }
 
     // Logik für Text-to-Speech
     let status: 'idle' | 'playing' | 'paused' | 'error' = 'idle';
