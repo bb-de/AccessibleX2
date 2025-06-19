@@ -114,8 +114,26 @@ export function SpeechControls({ initialText = '' }: { initialText?: string }) {
   );
 }
 
-// Neue Funktion: Overlay unabhängig von React als DOM-Element anzeigen
-export function exportSpeechControlsOverlay(show: boolean) {
+// Labels für Mehrsprachigkeit
+export type SpeechControlsLabels = {
+  title: string;
+  language: string;
+  start: string;
+  pause: string;
+  stop: string;
+  useSelection: string;
+  speed: string;
+  status: string;
+  statusIdle: string;
+  statusPlaying: string;
+  statusPaused: string;
+  statusError: string;
+  errorNoText: string;
+  errorNoSelection: string;
+  close: string;
+};
+
+export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: SpeechControlsLabels, defaultLang: string = 'de-DE') {
   const overlayId = 'speech-controls-plain-overlay';
   if (show) {
     if (document.getElementById(overlayId)) return; // Schon vorhanden
@@ -153,33 +171,36 @@ export function exportSpeechControlsOverlay(show: boolean) {
         #speech-controls-plain-overlay .speech-controls-status { margin-bottom: 4px; }
         #speech-controls-plain-overlay .speech-controls-error { color: #f87171; margin-top: 4px; }
         #speech-controls-plain-overlay .speech-controls-lang-row { margin-bottom: 10px; }
-        #speech-controls-plain-overlay select { border-radius: 6px; padding: 4px 8px; font-size: 15px; }
+        #speech-controls-plain-overlay select {
+          border-radius: 6px; padding: 4px 8px; font-size: 15px;
+          color: #111; background: #fff; border: 1px solid #ccc;
+        }
       </style>
-      <div class="speech-controls-title">Vorlesefunktion</div>
+      <div class="speech-controls-title">${labels.title}</div>
       <div class="speech-controls-lang-row">
-        <label for="speech-controls-lang" style="margin-right: 8px;">Sprache:</label>
+        <label for="speech-controls-lang" style="margin-right: 8px;">${labels.language}</label>
         <select id="speech-controls-lang">
           <option value="de-DE">Deutsch</option>
           <option value="en-US">Englisch</option>
           <option value="fr-FR">Französisch</option>
         </select>
       </div>
-      <textarea id="speech-controls-textarea" rows="3" placeholder="Text zum Vorlesen eingeben oder markieren..."></textarea>
+      <textarea id="speech-controls-textarea" rows="3" placeholder="${labels.errorNoText}"></textarea>
       <div class="speech-controls-row">
-        <button id="speech-controls-start">Start</button>
-        <button id="speech-controls-pause">Pause</button>
-        <button id="speech-controls-stop">Stopp</button>
-        <button id="speech-controls-selection">Markierten Text übernehmen</button>
+        <button id="speech-controls-start">${labels.start}</button>
+        <button id="speech-controls-pause">${labels.pause}</button>
+        <button id="speech-controls-stop">${labels.stop}</button>
+        <button id="speech-controls-selection">${labels.useSelection}</button>
       </div>
       <div style="margin-bottom: 8px;">
-        <label style="margin-right: 8px;">Geschwindigkeit: <span id="speech-controls-rate-label">1.00x</span></label>
+        <label style="margin-right: 8px;">${labels.speed} <span id="speech-controls-rate-label">1.00x</span></label>
         <input id="speech-controls-rate" type="range" min="0.5" max="2" step="0.05" value="1" style="vertical-align: middle;" />
       </div>
       <div class="speech-controls-status">
-        <span>Status: <b id="speech-controls-status">Bereit</b></span>
+        <span>${labels.status} <b id="speech-controls-status">${labels.statusIdle}</b></span>
       </div>
       <div id="speech-controls-error" class="speech-controls-error"></div>
-      <button id="speech-controls-close">×</button>
+      <button id="speech-controls-close">${labels.close}</button>
     `;
     document.body.appendChild(container);
 
@@ -189,13 +210,13 @@ export function exportSpeechControlsOverlay(show: boolean) {
     let rate: number = 1.0;
     let currentText: string = '';
     let utterance: SpeechSynthesisUtterance | null = null;
-    let lang: string = 'de-DE';
+    let lang: string = defaultLang;
 
     const statusMap: Record<'idle' | 'playing' | 'paused' | 'error', string> = {
-      idle: 'Bereit',
-      playing: 'Liest vor...',
-      paused: 'Pausiert',
-      error: 'Fehler beim Vorlesen',
+      idle: labels.statusIdle,
+      playing: labels.statusPlaying,
+      paused: labels.statusPaused,
+      error: labels.statusError,
     };
 
     // Sprache ändern
@@ -219,7 +240,7 @@ export function exportSpeechControlsOverlay(show: boolean) {
       const textarea = container.querySelector('#speech-controls-textarea') as HTMLTextAreaElement | null;
       currentText = textarea?.value || '';
       if (!currentText) {
-        updateStatus('error', 'Kein Text zum Vorlesen markiert.');
+        updateStatus('error', labels.errorNoText);
         return;
       }
       window.speechSynthesis.cancel();
@@ -230,7 +251,7 @@ export function exportSpeechControlsOverlay(show: boolean) {
       utterance.onpause = () => updateStatus('paused');
       utterance.onresume = () => updateStatus('playing');
       utterance.onend = () => updateStatus('idle');
-      utterance.onerror = () => updateStatus('error', 'Fehler beim Vorlesen');
+      utterance.onerror = () => updateStatus('error', labels.statusError);
       window.speechSynthesis.speak(utterance);
     }
     function handlePause() {
@@ -259,7 +280,7 @@ export function exportSpeechControlsOverlay(show: boolean) {
         updateStatus('idle');
         handleStart(); // Automatisch vorlesen nach Übernahme
       } else {
-        updateStatus('error', 'Bitte markieren Sie zuerst einen Text.');
+        updateStatus('error', labels.errorNoSelection);
       }
     }
     function handleClose() {
@@ -279,4 +300,25 @@ export function exportSpeechControlsOverlay(show: boolean) {
     const el = document.getElementById(overlayId);
     if (el) document.body.removeChild(el);
   }
+}
+
+// Für Kompatibilität: Standard-Export mit deutschen Labels
+export function exportSpeechControlsOverlay(show: boolean) {
+  return exportSpeechControlsOverlayWithLabels(show, {
+    title: 'Vorlesefunktion',
+    language: 'Sprache:',
+    start: 'Start',
+    pause: 'Pause',
+    stop: 'Stopp',
+    useSelection: 'Markierten Text übernehmen',
+    speed: 'Geschwindigkeit:',
+    status: 'Status:',
+    statusIdle: 'Bereit',
+    statusPlaying: 'Liest vor...',
+    statusPaused: 'Pausiert',
+    statusError: 'Fehler beim Vorlesen',
+    errorNoText: 'Text zum Vorlesen eingeben oder markieren...',
+    errorNoSelection: 'Bitte markieren Sie zuerst einen Text.',
+    close: '×',
+  }, 'de-DE');
 } 
