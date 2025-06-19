@@ -2,10 +2,17 @@ import { useAccessibility } from "@/hooks/useAccessibility";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
+import { useEffect } from "react";
+import { exportSpeechControlsOverlay } from "./SpeechControls";
 
 export function ContentTab() {
   useTextToSpeech();
   const { settings, updateSetting, translations } = useAccessibility();
+
+  useEffect(() => {
+    exportSpeechControlsOverlay(settings.textToSpeech);
+    return () => exportSpeechControlsOverlay(false);
+  }, [settings.textToSpeech]);
 
   return (
     <div className="py-4 px-5 space-y-5">
