@@ -152,8 +152,18 @@ export function exportSpeechControlsOverlay(show: boolean) {
         #speech-controls-plain-overlay .speech-controls-title { margin-bottom: 12px; font-weight: bold; font-size: 20px; }
         #speech-controls-plain-overlay .speech-controls-status { margin-bottom: 4px; }
         #speech-controls-plain-overlay .speech-controls-error { color: #f87171; margin-top: 4px; }
+        #speech-controls-plain-overlay .speech-controls-lang-row { margin-bottom: 10px; }
+        #speech-controls-plain-overlay select { border-radius: 6px; padding: 4px 8px; font-size: 15px; }
       </style>
       <div class="speech-controls-title">Vorlesefunktion</div>
+      <div class="speech-controls-lang-row">
+        <label for="speech-controls-lang" style="margin-right: 8px;">Sprache:</label>
+        <select id="speech-controls-lang">
+          <option value="de-DE">Deutsch</option>
+          <option value="en-US">Englisch</option>
+          <option value="fr-FR">Französisch</option>
+        </select>
+      </div>
       <textarea id="speech-controls-textarea" rows="3" placeholder="Text zum Vorlesen eingeben oder markieren..."></textarea>
       <div class="speech-controls-row">
         <button id="speech-controls-start">Start</button>
@@ -179,6 +189,7 @@ export function exportSpeechControlsOverlay(show: boolean) {
     let rate: number = 1.0;
     let currentText: string = '';
     let utterance: SpeechSynthesisUtterance | null = null;
+    let lang: string = 'de-DE';
 
     const statusMap: Record<'idle' | 'playing' | 'paused' | 'error', string> = {
       idle: 'Bereit',
@@ -186,6 +197,16 @@ export function exportSpeechControlsOverlay(show: boolean) {
       paused: 'Pausiert',
       error: 'Fehler beim Vorlesen',
     };
+
+    // Sprache ändern
+    const langSelect = container.querySelector('#speech-controls-lang') as HTMLSelectElement | null;
+    if (langSelect) {
+      langSelect.value = lang;
+      langSelect.onchange = (e: Event) => {
+        const target = e.target as HTMLSelectElement;
+        lang = target.value;
+      };
+    }
 
     function updateStatus(newStatus: typeof status, newError: string | null = null) {
       status = newStatus;
@@ -204,6 +225,7 @@ export function exportSpeechControlsOverlay(show: boolean) {
       window.speechSynthesis.cancel();
       utterance = new window.SpeechSynthesisUtterance(currentText);
       utterance.rate = rate;
+      utterance.lang = lang;
       utterance.onstart = () => updateStatus('playing');
       utterance.onpause = () => updateStatus('paused');
       utterance.onresume = () => updateStatus('playing');
@@ -235,6 +257,7 @@ export function exportSpeechControlsOverlay(show: boolean) {
         const textarea = container.querySelector('#speech-controls-textarea') as HTMLTextAreaElement | null;
         if (textarea) textarea.value = selectedText;
         updateStatus('idle');
+        handleStart(); // Automatisch vorlesen nach Übernahme
       } else {
         updateStatus('error', 'Bitte markieren Sie zuerst einen Text.');
       }
