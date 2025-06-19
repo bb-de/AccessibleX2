@@ -3,16 +3,96 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { useEffect } from "react";
-import { exportSpeechControlsOverlay } from "./SpeechControls";
+import { exportSpeechControlsOverlayWithLabels, SpeechControlsLabels } from "./SpeechControls";
+
+const overlayLabels: Record<string, SpeechControlsLabels> = {
+  de: {
+    title: 'Vorlesefunktion',
+    language: 'Sprache:',
+    start: 'Start',
+    pause: 'Pause',
+    stop: 'Stopp',
+    useSelection: 'Markierten Text übernehmen',
+    speed: 'Geschwindigkeit:',
+    status: 'Status:',
+    statusIdle: 'Bereit',
+    statusPlaying: 'Liest vor...',
+    statusPaused: 'Pausiert',
+    statusError: 'Fehler beim Vorlesen',
+    errorNoText: 'Text zum Vorlesen eingeben oder markieren...',
+    errorNoSelection: 'Bitte markieren Sie zuerst einen Text.',
+    close: '×',
+  },
+  en: {
+    title: 'Text to Speech',
+    language: 'Language:',
+    start: 'Start',
+    pause: 'Pause',
+    stop: 'Stop',
+    useSelection: 'Use selected text',
+    speed: 'Speed:',
+    status: 'Status:',
+    statusIdle: 'Ready',
+    statusPlaying: 'Reading...',
+    statusPaused: 'Paused',
+    statusError: 'Error while reading',
+    errorNoText: 'Enter or select text to read aloud...',
+    errorNoSelection: 'Please select some text first.',
+    close: '×',
+  },
+  fr: {
+    title: 'Synthèse vocale',
+    language: 'Langue:',
+    start: 'Démarrer',
+    pause: 'Pause',
+    stop: 'Arrêter',
+    useSelection: 'Utiliser le texte sélectionné',
+    speed: 'Vitesse:',
+    status: 'Statut:',
+    statusIdle: 'Prêt',
+    statusPlaying: 'Lecture...',
+    statusPaused: 'En pause',
+    statusError: 'Erreur lors de la lecture',
+    errorNoText: 'Saisissez ou sélectionnez le texte à lire...',
+    errorNoSelection: 'Veuillez d\'abord sélectionner un texte.',
+    close: '×',
+  },
+  es: {
+    title: 'Texto a voz',
+    language: 'Idioma:',
+    start: 'Iniciar',
+    pause: 'Pausa',
+    stop: 'Detener',
+    useSelection: 'Usar texto seleccionado',
+    speed: 'Velocidad:',
+    status: 'Estado:',
+    statusIdle: 'Listo',
+    statusPlaying: 'Leyendo...',
+    statusPaused: 'En pausa',
+    statusError: 'Error al leer',
+    errorNoText: 'Introduce o selecciona texto para leer...',
+    errorNoSelection: 'Por favor, selecciona primero un texto.',
+    close: '×',
+  },
+};
+
+const overlayLangMap: Record<string, string> = {
+  de: 'de-DE',
+  en: 'en-US',
+  fr: 'fr-FR',
+  es: 'es-ES',
+};
 
 export function ContentTab() {
   useTextToSpeech();
-  const { settings, updateSetting, translations } = useAccessibility();
+  const { settings, updateSetting, translations, language } = useAccessibility();
 
   useEffect(() => {
-    exportSpeechControlsOverlay(settings.textToSpeech);
-    return () => exportSpeechControlsOverlay(false);
-  }, [settings.textToSpeech]);
+    const labels = overlayLabels[language] || overlayLabels['de'];
+    const lang = overlayLangMap[language] || 'de-DE';
+    exportSpeechControlsOverlayWithLabels(settings.textToSpeech, labels, lang);
+    return () => exportSpeechControlsOverlayWithLabels(false, labels, lang);
+  }, [settings.textToSpeech, language]);
 
   // Synchronisiere das Setting, wenn das Overlay per X geschlossen wird
   useEffect(() => {
