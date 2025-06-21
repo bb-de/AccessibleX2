@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { AccessibilityProvider } from './contexts/AccessibilityContext';
+import { AccessibilityProvider, useAccessibility } from './contexts/AccessibilityContext';
 import { queryClient } from './lib/queryClient';
 import Home from './pages/Home';
 import { WidgetDemo } from './pages/WidgetDemo';
@@ -9,6 +10,16 @@ import NotFound from './pages/not-found';
 import { WidgetIntegrationPage } from './pages/WidgetIntegrationPage';
 import { WidgetDocsPage } from './pages/WidgetDocsPage';
 import { SpeechControls } from './components/accessibility/SpeechControls';
+
+function SpeechControlsPortal() {
+  const { settings } = useAccessibility();
+
+  if (!settings.textToSpeech) {
+    return null;
+  }
+
+  return createPortal(<SpeechControls />, document.body);
+}
 
 function App() {
   return (
@@ -26,7 +37,7 @@ function App() {
               </Routes>
             </div>
           </Router>
-          <SpeechControls />
+          <SpeechControlsPortal />
         </AccessibilityProvider>
       </TooltipProvider>
     </QueryClientProvider>

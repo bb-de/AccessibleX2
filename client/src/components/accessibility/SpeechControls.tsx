@@ -33,10 +33,6 @@ export function SpeechControls() {
     setSelectedVoice,
   } = useTextToSpeech({ lang: language });
 
-  if (!settings.textToSpeech) {
-    return null;
-  }
-
   const handleUseSelection = () => {
     const selectedText = window.getSelection()?.toString().trim();
     if (selectedText) {
