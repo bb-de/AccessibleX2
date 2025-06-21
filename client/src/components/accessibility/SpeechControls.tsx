@@ -115,6 +115,7 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
 
   return (
     <div ref={dragRef} className={containerClasses} style={containerStyle}>
+      <div style={{background:'red',color:'#fff',fontWeight:'bold',padding:4}}>DESKTOP-VARIANTE</div>
       {/* Auffällige Debug-Zeile für Mobilstatus und Body-Klassen */}
       <div style={{
         position: 'absolute',
@@ -207,6 +208,7 @@ function MobileSpeechControls(props: Omit<React.ComponentProps<typeof SpeechCont
   if (!supported) {
     return (
       <div className="fixed top-4 right-4 w-[95vw] max-w-xs bg-gray-800 text-white p-2 rounded-lg shadow-2xl z-[100000] speech-controls-container">
+        <div style={{background:'lime',color:'#000',fontWeight:'bold',padding:4}}>MOBILE-VARIANTE</div>
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-base font-bold">{trans.textToSpeech}</h3>
           <button 
@@ -224,6 +226,7 @@ function MobileSpeechControls(props: Omit<React.ComponentProps<typeof SpeechCont
 
   return (
     <div className="fixed top-4 right-4 w-[95vw] max-w-xs bg-gray-800 text-white p-2 rounded-lg shadow-2xl z-[100000] speech-controls-container">
+      <div style={{background:'lime',color:'#000',fontWeight:'bold',padding:4}}>MOBILE-VARIANTE</div>
       <div className="flex justify-between items-center mb-2">
         <h3 className="text-base font-bold">{trans.textToSpeech}</h3>
         <button 

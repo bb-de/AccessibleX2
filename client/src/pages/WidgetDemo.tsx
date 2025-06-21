@@ -158,6 +158,9 @@ export function WidgetDemo() {
       
       {/* Das React Accessibility Widget */}
       <AccessibilityWidget shadowRootElement={null} />
+
+      <div style={{background:'red',color:'#fff',fontWeight:'bold',padding:4}}>DESKTOP-VARIANTE</div>
+      <div style={{background:'lime',color:'#000',fontWeight:'bold',padding:4}}>MOBILE-VARIANTE</div>
     </div>
   );
 }
