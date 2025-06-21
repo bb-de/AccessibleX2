@@ -653,7 +653,29 @@ function removeCustomCursor(): void {
   document.removeEventListener('mousemove', handleMouseMove);
 }
 
-// Helper function to handle reading mask
+// ---- Touch & Mouse Event Normalization ----
+function getEventCoordinates(e: MouseEvent | TouchEvent): { x: number, y: number } {
+    if (e instanceof MouseEvent) {
+      return { x: e.clientX, y: e.clientY };
+    } else if (e.touches && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    return { x: -100, y: -100 }; // Default/fallback position
+}
+
+// Performance optimization: Throttle function
+function throttle<T extends (...args: any[]) => void>(func: T, limit: number): T {
+  let inThrottle: boolean;
+  return ((...args: any[]) => {
+    if (!inThrottle) {
+      func.apply(null, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  }) as T;
+}
+
+// ---- Reading Mask: Mouse and Touch Support ----
 function handleReadingMask(): void {
   let mask = document.getElementById('reading-mask-highlight');
   if (!mask) {
@@ -665,8 +687,8 @@ function handleReadingMask(): void {
     mask.style.borderRadius = '4px';
     mask.style.pointerEvents = 'none';
     mask.style.zIndex = '99999';
-    mask.style.transition = 'top 0.05s ease-out, left 0.05s ease-out, width 0.05s ease-out, height 0.05s ease-out';
-    mask.style.opacity = '0'; // Start hidden
+    mask.style.transition = 'none'; // Remove transition for better performance
+    mask.style.opacity = '0';
     document.body.appendChild(mask);
   }
 
@@ -686,34 +708,40 @@ function handleReadingMask(): void {
     document.body.appendChild(overlay);
   }
 
-  document.addEventListener('mousemove', updateReadingMask);
-  document.addEventListener('touchmove', updateReadingMask, { passive: true });
+  // Throttle the update function to ~60fps (16ms)
+  const throttledUpdate = throttle(updateReadingMask, 16);
+  
+  document.addEventListener('mousemove', throttledUpdate);
+  document.addEventListener('touchmove', throttledUpdate, { passive: true });
 }
 
 function updateReadingMask(e: MouseEvent | TouchEvent): void {
-  const mask = document.getElementById('reading-mask-highlight');
-  if (!mask) return;
+  // Use requestAnimationFrame for smooth updates
+  requestAnimationFrame(() => {
+    const mask = document.getElementById('reading-mask-highlight');
+    if (!mask) return;
 
-  const { x, y } = getEventCoordinates(e);
-  
-  // Hide mask if coordinates are invalid (e.g., touchend)
-  if (x < 0) {
-    mask.style.opacity = '0';
-    return;
-  }
+    const { x, y } = getEventCoordinates(e);
+    
+    // Hide mask if coordinates are invalid (e.g., touchend)
+    if (x < 0) {
+      mask.style.opacity = '0';
+      return;
+    }
 
-  const target = document.elementFromPoint(x, y);
+    const target = document.elementFromPoint(x, y);
 
-  if (target && !target.closest('[data-accessibility-widget]')) {
-    const rect = target.getBoundingClientRect();
-    mask.style.width = `${rect.width}px`;
-    mask.style.height = `${rect.height}px`;
-    mask.style.top = `${rect.top}px`;
-    mask.style.left = `${rect.left}px`;
-    mask.style.opacity = '1';
-  } else {
-    mask.style.opacity = '0';
-  }
+    if (target && !target.closest('[data-accessibility-widget]')) {
+      const rect = target.getBoundingClientRect();
+      mask.style.width = `${rect.width}px`;
+      mask.style.height = `${rect.height}px`;
+      mask.style.top = `${rect.top}px`;
+      mask.style.left = `${rect.left}px`;
+      mask.style.opacity = '1';
+    } else {
+      mask.style.opacity = '0';
+    }
+  });
 }
 
 function removeReadingMask(): void {
@@ -723,11 +751,12 @@ function removeReadingMask(): void {
   const overlay = document.getElementById('reading-mask-overlay');
   if (overlay) overlay.remove();
 
+  // Remove all event listeners by cloning the element
   document.removeEventListener('mousemove', updateReadingMask);
   document.removeEventListener('touchmove', updateReadingMask);
 }
 
-// Helper function to handle reading guide
+// ---- Reading Guide: Mouse and Touch Support ----
 function handleReadingGuide(): void {
   let guide = document.getElementById('reading-guide');
   if (!guide) {
@@ -740,25 +769,32 @@ function handleReadingGuide(): void {
     guide.style.backgroundColor = 'yellow';
     guide.style.pointerEvents = 'none';
     guide.style.zIndex = '99999';
-    guide.style.transition = 'top 0.05s ease-out';
+    guide.style.transition = 'none'; // Remove transition for better performance
     document.body.appendChild(guide);
   }
-  document.addEventListener('mousemove', updateReadingGuide);
-  document.addEventListener('touchmove', updateReadingGuide, { passive: true });
+  
+  // Throttle the update function to ~60fps (16ms)
+  const throttledUpdate = throttle(updateReadingGuide, 16);
+  
+  document.addEventListener('mousemove', throttledUpdate);
+  document.addEventListener('touchmove', throttledUpdate, { passive: true });
 }
 
 function updateReadingGuide(e: MouseEvent | TouchEvent): void {
-  const guide = document.getElementById('reading-guide');
-  if (!guide) return;
+  // Use requestAnimationFrame for smooth updates
+  requestAnimationFrame(() => {
+    const guide = document.getElementById('reading-guide');
+    if (!guide) return;
 
-  const { y } = getEventCoordinates(e);
+    const { y } = getEventCoordinates(e);
 
-  if (y > 0) {
-     guide.style.top = `${y}px`;
-     guide.style.opacity = '1';
-  } else {
-     guide.style.opacity = '0';
-  }
+    if (y > 0) {
+       guide.style.top = `${y}px`;
+       guide.style.opacity = '1';
+    } else {
+       guide.style.opacity = '0';
+    }
+  });
 }
 
 function removeReadingGuide(): void {
@@ -1321,14 +1357,4 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   if (settings.highlightLinks) {
     document.body.classList.add('highlight-links');
   }
-}
-
-// ---- Touch & Mouse Event Normalization ----
-function getEventCoordinates(e: MouseEvent | TouchEvent): { x: number, y: number } {
-    if (e instanceof MouseEvent) {
-      return { x: e.clientX, y: e.clientY };
-    } else if (e.touches && e.touches.length > 0) {
-      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }
-    return { x: -100, y: -100 }; // Default/fallback position
 }
