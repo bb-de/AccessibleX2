@@ -317,7 +317,7 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
           color: white;
           border-radius: 12px;
           ${isMobile
-            ? `width: 45vw; max-width: 180px; min-width: unset; right: 1rem; left: unset; top: 1rem; padding: 8px; position: fixed;`
+            ? `width: 45vw; max-width: 180px; min-width: unset; right: 1rem; left: unset; top: 1rem; padding: 8px; position: fixed; max-height: 90vh; overflow-y: auto; pointer-events: auto;`
             : `min-width: 340px; left: calc(100vw - 500px); top: 60px; padding: 20px; position: absolute;`}
           box-shadow: 0 4px 24px rgba(0,0,0,0.2);
           z-index: 1000001;
@@ -436,7 +436,12 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
     function handleStart() {
       // Wert immer direkt aus dem Textarea holen
       const textarea = container.querySelector('#speech-controls-textarea') as HTMLTextAreaElement | null;
-      currentText = textarea?.value || '';
+      let textToRead = textarea?.value || '';
+      // Wenn eine Auswahl existiert, ab selectionStart vorlesen
+      if (textarea && textarea.selectionStart !== textarea.selectionEnd) {
+        textToRead = textarea.value.substring(textarea.selectionStart);
+      }
+      currentText = textToRead;
       if (!currentText) {
         updateStatus('error', labels.errorNoText);
         return;
