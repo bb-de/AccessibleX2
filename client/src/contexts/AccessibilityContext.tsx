@@ -5,6 +5,7 @@ import { applyAccessibilityStyles } from '@/lib/a11y-helpers';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useDeviceDetection } from '@/hooks/use-mobile';
+import { Toaster } from '@/components/ui/toaster';
 
 const NETLIFY_FUNCTIONS_API_BASE = 'https://shimmering-tartufo-f58e9c.netlify.app/.netlify/functions/analytics';
 
@@ -446,26 +447,27 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
     };
   }, [settings.pageStructure, settings.virtualKeyboard, settings.keyboardNavigation, updateSetting]);
 
+  const value: AccessibilityContextType = {
+    isOpen,
+    toggleWidget,
+    settings,
+    updateSetting,
+    incrementSetting,
+    decrementSetting,
+    resetSettings,
+    applyProfile,
+    language,
+    setLanguage,
+    translations: {...translations.en, ...translations[language]},
+    applyAccessibilityChanges,
+    shadowRoot,
+    deviceInfo: useDeviceDetection(),
+  };
+
   return (
-    <AccessibilityContext.Provider
-      value={{
-        isOpen,
-        toggleWidget,
-        settings,
-        updateSetting,
-        incrementSetting,
-        decrementSetting,
-        resetSettings,
-        applyProfile,
-        language,
-        setLanguage,
-        translations: {...translations.en, ...translations[language]},
-        applyAccessibilityChanges,
-        shadowRoot,
-        deviceInfo: useDeviceDetection(),
-      }}
-    >
+    <AccessibilityContext.Provider value={value}>
       {children}
+      <Toaster />
     </AccessibilityContext.Provider>
   );
 }

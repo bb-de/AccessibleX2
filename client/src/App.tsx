@@ -1,62 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { Router as WouterRouter, Route, Switch } from 'wouter';
-import { AccessibilityProvider } from '@/contexts/AccessibilityContext';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Toaster } from '@/components/ui/toaster';
-import { WidgetDemo } from '@/pages/WidgetDemo';
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useAccessibility } from "@/hooks/useAccessibility";
-import { SpeechControls } from "@/components/accessibility/SpeechControls";
-import { createPortal } from "react-dom";
-
-function AppRouter() {
-  return (
-    <Switch>
-      <Route path="/" component={WidgetDemo} />
-      <Route component={WidgetDemo} />
-    </Switch>
-  );
-}
-
-function SpeechControlsPortal() {
-  const { settings } = useAccessibility();
-  const [container, setContainer] = useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    if (settings.textToSpeech) {
-      const el = document.createElement("div");
-      el.id = "speech-controls-portal";
-      document.body.appendChild(el);
-      setContainer(el);
-      return () => {
-        document.body.removeChild(el);
-        setContainer(null);
-      };
-    }
-  }, [settings.textToSpeech]);
-
-  if (!settings.textToSpeech || !container) return null;
-  return createPortal(
-    <div style={{ position: "fixed", bottom: 20, right: 140, zIndex: 1000001 }}>
-      <SpeechControls />
-    </div>,
-    container
-  );
-}
+import { AccessibilityProvider } from './contexts/AccessibilityContext';
+import { queryClient } from './lib/queryClient';
+import Home from './pages/Home';
+import { WidgetDemo } from './pages/WidgetDemo';
+import NotFound from './pages/not-found';
+import { WidgetIntegrationPage } from './pages/WidgetIntegrationPage';
+import { WidgetDocsPage } from './pages/WidgetDocsPage';
+import { SpeechControls } from './components/accessibility/SpeechControls';
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AccessibilityProvider shadowRoot={null}>
-          <WouterRouter>
+          <Router>
             <div className="min-h-screen">
-              <AppRouter />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/widget-demo" element={<WidgetDemo />} />
+                <Route path="/integration" element={<WidgetIntegrationPage />} />
+                <Route path="/docs" element={<WidgetDocsPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </div>
-          </WouterRouter>
-          <Toaster />
-          <SpeechControlsPortal />
+          </Router>
+          <SpeechControls />
         </AccessibilityProvider>
       </TooltipProvider>
     </QueryClientProvider>
