@@ -434,6 +434,7 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
     }
 
     function handleStart() {
+      // Wert immer direkt aus dem Textarea holen
       const textarea = container.querySelector('#speech-controls-textarea') as HTMLTextAreaElement | null;
       currentText = textarea?.value || '';
       if (!currentText) {
@@ -502,6 +503,8 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
         if (selectedText) {
           const textarea = container.querySelector('#speech-controls-textarea') as HTMLTextAreaElement | null;
           if (textarea) textarea.value = selectedText;
+          // Automatisch vorlesen, wenn Text übernommen wird
+          handleStart();
         }
       };
       document.addEventListener('selectionchange', updateSelection);
