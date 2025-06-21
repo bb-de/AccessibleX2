@@ -14,8 +14,8 @@ const STATUS = {
 };
 
 export function SpeechControls() {
-  const { settings, updateSetting } = useAccessibility();
-  const { language, textToSpeech } = settings;
+  const { settings, updateSetting, language } = useAccessibility();
+  const { textToSpeech } = settings;
   const trans = translations[language];
   const isMobile = isTouchDevice();
 
