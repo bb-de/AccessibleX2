@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export function useTextToSpeech({ lang }: { lang: string }) {
+export function useTextToSpeech(props?: { lang: string }) {
+  const lang = props?.lang || 'en'; // Fallback to 'en' if props or lang is undefined
+
   const [text, setText] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);

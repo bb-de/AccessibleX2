@@ -15,7 +15,6 @@ const STATUS = {
 
 export function SpeechControls() {
   const { settings, updateSetting, language } = useAccessibility();
-  const { textToSpeech } = settings;
   const trans = translations[language];
   const isMobile = isTouchDevice();
 
@@ -34,7 +33,7 @@ export function SpeechControls() {
     setSelectedVoice,
   } = useTextToSpeech({ lang: language });
 
-  if (!textToSpeech) {
+  if (!settings.textToSpeech) {
     return null;
   }
 
