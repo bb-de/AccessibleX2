@@ -675,6 +675,29 @@ function throttle<T extends (...args: any[]) => void>(func: T, limit: number): T
   }) as T;
 }
 
+// Mobile-optimized throttle (more aggressive for touch devices)
+function mobileThrottle<T extends (...args: any[]) => void>(func: T, limit: number): T {
+  let inThrottle: boolean;
+  let lastArgs: any[] | null = null;
+  
+  return ((...args: any[]) => {
+    lastArgs = args;
+    
+    if (!inThrottle) {
+      func.apply(null, args);
+      inThrottle = true;
+      setTimeout(() => {
+        inThrottle = false;
+        // Execute the last missed call
+        if (lastArgs) {
+          func.apply(null, lastArgs);
+          lastArgs = null;
+        }
+      }, limit);
+    }
+  }) as T;
+}
+
 // ---- Reading Mask: Mouse and Touch Support ----
 function handleReadingMask(): void {
   // Remove any existing reading mask first
@@ -690,27 +713,32 @@ function handleReadingMask(): void {
   bottomMask.id = 'reading-mask-bottom';
   focusStrip.id = 'reading-mask-focus';
 
-  // Set common styles
+  // Set common styles with performance optimizations
   const commonStyles = {
     position: 'fixed',
     left: '0',
     width: '100%',
     pointerEvents: 'none',
-    zIndex: '999999'
+    zIndex: '999999',
+    willChange: 'transform', // Optimize for animations
+    backfaceVisibility: 'hidden', // Reduce rendering cost
+    transform: 'translateZ(0)' // Force hardware acceleration
   };
 
   // Apply styles to top mask
   Object.assign(topMask.style, commonStyles, {
     top: '0',
     height: '0',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)'
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    transform: 'translateZ(0) translateY(0px)' // Use transform instead of height
   });
 
   // Apply styles to bottom mask
   Object.assign(bottomMask.style, commonStyles, {
     bottom: '0',
     height: '0',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)'
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    transform: 'translateZ(0) translateY(0px)' // Use transform instead of height
   });
 
   // Apply styles to focus strip
@@ -718,7 +746,8 @@ function handleReadingMask(): void {
     height: '100px',
     border: '2px solid rgba(255, 255, 0, 0.5)',
     boxSizing: 'border-box',
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
+    transform: 'translateZ(0) translateY(0px)' // Use transform for positioning
   });
 
   // Add elements to the document
@@ -755,8 +784,10 @@ function handleReadingMask(): void {
   });
   updateReadingMask(initialEvent);
 
-  // Throttle the update function to ~60fps (16ms)
-  const throttledUpdate = throttle(updateReadingMask, 16);
+  // Use different throttle for mobile vs desktop
+  const isMobile = isTouchDevice();
+  const throttleDelay = isMobile ? 16 : 16; // 60fps on both mobile and desktop for modern devices
+  const throttledUpdate = isMobile ? mobileThrottle(updateReadingMask, throttleDelay) : throttle(updateReadingMask, throttleDelay);
   
   document.addEventListener('mousemove', throttledUpdate);
   document.addEventListener('touchmove', throttledUpdate, { passive: true });
@@ -780,11 +811,10 @@ function updateReadingMask(e: MouseEvent | TouchEvent): void {
       const bottomMaskTop = Math.min(windowHeight, y + focusHeight / 2);
       const bottomMaskHeight = Math.max(0, windowHeight - bottomMaskTop);
 
-      // Update element positions
-      topMask.style.height = `${topMaskHeight}px`;
-      bottomMask.style.top = `${bottomMaskTop}px`;
-      bottomMask.style.height = `${bottomMaskHeight}px`;
-      focusStrip.style.top = `${focusStripTop}px`;
+      // Use transform instead of height/top for better performance
+      topMask.style.transform = `translateZ(0) scaleY(${topMaskHeight / windowHeight})`;
+      bottomMask.style.transform = `translateZ(0) translateY(${bottomMaskTop - windowHeight}px) scaleY(${bottomMaskHeight / windowHeight})`;
+      focusStrip.style.transform = `translateZ(0) translateY(${focusStripTop}px)`;
     }
   });
 }
@@ -815,7 +845,7 @@ function handleReadingGuide(): void {
   const guide = document.createElement('div');
   guide.id = 'reading-guide';
 
-  // Apply styles
+  // Apply styles with performance optimizations
   guide.style.position = 'fixed';
   guide.style.left = '0';
   guide.style.width = '100%';
@@ -824,12 +854,17 @@ function handleReadingGuide(): void {
   guide.style.border = '1px solid rgba(255, 255, 0, 0.5)';
   guide.style.pointerEvents = 'none';
   guide.style.zIndex = '9999';
+  guide.style.willChange = 'transform';
+  guide.style.backfaceVisibility = 'hidden';
+  guide.style.transform = 'translateZ(0) translateY(0px)';
 
   // Add to document
   document.body.appendChild(guide);
 
-  // Throttle the update function to ~60fps (16ms)
-  const throttledUpdate = throttle(updateReadingGuide, 16);
+  // Use different throttle for mobile vs desktop
+  const isMobile = isTouchDevice();
+  const throttleDelay = isMobile ? 16 : 16; // 60fps on both mobile and desktop for modern devices
+  const throttledUpdate = isMobile ? mobileThrottle(updateReadingGuide, throttleDelay) : throttle(updateReadingGuide, throttleDelay);
   
   document.addEventListener('mousemove', throttledUpdate);
   document.addEventListener('touchmove', throttledUpdate, { passive: true });
@@ -841,7 +876,8 @@ function updateReadingGuide(e: MouseEvent | TouchEvent): void {
     const guide = document.getElementById('reading-guide');
     if (guide) {
       const { y } = getEventCoordinates(e);
-      guide.style.top = `${y}px`;
+      // Use transform instead of top for better performance
+      guide.style.transform = `translateZ(0) translateY(${y}px)`;
     }
   });
 }
