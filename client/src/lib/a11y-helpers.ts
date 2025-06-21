@@ -1,6 +1,7 @@
 // Copyright (c) 2024 brandingbrothers.de. All rights reserved.
 import { AccessibilitySettings } from '@/contexts/AccessibilityContext';
 import { getTextColorStyles, getTitleColorStyles, getBackgroundColorStyles } from './color-helpers';
+import { isTouchDevice } from './device-detection';
 
 // Global variable to store the last active input element
 let _lastActiveInput: HTMLInputElement | HTMLTextAreaElement | null = null;
@@ -608,14 +609,16 @@ function handleCustomCursor(settings: AccessibilitySettings): void {
 
 // Helper function to handle mouse movement for custom cursor
 function handleMouseMove(e: MouseEvent): void {
-  const cursor = document.getElementById('custom-cursor');
-  if (cursor) {
+  const customCursor = document.getElementById('custom-cursor');
+  const customCursorDot = document.getElementById('custom-cursor-dot');
+
+  if (customCursor) {
     const target = e.target as HTMLElement;
     const isOverWidget = target.closest('[data-accessibility-widget]');
 
     // Holen Sie die aktuelle Cursorgröße in Pixeln
-    const cursorElementWidth = cursor.offsetWidth;
-    const cursorElementHeight = cursor.offsetHeight;
+    const cursorElementWidth = customCursor.offsetWidth;
+    const cursorElementHeight = customCursor.offsetHeight;
 
     // Der Hotspot des SVG-Cursors ist bei (13, 5) im 50x50 ViewBox
     // Berechnen Sie den Offset relativ zur tatsächlichen Größe des SVG-Elements
@@ -623,12 +626,16 @@ function handleMouseMove(e: MouseEvent): void {
     const offsetY = (5 / 50) * cursorElementHeight;
 
     if (isOverWidget) {
-      cursor.style.display = 'none';
+      customCursor.style.display = 'none';
     } else {
-      cursor.style.display = 'block';
-      cursor.style.left = `${e.clientX - offsetX}px`;
-      cursor.style.top = `${e.clientY - offsetY}px`;
-      cursor.style.transform = 'none'; // Stellen Sie sicher, dass keine zusätzliche Transformation angewendet wird
+      customCursor.style.display = 'block';
+      customCursor.style.left = `${e.clientX - offsetX}px`;
+      customCursor.style.top = `${e.clientY - offsetY}px`;
+      customCursor.style.transform = 'none'; // Stellen Sie sicher, dass keine zusätzliche Transformation angewendet wird
+    }
+
+    if (customCursorDot) {
+      customCursorDot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
     }
   }
 }
@@ -636,188 +643,139 @@ function handleMouseMove(e: MouseEvent): void {
 // Helper function to remove custom cursor
 function removeCustomCursor(): void {
   const customCursor = document.getElementById('custom-cursor');
+  const customCursorDot = document.getElementById('custom-cursor-dot');
   if (customCursor) {
     customCursor.remove();
   }
-
-  // Remove event listener to prevent memory leaks
+  if (customCursorDot) {
+    customCursorDot.remove();
+  }
   document.removeEventListener('mousemove', handleMouseMove);
 }
 
 // Helper function to handle reading mask
 function handleReadingMask(): void {
-  // Remove any existing reading mask first
-  removeReadingMask();
-
-  // Create mask elements
-  const topMask = document.createElement('div');
-  const bottomMask = document.createElement('div');
-  const focusStrip = document.createElement('div');
-
-  // Set IDs
-  topMask.id = 'reading-mask-top';
-  bottomMask.id = 'reading-mask-bottom';
-  focusStrip.id = 'reading-mask-focus';
-
-  // Set common styles
-  const commonStyles = {
-    position: 'fixed',
-    left: '0',
-    width: '100%',
-    pointerEvents: 'none',
-    zIndex: '999999'
-  };
-
-  // Apply styles to top mask
-  Object.assign(topMask.style, commonStyles, {
-    top: '0',
-    height: '0',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)'
-  });
-
-  // Apply styles to bottom mask
-  Object.assign(bottomMask.style, commonStyles, {
-    bottom: '0',
-    height: '0',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)'
-  });
-
-  // Apply styles to focus strip
-  Object.assign(focusStrip.style, commonStyles, {
-    height: '100px',
-    border: '2px solid rgba(255, 255, 0, 0.5)',
-    boxSizing: 'border-box',
-    backgroundColor: 'transparent'
-  });
-
-  // Add elements to the document
-  document.body.appendChild(topMask);
-  document.body.appendChild(bottomMask);
-  document.body.appendChild(focusStrip);
-
-  // Speichere aktuelle Mausposition global
-  if (!window.hasOwnProperty('lastKnownMousePosition')) {
-    // Initialisiere globale Variablen, falls noch nicht vorhanden
-    (window as any).lastKnownMousePosition = {
-      x: window.innerWidth / 2,
-      y: window.innerHeight / 2
-    };
-
-    // Tracking-Funktion für die Mausposition einrichten (läuft nur einmal)
-    document.addEventListener('mousemove', (e) => {
-      (window as any).lastKnownMousePosition = {
-        x: e.clientX,
-        y: e.clientY
-      };
-    });
+  let mask = document.getElementById('reading-mask-highlight');
+  if (!mask) {
+    mask = document.createElement('div');
+    mask.id = 'reading-mask-highlight';
+    mask.style.position = 'fixed';
+    mask.style.border = '2px solid yellow';
+    mask.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+    mask.style.borderRadius = '4px';
+    mask.style.pointerEvents = 'none';
+    mask.style.zIndex = '99999';
+    mask.style.transition = 'top 0.05s ease-out, left 0.05s ease-out, width 0.05s ease-out, height 0.05s ease-out';
+    mask.style.opacity = '0'; // Start hidden
+    document.body.appendChild(mask);
   }
 
-  // Verwende die zuletzt gespeicherte Mausposition für die initiale Platzierung
-  const cursorX = (window as any).lastKnownMousePosition.x;
-  const cursorY = (window as any).lastKnownMousePosition.y;
+  // Add overlay
+  let overlay = document.getElementById('reading-mask-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'reading-mask-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    overlay.style.pointerEvents = 'none';
+    overlay.style.zIndex = '99998';
+    document.body.appendChild(overlay);
+  }
 
-  // Starte mit der aktuellen Mausposition
-  const initialEvent = new MouseEvent('mousemove', {
-    clientX: cursorX,
-    clientY: cursorY,
-    bubbles: true
-  });
-  updateReadingMask(initialEvent);
-
-  // Add mousemove handler to update mask positions
   document.addEventListener('mousemove', updateReadingMask);
+  document.addEventListener('touchmove', updateReadingMask, { passive: true });
 }
 
-// Helper function to update reading mask position
-function updateReadingMask(e: MouseEvent): void {
-  const topMask = document.getElementById('reading-mask-top');
-  const bottomMask = document.getElementById('reading-mask-bottom');
-  const focusStrip = document.getElementById('reading-mask-focus');
+function updateReadingMask(e: MouseEvent | TouchEvent): void {
+  const mask = document.getElementById('reading-mask-highlight');
+  if (!mask) return;
 
-  if (topMask && bottomMask && focusStrip) {
-    const focusHeight = 100; // Height of the focus strip
-    const mouseY = e.clientY;
-    const windowHeight = window.innerHeight;
+  const { x, y } = getEventCoordinates(e);
+  
+  // Hide mask if coordinates are invalid (e.g., touchend)
+  if (x < 0) {
+    mask.style.opacity = '0';
+    return;
+  }
 
-    // Calculate positions
-    const focusStripTop = mouseY - focusHeight / 2;
-    const topMaskHeight = Math.max(0, focusStripTop);
-    const bottomMaskTop = Math.min(windowHeight, mouseY + focusHeight / 2);
-    const bottomMaskHeight = Math.max(0, windowHeight - bottomMaskTop);
+  const target = document.elementFromPoint(x, y);
 
-    // Update element positions
-    topMask.style.height = `${topMaskHeight}px`;
-    bottomMask.style.top = `${bottomMaskTop}px`;
-    bottomMask.style.height = `${bottomMaskHeight}px`;
-    focusStrip.style.top = `${focusStripTop}px`;
+  if (target && !target.closest('[data-accessibility-widget]')) {
+    const rect = target.getBoundingClientRect();
+    mask.style.width = `${rect.width}px`;
+    mask.style.height = `${rect.height}px`;
+    mask.style.top = `${rect.top}px`;
+    mask.style.left = `${rect.left}px`;
+    mask.style.opacity = '1';
+  } else {
+    mask.style.opacity = '0';
   }
 }
 
-// Helper function to remove reading mask
 function removeReadingMask(): void {
-  const elementsToRemove = [
-    'reading-mask-top',
-    'reading-mask-bottom',
-    'reading-mask-focus'
-  ];
+  const mask = document.getElementById('reading-mask-highlight');
+  if (mask) mask.remove();
+  
+  const overlay = document.getElementById('reading-mask-overlay');
+  if (overlay) overlay.remove();
 
-  elementsToRemove.forEach(id => {
-    const element = document.getElementById(id);
-    if (element) element.remove();
-  });
-
-  // Remove event listener to prevent memory leaks
   document.removeEventListener('mousemove', updateReadingMask);
+  document.removeEventListener('touchmove', updateReadingMask);
 }
 
 // Helper function to handle reading guide
 function handleReadingGuide(): void {
-  // Remove any existing reading guide first
-  removeReadingGuide();
-
-  // Create guide element
-  const guide = document.createElement('div');
-  guide.id = 'reading-guide';
-
-  // Apply styles
-  guide.style.position = 'fixed';
-  guide.style.left = '0';
-  guide.style.width = '100%';
-  guide.style.height = '30px';
-  guide.style.backgroundColor = 'rgba(255, 255, 0, 0.2)';
-  guide.style.border = '1px solid rgba(255, 255, 0, 0.5)';
-  guide.style.pointerEvents = 'none';
-  guide.style.zIndex = '9999';
-
-  // Add to document
-  document.body.appendChild(guide);
-
-  // Add mousemove handler
+  let guide = document.getElementById('reading-guide');
+  if (!guide) {
+    guide = document.createElement('div');
+    guide.id = 'reading-guide';
+    guide.style.position = 'fixed';
+    guide.style.left = '0';
+    guide.style.width = '100%';
+    guide.style.height = '4px';
+    guide.style.backgroundColor = 'yellow';
+    guide.style.pointerEvents = 'none';
+    guide.style.zIndex = '99999';
+    guide.style.transition = 'top 0.05s ease-out';
+    document.body.appendChild(guide);
+  }
   document.addEventListener('mousemove', updateReadingGuide);
+  document.addEventListener('touchmove', updateReadingGuide, { passive: true });
 }
 
-// Helper function to update reading guide position
-function updateReadingGuide(e: MouseEvent): void {
+function updateReadingGuide(e: MouseEvent | TouchEvent): void {
   const guide = document.getElementById('reading-guide');
-  if (guide) {
-    guide.style.top = `${e.clientY}px`;
+  if (!guide) return;
+
+  const { y } = getEventCoordinates(e);
+
+  if (y > 0) {
+     guide.style.top = `${y}px`;
+     guide.style.opacity = '1';
+  } else {
+     guide.style.opacity = '0';
   }
 }
 
-// Helper function to remove reading guide
 function removeReadingGuide(): void {
   const guide = document.getElementById('reading-guide');
-  if (guide) guide.remove();
-
-  // Remove event listener to prevent memory leaks
+  if (guide) {
+    guide.remove();
+  }
   document.removeEventListener('mousemove', updateReadingGuide);
+  document.removeEventListener('touchmove', updateReadingGuide);
 }
 
 // Helper function for contrast modes
 function getContrastModeStyles(contrastMode: string): string {
+  let styles = '';
   switch (contrastMode) {
     case 'increased':
-      return `
+      styles += `
         /* Apply increased contrast to all elements EXCEPT the widget */
         body *:not([data-accessibility-widget]):not([data-accessibility-widget] *):not(#accessibility-toggle):not(#accessibility-panel):not(#accessibility-panel *) {
           color: #000000 !important;
@@ -846,8 +804,9 @@ function getContrastModeStyles(contrastMode: string): string {
           font-weight: bold !important;
         }
       `;
+      break;
     case 'high':
-      return `
+      styles += `
         /* Apply high contrast (weiße Schrift auf schwarzem Hintergrund) EXCEPT the widget */
         body *:not([data-accessibility-widget]):not([data-accessibility-widget] *):not(#accessibility-toggle):not(#accessibility-panel):not(#accessibility-panel *) {
           color: #ffffff !important;
@@ -877,8 +836,9 @@ function getContrastModeStyles(contrastMode: string): string {
           border-bottom: 1px solid #ffffff !important;
         }
       `;
+      break;
     case 'dark':
-      return `
+      styles += `
         /* Apply dark contrast (gelbe Schrift auf schwarzem Hintergrund) EXCEPT the widget */
         body *:not([data-accessibility-widget]):not([data-accessibility-widget] *):not(#accessibility-toggle):not(#accessibility-panel):not(#accessibility-panel *) {
           color: #ffff00 !important;
@@ -907,8 +867,9 @@ function getContrastModeStyles(contrastMode: string): string {
           font-weight: bold !important;
         }
       `;
+      break;
     case 'light':
-      return `
+      styles += `
         /* Apply light sepia contrast to all elements EXCEPT the widget */
         body *:not([data-accessibility-widget]):not([data-accessibility-widget]*):not(#accessibility-toggle):not(#accessibility-panel):not(#accessibility-panel *) {
           color: #4b3621 !important;
@@ -937,9 +898,37 @@ function getContrastModeStyles(contrastMode: string): string {
           font-weight: bold !important;
         }
       `;
+      break;
+    case 'yellow-on-black':
+      styles += `
+        html, body, div, span, applet, object, iframe,
+        /* Make links and buttons distinct but exclude widget elements */
+        a:not([data-accessibility-widget] a), 
+        button:not([data-accessibility-widget] button), 
+        [role="button"]:not([data-accessibility-widget] [role="button"]), 
+        [role="link"]:not([data-accessibility-widget] [role="link"]) {
+          color: #ffff00 !important;
+          background-color: #000000 !important;
+          text-decoration: underline !important;
+        }
+
+        /* Ensure headers stand out but exclude widget headers */
+        h1:not([data-accessibility-widget] h1),
+        h2:not([data-accessibility-widget] h2),
+        h3:not([data-accessibility-widget] h3),
+        h4:not([data-accessibility-widget] h4),
+        h5:not([data-accessibility-widget] h5),
+        h6:not([data-accessibility-widget] h6) {
+          color: #ffff00 !important;
+          background-color: #000000 !important;
+          font-weight: bold !important;
+        }
+      `;
+      break;
     default:
-      return '';
+      styles = '';
   }
+  return styles;
 }
 
 // Helper function for font families
@@ -996,15 +985,15 @@ function applySelectiveDarkmode(active: boolean) {
 
 // Apply multiple style adjustments based on the active settings
 export function applyAccessibilityStyles(settings: AccessibilitySettings, shadowRoot: ShadowRoot | null | undefined): void {
-  // Entferne das alte Style-Tag IMMER, bevor ein neues eingefügt wird
-  const existingStyle = document.getElementById('accessibility-styles');
-  if (existingStyle) {
-    existingStyle.remove();
+  const styleId = 'accessibility-styles';
+  let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+
+  if (styleElement) {
+    styleElement.remove();
   }
 
-  // Neues Style-Tag erzeugen
-  const styleElement = document.createElement('style');
-  styleElement.id = 'accessibility-styles';
+  styleElement = document.createElement('style');
+  styleElement.id = styleId;
 
   let cssRules = '';
 
@@ -1298,10 +1287,16 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     disableKeyboardNavigation();
   }
 
-  if (settings.customCursor) {
-    handleCustomCursor(settings);
+  if (settings.virtualKeyboard) {
+    showVirtualKeyboard(shadowRoot);
   } else {
-    removeCustomCursor();
+    hideVirtualKeyboard(shadowRoot);
+  }
+
+  if (settings.pageStructure) {
+    showPageStructure();
+  } else {
+    hidePageStructure();
   }
 
   if (settings.readingMask) {
@@ -1316,15 +1311,24 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
     removeReadingGuide();
   }
 
-  if (settings.virtualKeyboard) {
-    showVirtualKeyboard(shadowRoot);
+  // Only apply custom cursor on non-touch devices
+  if (settings.customCursor && !isTouchDevice()) {
+    handleCustomCursor(settings);
   } else {
-    hideVirtualKeyboard(shadowRoot);
+    removeCustomCursor();
   }
 
-  if (settings.pageStructure) {
-    showPageStructure();
-  } else {
-    hidePageStructure();
+  if (settings.highlightLinks) {
+    document.body.classList.add('highlight-links');
   }
+}
+
+// ---- Touch & Mouse Event Normalization ----
+function getEventCoordinates(e: MouseEvent | TouchEvent): { x: number, y: number } {
+    if (e instanceof MouseEvent) {
+      return { x: e.clientX, y: e.clientY };
+    } else if (e.touches && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    return { x: -100, y: -100 }; // Default/fallback position
 }
