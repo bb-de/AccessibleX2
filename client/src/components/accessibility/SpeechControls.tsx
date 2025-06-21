@@ -114,6 +114,10 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
 
   return (
     <div ref={dragRef} className={containerClasses} style={containerStyle}>
+      {/* Debug-Zeile für Mobilstatus und Body-Klassen */}
+      <div style={{fontSize: '12px', color: '#ffbaba', marginBottom: 4, fontFamily: 'monospace'}}>
+        isMobile: {String(isMobile)} | body.className: {typeof document !== 'undefined' ? document.body.className : ''}
+      </div>
       <div 
         className={`flex justify-between items-center mb-4 ${!isMobile ? 'cursor-move' : ''}`}
         onMouseDown={handleMouseDown}
