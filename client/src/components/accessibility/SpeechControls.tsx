@@ -303,6 +303,9 @@ export type SpeechControlsLabels = {
 
 export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: SpeechControlsLabels, defaultLang: string = 'de-DE', isMobile: boolean = false) {
   const overlayId = 'speech-controls-plain-overlay';
+  // Immer zuerst ein eventuell vorhandenes Overlay entfernen
+  const existing = document.getElementById(overlayId);
+  if (existing) document.body.removeChild(existing);
   if (show) {
     if (document.getElementById(overlayId)) return; // Schon vorhanden
     const container = document.createElement('div');
