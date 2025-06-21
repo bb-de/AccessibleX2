@@ -314,7 +314,7 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
           color: white;
           border-radius: 12px;
           ${isMobile
-            ? `width: 90vw; max-width: 320px; min-width: unset; left: 5vw; top: 1rem; padding: 10px;`
+            ? `width: 45vw; max-width: 180px; min-width: unset; right: 1rem; left: unset; top: 1rem; padding: 8px;`
             : `min-width: 340px; left: calc(100vw - 500px); top: 60px; padding: 20px;`}
           box-shadow: 0 4px 24px rgba(0,0,0,0.2);
           position: absolute;
