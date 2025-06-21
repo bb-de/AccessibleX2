@@ -12,6 +12,7 @@ import { WidgetDocsPage } from './pages/WidgetDocsPage';
 import { SpeechControls } from './components/accessibility/SpeechControls';
 import './styles/global-accessibility.css';
 import { useDeviceDetection } from './lib/device-detection';
+import { useEffect } from 'react';
 
 function SpeechControlsPortal({ isMobile }: { isMobile: boolean }) {
   const { settings } = useAccessibility();
@@ -25,6 +26,16 @@ function SpeechControlsPortal({ isMobile }: { isMobile: boolean }) {
 
 function App() {
   const { isMobile } = useDeviceDetection();
+
+  useEffect(() => {
+    if (isMobile) {
+      document.body.classList.add('is-mobile');
+      document.body.classList.remove('is-desktop');
+    } else {
+      document.body.classList.add('is-desktop');
+      document.body.classList.remove('is-mobile');
+    }
+  }, [isMobile]);
 
   return (
     <QueryClientProvider client={queryClient}>
