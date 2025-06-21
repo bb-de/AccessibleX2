@@ -6,6 +6,8 @@ import { isTouchDevice } from './device-detection';
 // Global variable to store the last active input element
 let _lastActiveInput: HTMLInputElement | HTMLTextAreaElement | null = null;
 let _focusListener: ((event: FocusEvent) => void) | null = null;
+let _throttledReadingMaskUpdate: ((e: MouseEvent | TouchEvent) => void) | null = null;
+let _throttledReadingGuideUpdate: ((e: MouseEvent | TouchEvent) => void) | null = null;
 
 // Konstanten für die Seitenstruktur
 const PAGE_STRUCTURE_CONSTANTS = {
@@ -789,10 +791,10 @@ function handleReadingMask(): void {
   // Use different throttle for mobile vs desktop
   const isMobile = isTouchDevice();
   const throttleDelay = isMobile ? 16 : 16; // 60fps on both mobile and desktop for modern devices
-  const throttledUpdate = isMobile ? mobileThrottle(updateReadingMask, throttleDelay) : throttle(updateReadingMask, throttleDelay);
+  _throttledReadingMaskUpdate = isMobile ? mobileThrottle(updateReadingMask, throttleDelay) : throttle(updateReadingMask, throttleDelay);
   
-  document.addEventListener('mousemove', throttledUpdate);
-  document.addEventListener('touchmove', throttledUpdate, { passive: true });
+  document.addEventListener('mousemove', _throttledReadingMaskUpdate);
+  document.addEventListener('touchmove', _throttledReadingMaskUpdate, { passive: true });
 }
 
 function updateReadingMask(e: MouseEvent | TouchEvent): void {
@@ -834,8 +836,10 @@ function removeReadingMask(): void {
   });
 
   // Remove event listeners
-  document.removeEventListener('mousemove', updateReadingMask);
-  document.removeEventListener('touchmove', updateReadingMask);
+  if (_throttledReadingMaskUpdate) {
+    document.removeEventListener('mousemove', _throttledReadingMaskUpdate);
+    document.removeEventListener('touchmove', _throttledReadingMaskUpdate);
+  }
 }
 
 // ---- Reading Guide: Mouse and Touch Support ----
@@ -856,9 +860,8 @@ function handleReadingGuide(): void {
   guide.style.border = '1px solid rgba(255, 255, 0, 0.5)';
   guide.style.pointerEvents = 'none';
   guide.style.zIndex = '9999';
-  guide.style.willChange = 'transform';
-  guide.style.backfaceVisibility = 'hidden';
-  guide.style.transform = 'translateZ(0) translateY(0px)';
+  guide.style.top = '-100px'; // Start off-screen
+  guide.style.transition = 'top 0.05s linear'; // Smooth transition
 
   // Add to document
   document.body.appendChild(guide);
@@ -866,10 +869,10 @@ function handleReadingGuide(): void {
   // Use different throttle for mobile vs desktop
   const isMobile = isTouchDevice();
   const throttleDelay = isMobile ? 16 : 16; // 60fps on both mobile and desktop for modern devices
-  const throttledUpdate = isMobile ? mobileThrottle(updateReadingGuide, throttleDelay) : throttle(updateReadingGuide, throttleDelay);
+  _throttledReadingGuideUpdate = isMobile ? mobileThrottle(updateReadingGuide, throttleDelay) : throttle(updateReadingGuide, throttleDelay);
   
-  document.addEventListener('mousemove', throttledUpdate);
-  document.addEventListener('touchmove', throttledUpdate, { passive: true });
+  document.addEventListener('mousemove', _throttledReadingGuideUpdate);
+  document.addEventListener('touchmove', _throttledReadingGuideUpdate, { passive: true });
 }
 
 function updateReadingGuide(e: MouseEvent | TouchEvent): void {
@@ -878,8 +881,8 @@ function updateReadingGuide(e: MouseEvent | TouchEvent): void {
     const guide = document.getElementById('reading-guide');
     if (guide) {
       const { y } = getEventCoordinates(e);
-      // Use transform instead of top for better performance
-      guide.style.transform = `translateZ(0) translateY(${y}px)`;
+      // Position the guide centered on the cursor by subtracting half its height
+      guide.style.top = `${y - 15}px`;
     }
   });
 }
@@ -889,8 +892,10 @@ function removeReadingGuide(): void {
   if (guide) guide.remove();
 
   // Remove event listeners
-  document.removeEventListener('mousemove', updateReadingGuide);
-  document.removeEventListener('touchmove', updateReadingGuide);
+  if (_throttledReadingGuideUpdate) {
+    document.removeEventListener('mousemove', _throttledReadingGuideUpdate);
+    document.removeEventListener('touchmove', _throttledReadingGuideUpdate);
+  }
 }
 
 // Helper function for contrast modes
