@@ -3,7 +3,6 @@ import React, { useState, useRef } from 'react';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useAccessibility } from '@/hooks/useAccessibility';
 import { translations } from '@/lib/translation';
-import { isTouchDevice } from '@/lib/device-detection';
 import { X } from 'lucide-react';
 
 const STATUS = {
@@ -14,9 +13,9 @@ const STATUS = {
 };
 
 export function SpeechControls() {
-  const { settings, updateSetting, language } = useAccessibility();
+  const { settings, updateSetting, language, deviceInfo } = useAccessibility();
+  const { isMobile } = deviceInfo;
   const trans = translations[language];
-  const isMobile = isTouchDevice();
 
   const {
     text,
