@@ -13,6 +13,7 @@ const STATUS = {
 };
 
 export function SpeechControls({ isMobile }: { isMobile: boolean }) {
+  console.log('SpeechControls: isMobile =', isMobile);
   if (isMobile) return <MobileSpeechControls />;
   const { settings, updateSetting, language } = useAccessibility();
   const trans = translations[language];
@@ -188,6 +189,7 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
 }
 
 function MobileSpeechControls(props: Omit<React.ComponentProps<typeof SpeechControls>, 'isMobile'>) {
+  console.log('MobileSpeechControls gerendert');
   const { settings, updateSetting, language } = useAccessibility();
   const trans = translations[language];
   const {
