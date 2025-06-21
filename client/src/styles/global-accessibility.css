@@ -4,10 +4,13 @@
 
 .speech-controls-container {
   transition: all 0.3s ease-in-out;
+  position: fixed;
+  z-index: 100000;
 }
 
 body.is-mobile .speech-controls-container {
-  width: 250px;
+  width: 90vw;
+  max-width: 320px;
   top: 1rem; /* 16px */
   right: 1rem; /* 16px */
   left: auto;
@@ -18,5 +21,7 @@ body.is-desktop .speech-controls-container {
   width: 400px;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  /* Die transform-Eigenschaft wird jetzt von React gesteuert,
+     startet aber zentriert mit leichten Abweichungen */
+  transform: translate(calc(-50% + 0px), calc(-50% + 0px));
 } 

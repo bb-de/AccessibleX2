@@ -17,7 +17,7 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
   const trans = translations[language];
   const dragRef = useRef<HTMLDivElement>(null);
 
-  const [position, setPosition] = useState({ x: 100, y: 100 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
@@ -35,6 +35,13 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
     selectedVoice,
     setSelectedVoice,
   } = useTextToSpeech({ lang: language });
+
+  useEffect(() => {
+    if (isMobile) {
+      // Position zurücksetzen, damit die CSS-Klasse die volle Kontrolle hat
+      setPosition({ x: 0, y: 0 });
+    }
+  }, [isMobile]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isMobile || !dragRef.current) return;
@@ -102,9 +109,7 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
   }
   
   const containerStyle: React.CSSProperties = isMobile ? {} : {
-    position: 'fixed',
-    left: `${position.x}px`,
-    top: `${position.y}px`,
+    transform: `translate(${position.x}px, ${position.y}px)`,
   };
 
   return (
