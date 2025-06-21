@@ -677,36 +677,83 @@ function throttle<T extends (...args: any[]) => void>(func: T, limit: number): T
 
 // ---- Reading Mask: Mouse and Touch Support ----
 function handleReadingMask(): void {
-  let mask = document.getElementById('reading-mask-highlight');
-  if (!mask) {
-    mask = document.createElement('div');
-    mask.id = 'reading-mask-highlight';
-    mask.style.position = 'fixed';
-    mask.style.border = '2px solid yellow';
-    mask.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
-    mask.style.borderRadius = '4px';
-    mask.style.pointerEvents = 'none';
-    mask.style.zIndex = '99999';
-    mask.style.transition = 'none'; // Remove transition for better performance
-    mask.style.opacity = '0';
-    document.body.appendChild(mask);
+  // Remove any existing reading mask first
+  removeReadingMask();
+
+  // Create mask elements
+  const topMask = document.createElement('div');
+  const bottomMask = document.createElement('div');
+  const focusStrip = document.createElement('div');
+
+  // Set IDs
+  topMask.id = 'reading-mask-top';
+  bottomMask.id = 'reading-mask-bottom';
+  focusStrip.id = 'reading-mask-focus';
+
+  // Set common styles
+  const commonStyles = {
+    position: 'fixed',
+    left: '0',
+    width: '100%',
+    pointerEvents: 'none',
+    zIndex: '999999'
+  };
+
+  // Apply styles to top mask
+  Object.assign(topMask.style, commonStyles, {
+    top: '0',
+    height: '0',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)'
+  });
+
+  // Apply styles to bottom mask
+  Object.assign(bottomMask.style, commonStyles, {
+    bottom: '0',
+    height: '0',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)'
+  });
+
+  // Apply styles to focus strip
+  Object.assign(focusStrip.style, commonStyles, {
+    height: '100px',
+    border: '2px solid rgba(255, 255, 0, 0.5)',
+    boxSizing: 'border-box',
+    backgroundColor: 'transparent'
+  });
+
+  // Add elements to the document
+  document.body.appendChild(topMask);
+  document.body.appendChild(bottomMask);
+  document.body.appendChild(focusStrip);
+
+  // Store current mouse/touch position globally
+  if (!window.hasOwnProperty('lastKnownPosition')) {
+    (window as any).lastKnownPosition = {
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2
+    };
+
+    // Tracking function for position (runs only once)
+    const updatePosition = (e: MouseEvent | TouchEvent) => {
+      const { x, y } = getEventCoordinates(e);
+      (window as any).lastKnownPosition = { x, y };
+    };
+    
+    document.addEventListener('mousemove', updatePosition);
+    document.addEventListener('touchmove', updatePosition, { passive: true });
   }
 
-  // Add overlay
-  let overlay = document.getElementById('reading-mask-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'reading-mask-overlay';
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100vw';
-    overlay.style.height = '100vh';
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    overlay.style.pointerEvents = 'none';
-    overlay.style.zIndex = '99998';
-    document.body.appendChild(overlay);
-  }
+  // Use the last stored position for initial placement
+  const cursorX = (window as any).lastKnownPosition.x;
+  const cursorY = (window as any).lastKnownPosition.y;
+
+  // Start with the current position
+  const initialEvent = new MouseEvent('mousemove', {
+    clientX: cursorX,
+    clientY: cursorY,
+    bubbles: true
+  });
+  updateReadingMask(initialEvent);
 
   // Throttle the update function to ~60fps (16ms)
   const throttledUpdate = throttle(updateReadingMask, 16);
@@ -718,61 +765,69 @@ function handleReadingMask(): void {
 function updateReadingMask(e: MouseEvent | TouchEvent): void {
   // Use requestAnimationFrame for smooth updates
   requestAnimationFrame(() => {
-    const mask = document.getElementById('reading-mask-highlight');
-    if (!mask) return;
+    const topMask = document.getElementById('reading-mask-top');
+    const bottomMask = document.getElementById('reading-mask-bottom');
+    const focusStrip = document.getElementById('reading-mask-focus');
 
-    const { x, y } = getEventCoordinates(e);
-    
-    // Hide mask if coordinates are invalid (e.g., touchend)
-    if (x < 0) {
-      mask.style.opacity = '0';
-      return;
-    }
+    if (topMask && bottomMask && focusStrip) {
+      const focusHeight = 100; // Height of the focus strip
+      const { y } = getEventCoordinates(e);
+      const windowHeight = window.innerHeight;
 
-    const target = document.elementFromPoint(x, y);
+      // Calculate positions
+      const focusStripTop = y - focusHeight / 2;
+      const topMaskHeight = Math.max(0, focusStripTop);
+      const bottomMaskTop = Math.min(windowHeight, y + focusHeight / 2);
+      const bottomMaskHeight = Math.max(0, windowHeight - bottomMaskTop);
 
-    if (target && !target.closest('[data-accessibility-widget]')) {
-      const rect = target.getBoundingClientRect();
-      mask.style.width = `${rect.width}px`;
-      mask.style.height = `${rect.height}px`;
-      mask.style.top = `${rect.top}px`;
-      mask.style.left = `${rect.left}px`;
-      mask.style.opacity = '1';
-    } else {
-      mask.style.opacity = '0';
+      // Update element positions
+      topMask.style.height = `${topMaskHeight}px`;
+      bottomMask.style.top = `${bottomMaskTop}px`;
+      bottomMask.style.height = `${bottomMaskHeight}px`;
+      focusStrip.style.top = `${focusStripTop}px`;
     }
   });
 }
 
 function removeReadingMask(): void {
-  const mask = document.getElementById('reading-mask-highlight');
-  if (mask) mask.remove();
-  
-  const overlay = document.getElementById('reading-mask-overlay');
-  if (overlay) overlay.remove();
+  const elementsToRemove = [
+    'reading-mask-top',
+    'reading-mask-bottom',
+    'reading-mask-focus'
+  ];
 
-  // Remove all event listeners by cloning the element
+  elementsToRemove.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.remove();
+  });
+
+  // Remove event listeners
   document.removeEventListener('mousemove', updateReadingMask);
   document.removeEventListener('touchmove', updateReadingMask);
 }
 
 // ---- Reading Guide: Mouse and Touch Support ----
 function handleReadingGuide(): void {
-  let guide = document.getElementById('reading-guide');
-  if (!guide) {
-    guide = document.createElement('div');
-    guide.id = 'reading-guide';
-    guide.style.position = 'fixed';
-    guide.style.left = '0';
-    guide.style.width = '100%';
-    guide.style.height = '4px';
-    guide.style.backgroundColor = 'yellow';
-    guide.style.pointerEvents = 'none';
-    guide.style.zIndex = '99999';
-    guide.style.transition = 'none'; // Remove transition for better performance
-    document.body.appendChild(guide);
-  }
-  
+  // Remove any existing reading guide first
+  removeReadingGuide();
+
+  // Create guide element
+  const guide = document.createElement('div');
+  guide.id = 'reading-guide';
+
+  // Apply styles
+  guide.style.position = 'fixed';
+  guide.style.left = '0';
+  guide.style.width = '100%';
+  guide.style.height = '30px';
+  guide.style.backgroundColor = 'rgba(255, 255, 0, 0.2)';
+  guide.style.border = '1px solid rgba(255, 255, 0, 0.5)';
+  guide.style.pointerEvents = 'none';
+  guide.style.zIndex = '9999';
+
+  // Add to document
+  document.body.appendChild(guide);
+
   // Throttle the update function to ~60fps (16ms)
   const throttledUpdate = throttle(updateReadingGuide, 16);
   
@@ -784,24 +839,18 @@ function updateReadingGuide(e: MouseEvent | TouchEvent): void {
   // Use requestAnimationFrame for smooth updates
   requestAnimationFrame(() => {
     const guide = document.getElementById('reading-guide');
-    if (!guide) return;
-
-    const { y } = getEventCoordinates(e);
-
-    if (y > 0) {
-       guide.style.top = `${y}px`;
-       guide.style.opacity = '1';
-    } else {
-       guide.style.opacity = '0';
+    if (guide) {
+      const { y } = getEventCoordinates(e);
+      guide.style.top = `${y}px`;
     }
   });
 }
 
 function removeReadingGuide(): void {
   const guide = document.getElementById('reading-guide');
-  if (guide) {
-    guide.remove();
-  }
+  if (guide) guide.remove();
+
+  // Remove event listeners
   document.removeEventListener('mousemove', updateReadingGuide);
   document.removeEventListener('touchmove', updateReadingGuide);
 }
