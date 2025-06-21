@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { useEffect } from "react";
 import { exportSpeechControlsOverlayWithLabels, SpeechControlsLabels } from "./SpeechControls";
+import { useDeviceDetection } from "@/hooks/use-mobile";
 
 const overlayLabels: Record<string, SpeechControlsLabels> = {
   de: {
@@ -87,13 +88,14 @@ const overlayLangMap: Record<string, string> = {
 export function ContentTab() {
   useTextToSpeech();
   const { settings, updateSetting, translations, language } = useAccessibility();
+  const deviceInfo = useDeviceDetection();
 
   useEffect(() => {
     const labels = overlayLabels[language] || overlayLabels['de'];
     const lang = overlayLangMap[language] || 'de-DE';
-    exportSpeechControlsOverlayWithLabels(settings.textToSpeech, labels, lang);
-    return () => exportSpeechControlsOverlayWithLabels(false, labels, lang);
-  }, [settings.textToSpeech, language]);
+    exportSpeechControlsOverlayWithLabels(settings.textToSpeech, labels, lang, deviceInfo.isMobile);
+    return () => exportSpeechControlsOverlayWithLabels(false, labels, lang, deviceInfo.isMobile);
+  }, [settings.textToSpeech, language, deviceInfo.isMobile]);
 
   // Synchronisiere das Setting, wenn das Overlay per X geschlossen wird
   useEffect(() => {

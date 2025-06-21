@@ -301,7 +301,7 @@ export type SpeechControlsLabels = {
   close: string;
 };
 
-export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: SpeechControlsLabels, defaultLang: string = 'de-DE') {
+export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: SpeechControlsLabels, defaultLang: string = 'de-DE', isMobile: boolean = false) {
   const overlayId = 'speech-controls-plain-overlay';
   if (show) {
     if (document.getElementById(overlayId)) return; // Schon vorhanden
@@ -313,12 +313,11 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
           background: #222;
           color: white;
           border-radius: 12px;
-          min-width: 340px;
+          ${isMobile
+            ? `width: 90vw; max-width: 320px; min-width: unset; left: 5vw; top: 1rem; padding: 10px;`
+            : `min-width: 340px; left: calc(100vw - 500px); top: 60px; padding: 20px;`}
           box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-          padding: 20px;
           position: absolute;
-          top: 60px;
-          left: calc(100vw - 500px);
           z-index: 1000001;
           user-select: none;
         }
