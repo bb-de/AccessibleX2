@@ -132,26 +132,17 @@ interface AccessibilityContextType {
 
 export const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
 
-export function AccessibilityProvider({ children, shadowRoot }: { children: React.ReactNode, shadowRoot: ShadowRoot | null }) {
+export const AccessibilityProvider = ({ children, shadowRoot }: { children: React.ReactNode, shadowRoot: ShadowRoot | null }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [settings, setSettings] = useState<AccessibilitySettings>(() => {
-    // Initialisiere die Einstellungen aus dem localStorage beim ersten Rendern
-    const savedSettings = localStorage.getItem('accessibility-settings');
-    if (savedSettings) {
-      try {
-        return JSON.parse(savedSettings);
-      } catch (error) {
-        console.error('Fehler beim Laden der gespeicherten Einstellungen:', error);
-        return defaultSettings;
-      }
-    }
-    return defaultSettings;
-  });
-  const [language, setLanguage] = useState<Language>(() => {
-    const savedLanguage = localStorage.getItem('accessibility-language');
-    return (savedLanguage as Language) || 'en';
-  });
+  const [settings, setSettings] = useState<AccessibilitySettings>(defaultSettings);
   const { toast } = useToast();
+  const [language, setLanguage] = useState<Language>('en');
+  const deviceInfo = useDeviceDetection();
+
+  useEffect(() => {
+    document.body.classList.toggle('is-mobile', deviceInfo.isMobile);
+    document.body.classList.toggle('is-desktop', !deviceInfo.isMobile);
+  }, [deviceInfo.isMobile]);
 
   // Wende die Einstellungen an, wenn sie sich ändern
   useEffect(() => {
@@ -461,7 +452,7 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
     translations: {...translations.en, ...translations[language]},
     applyAccessibilityChanges,
     shadowRoot,
-    deviceInfo: useDeviceDetection(),
+    deviceInfo,
   };
 
   return (

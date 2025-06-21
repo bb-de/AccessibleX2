@@ -1,0 +1,22 @@
+/* Globale Stile, die vom Accessibility Widget beeinflusst werden */
+
+/* Stile für das Text-to-Speech-Fenster basierend auf dem Gerätetyp */
+
+.speech-controls-container {
+  transition: all 0.3s ease-in-out;
+}
+
+body.is-mobile .speech-controls-container {
+  width: 250px;
+  top: 1rem; /* 16px */
+  right: 1rem; /* 16px */
+  left: auto;
+  transform: none;
+}
+
+body.is-desktop .speech-controls-container {
+  width: 400px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+} 

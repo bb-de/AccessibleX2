@@ -4,7 +4,6 @@ import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useAccessibility } from '@/hooks/useAccessibility';
 import { translations } from '@/lib/translation';
 import { X } from 'lucide-react';
-import clsx from 'clsx';
 
 const STATUS = {
   idle: 'Bereit',
@@ -14,8 +13,7 @@ const STATUS = {
 };
 
 export function SpeechControls() {
-  const { settings, updateSetting, language, deviceInfo } = useAccessibility();
-  const { isMobile } = deviceInfo;
+  const { settings, updateSetting, language } = useAccessibility();
   const trans = translations[language];
 
   const {
@@ -40,13 +38,7 @@ export function SpeechControls() {
     }
   };
 
-  const containerClasses = clsx(
-    'fixed z-[100000] bg-gray-800 text-white p-4 rounded-lg shadow-2xl transition-all duration-300',
-    {
-      'w-[250px] top-4 right-4': isMobile,
-      'w-[400px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2': !isMobile,
-    }
-  );
+  const containerClasses = "fixed z-[100000] bg-gray-800 text-white p-4 rounded-lg shadow-2xl speech-controls-container";
 
   if (!supported) {
     return (

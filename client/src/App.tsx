@@ -10,6 +10,7 @@ import NotFound from './pages/not-found';
 import { WidgetIntegrationPage } from './pages/WidgetIntegrationPage';
 import { WidgetDocsPage } from './pages/WidgetDocsPage';
 import { SpeechControls } from './components/accessibility/SpeechControls';
+import './styles/global-accessibility.css';
 
 function SpeechControlsPortal() {
   const { settings } = useAccessibility();
