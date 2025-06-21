@@ -41,21 +41,22 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
     if (deviceInfo.isMobile && deviceInfo.isPortrait) {
       // Mobil - Hochformat
       return {
-        width: 'calc(100vw - 40px)', // 20px Rand auf jeder Seite
+        width: '90vw', // 90% der Bildschirmbreite
+        left: '5vw', // Zentriert
+        right: '5vw',
         maxWidth: '400px',
         minWidth: 'auto',
-        right: '20px',
-        maxHeight: '75vh', // Reduzierte Höhe
-        bottom: dynamicBottom,
+        maxHeight: '70vh', // Höhe weiter reduziert
+        bottom: '80px', // Sicherer Abstand zum Button
       };
     } else if (deviceInfo.isMobile && deviceInfo.isLandscape) {
       // Mobil - Querformat
       return {
-        width: '50vw', // 50% der Bildschirmbreite
+        width: '50vw',
         maxWidth: '400px',
         minWidth: '300px',
         right: '20px',
-        maxHeight: 'calc(100vh - 40px)', // Fast volle Höhe
+        maxHeight: 'calc(100vh - 85px)', // Höhe angepasst, um Platz für Button zu schaffen
         bottom: '20px',
       };
     } else {
@@ -65,7 +66,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         minWidth: '340px',
         maxWidth: '340px',
         maxHeight: 'calc(100vh - 120px)',
-        bottom: dynamicBottom,
+        bottom: '80px',
         right: '16px'
       };
     }
@@ -74,12 +75,23 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
 
   // Animation-Logik
   let panelClass = "fixed bg-white rounded-xl shadow-lg transition-all duration-300 transform";
-  if (isOpen && !isClosing) {
-    panelClass += " translate-y-0 opacity-100 visible";
+  
+  if(isOpen && !isClosing) {
+      panelClass += " opacity-100 visible"
+      if(deviceInfo.isMobile && deviceInfo.isPortrait) {
+          panelClass += " bottom-[80px]"
+      } else {
+          panelClass += " translate-y-0"
+      }
   } else if (isClosing) {
-    panelClass += " translate-y-[-100%] opacity-0 visible";
+      panelClass += " opacity-0 visible"
+      if(deviceInfo.isMobile && deviceInfo.isPortrait) {
+          panelClass += " bottom-[-100%]"
+      } else {
+          panelClass += " translate-y-[-100%]"
+      }
   } else {
-    panelClass += " translate-y-[-100%] opacity-0 invisible w-0 h-0 overflow-hidden pointer-events-none";
+      panelClass += " opacity-0 invisible w-0 h-0 overflow-hidden pointer-events-none"
   }
 
   return (
@@ -89,9 +101,9 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
       className={panelClass}
       style={{
         ...dynamicStyles,
-        overflowY: 'scroll',
+        overflowY: 'auto', // Geändert auf auto für besseres Scrolling
         scrollBehavior: 'smooth',
-        zIndex: 999999 // Höherer z-index als die virtuelle Tastatur
+        zIndex: 999999
       }}
       aria-hidden={!isOpen && !isClosing}
       onMouseDown={(e) => e.stopPropagation()} // Prevent clicks inside the panel from closing it
