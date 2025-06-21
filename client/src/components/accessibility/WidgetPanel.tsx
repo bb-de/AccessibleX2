@@ -39,59 +39,42 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
   // Dynamische Stil-Anpassungen basierend auf Gerät und Orientierung
   const getDynamicStyles = () => {
     if (deviceInfo.isMobile && deviceInfo.isPortrait) {
-      // Mobil - Hochformat
+      // Mobil - Hochformat: Zentriert und schmaler
       return {
-        width: '90vw', // 90% der Bildschirmbreite
-        left: '5vw', // Zentriert
-        right: '5vw',
-        maxWidth: '400px',
-        minWidth: 'auto',
-        maxHeight: '70vh', // Höhe weiter reduziert
-        bottom: '80px', // Sicherer Abstand zum Button
+        width: '90vw',
+        maxWidth: '280px', // Deutlich schmaler
+        left: '50%',
+        transform: 'translateX(-50%)',
+        maxHeight: '70vh',
+        bottom: '80px',
       };
     } else if (deviceInfo.isMobile && deviceInfo.isLandscape) {
-      // Mobil - Querformat
+      // Mobil - Querformat: Rechtsbündig mit sicherem Abstand zum Button
       return {
-        width: '50vw',
-        maxWidth: '400px',
-        minWidth: '300px',
-        right: '20px',
-        maxHeight: 'calc(100vh - 85px)', // Höhe angepasst, um Platz für Button zu schaffen
+        width: '280px', // Feste, schmalere Breite
+        right: '80px',  // Sicherer Abstand zum Button (48px Button + 12px Offset + 20px Lücke)
+        maxHeight: 'calc(100vh - 40px)',
         bottom: '20px',
       };
     } else {
       // Desktop und Tablet
       return {
         width: '340px',
-        minWidth: '340px',
-        maxWidth: '340px',
-        maxHeight: 'calc(100vh - 120px)',
+        right: '16px',
         bottom: '80px',
-        right: '16px'
+        maxHeight: 'calc(100vh - 120px)',
       };
     }
   };
   const dynamicStyles = getDynamicStyles();
 
-  // Animation-Logik
-  let panelClass = "fixed bg-white rounded-xl shadow-lg transition-all duration-300 transform";
+  // Animationslogik (angepasst für smoothe Übergänge)
+  let panelClass = "fixed bg-white rounded-xl shadow-lg transition-all duration-300";
   
-  if(isOpen && !isClosing) {
-      panelClass += " opacity-100 visible"
-      if(deviceInfo.isMobile && deviceInfo.isPortrait) {
-          panelClass += " bottom-[80px]"
-      } else {
-          panelClass += " translate-y-0"
-      }
-  } else if (isClosing) {
-      panelClass += " opacity-0 visible"
-      if(deviceInfo.isMobile && deviceInfo.isPortrait) {
-          panelClass += " bottom-[-100%]"
-      } else {
-          panelClass += " translate-y-[-100%]"
-      }
+  if (isOpen && !isClosing) {
+    panelClass += " opacity-100 visible";
   } else {
-      panelClass += " opacity-0 invisible w-0 h-0 overflow-hidden pointer-events-none"
+    panelClass += " opacity-0 invisible";
   }
 
   return (
@@ -101,12 +84,18 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
       className={panelClass}
       style={{
         ...dynamicStyles,
-        overflowY: 'auto', // Geändert auf auto für besseres Scrolling
+        // minWidth auf 280px setzen, um Konsistenz zu gewährleisten
+        minWidth: deviceInfo.isMobile ? '280px' : '340px', 
+        overflowY: 'auto',
         scrollBehavior: 'smooth',
-        zIndex: 999999
+        zIndex: 999999,
+        // Transform für die Animation hinzufügen
+        transform: isOpen && !isClosing ? 
+          (dynamicStyles.transform || 'none') : 
+          `${dynamicStyles.transform || ''} translateY(20px) scale(0.95)`
       }}
       aria-hidden={!isOpen && !isClosing}
-      onMouseDown={(e) => e.stopPropagation()} // Prevent clicks inside the panel from closing it
+      onMouseDown={(e) => e.stopPropagation()}
     >
       {/* Panel Header */}
       <div className="p-4 border-b border-gray-200">
