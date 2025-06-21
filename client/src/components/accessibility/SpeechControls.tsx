@@ -325,8 +325,9 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
           width: 100%; border-radius: 6px; padding: 8px; font-size: 16px; color: #222;
         }
         #speech-controls-plain-overlay button {
-          padding: 6px 14px; border-radius: 6px; border: none; font-weight: bold;
-          margin-right: 4px; margin-bottom: 2px; cursor: pointer;
+          ${isMobile
+            ? 'padding: 4px 8px; font-size: 13px; border-radius: 6px; border: none; font-weight: bold; margin-right: 2px; margin-bottom: 2px; cursor: pointer;'
+            : 'padding: 6px 14px; border-radius: 6px; border: none; font-weight: bold; margin-right: 4px; margin-bottom: 2px; cursor: pointer;'}
         }
         #speech-controls-plain-overlay #speech-controls-start { background: #2563eb; color: white; }
         #speech-controls-plain-overlay #speech-controls-pause { background: #f59e42; color: white; }
