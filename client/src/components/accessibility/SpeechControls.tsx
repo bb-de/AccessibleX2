@@ -13,6 +13,7 @@ const STATUS = {
 };
 
 export function SpeechControls({ isMobile }: { isMobile: boolean }) {
+  if (isMobile) return <MobileSpeechControls />;
   const { settings, updateSetting, language } = useAccessibility();
   const trans = translations[language];
   const dragRef = useRef<HTMLDivElement>(null);
@@ -114,8 +115,21 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
 
   return (
     <div ref={dragRef} className={containerClasses} style={containerStyle}>
-      {/* Debug-Zeile für Mobilstatus und Body-Klassen */}
-      <div style={{fontSize: '12px', color: '#ffbaba', marginBottom: 4, fontFamily: 'monospace'}}>
+      {/* Auffällige Debug-Zeile für Mobilstatus und Body-Klassen */}
+      <div style={{
+        position: 'absolute',
+        top: 8,
+        left: 8,
+        zIndex: 999999,
+        background: 'rgba(255,0,0,0.85)',
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 22,
+        padding: 8,
+        borderRadius: 6,
+        pointerEvents: 'none',
+        fontFamily: 'monospace',
+      }}>
         isMobile: {String(isMobile)} | body.className: {typeof document !== 'undefined' ? document.body.className : ''}
       </div>
       <div 
@@ -166,6 +180,97 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
           )}
           <button onClick={cancel} disabled={!isSpeaking && isEnded} className="px-3 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-md flex-grow disabled:bg-red-800 disabled:cursor-not-allowed">Stop</button>
           <button onClick={handleUseSelection} className="px-3 py-2 text-sm bg-green-500 hover:bg-green-600 text-white rounded-md flex-grow">Use selection</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileSpeechControls(props: Omit<React.ComponentProps<typeof SpeechControls>, 'isMobile'>) {
+  const { settings, updateSetting, language } = useAccessibility();
+  const trans = translations[language];
+  const {
+    text,
+    setText,
+    isPaused,
+    isSpeaking,
+    isEnded,
+    speak,
+    pause,
+    cancel,
+    supported,
+    voices,
+    selectedVoice,
+    setSelectedVoice,
+  } = useTextToSpeech({ lang: language });
+
+  if (!supported) {
+    return (
+      <div className="fixed top-4 right-4 w-[95vw] max-w-xs bg-gray-800 text-white p-2 rounded-lg shadow-2xl z-[100000] speech-controls-container">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-base font-bold">{trans.textToSpeech}</h3>
+          <button 
+            onClick={() => updateSetting('textToSpeech', false)}
+            className="text-gray-400 hover:text-white"
+            aria-label={trans.closeAccessibilityMenu}
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <p>{trans.textToSpeechNotSupported || 'Text-to-Speech is not supported by your browser.'}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed top-4 right-4 w-[95vw] max-w-xs bg-gray-800 text-white p-2 rounded-lg shadow-2xl z-[100000] speech-controls-container">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-base font-bold">{trans.textToSpeech}</h3>
+        <button 
+          onClick={() => updateSetting('textToSpeech', false)}
+          className="text-gray-400 hover:text-white"
+          aria-label={trans.closeAccessibilityMenu}
+        >
+          <X size={20} />
+        </button>
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center space-x-2">
+          <select
+            value={selectedVoice?.voiceURI || ''}
+            onChange={(e) => {
+              const voice = voices.find(v => v.voiceURI === e.target.value);
+              if (voice) setSelectedVoice(voice);
+            }}
+            className="w-full bg-gray-700 border-gray-600 rounded-md p-1 text-xs"
+            aria-label="Select voice"
+          >
+            {voices.map(voice => (
+              <option key={voice.voiceURI} value={voice.voiceURI}>
+                {voice.name} ({voice.lang})
+              </option>
+            ))}
+          </select>
+        </div>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={2}
+          className="w-full bg-gray-700 border-gray-600 rounded-md p-1 text-xs"
+          placeholder={trans.selectTextToReadAloud || 'Select text to read aloud...'}
+          aria-label="Text to read"
+        />
+        <div className="flex justify-between items-center gap-1 flex-wrap">
+          {isSpeaking && !isPaused ? (
+            <button onClick={pause} className="px-2 py-1 text-xs bg-orange-500 hover:bg-orange-600 text-white rounded-md flex-grow">Pause</button>
+          ) : (
+            <button onClick={speak} className="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded-md flex-grow">{isPaused ? 'Resume' : 'Speak'}</button>
+          )}
+          <button onClick={cancel} disabled={!isSpeaking && isEnded} className="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded-md flex-grow disabled:bg-red-800 disabled:cursor-not-allowed">Stop</button>
+          <button onClick={() => {
+            const selectedText = window.getSelection()?.toString().trim();
+            if (selectedText) setText(selectedText);
+          }} className="px-2 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-md flex-grow">Use selection</button>
         </div>
       </div>
     </div>
