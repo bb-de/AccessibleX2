@@ -11,18 +11,21 @@ import { WidgetIntegrationPage } from './pages/WidgetIntegrationPage';
 import { WidgetDocsPage } from './pages/WidgetDocsPage';
 import { SpeechControls } from './components/accessibility/SpeechControls';
 import './styles/global-accessibility.css';
+import { useDeviceDetection } from './lib/device-detection';
 
-function SpeechControlsPortal() {
+function SpeechControlsPortal({ isMobile }: { isMobile: boolean }) {
   const { settings } = useAccessibility();
 
   if (!settings.textToSpeech) {
     return null;
   }
 
-  return createPortal(<SpeechControls />, document.body);
+  return createPortal(<SpeechControls isMobile={isMobile} />, document.body);
 }
 
 function App() {
+  const { isMobile } = useDeviceDetection();
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -38,7 +41,7 @@ function App() {
               </Routes>
             </div>
           </Router>
-          <SpeechControlsPortal />
+          <SpeechControlsPortal isMobile={isMobile} />
         </AccessibilityProvider>
       </TooltipProvider>
     </QueryClientProvider>

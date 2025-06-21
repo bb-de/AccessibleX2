@@ -3,6 +3,8 @@
  * Können sowohl in React-Komponenten als auch in reinem JavaScript verwendet werden
  */
 
+import { useState, useEffect } from 'react';
+
 export interface DeviceInfo {
   isMobile: boolean;
   isTablet: boolean;
@@ -193,4 +195,17 @@ export function isBreakpoint(breakpoint: keyof typeof BREAKPOINTS): boolean {
     default:
       return false;
   }
+}
+
+export function useDeviceDetection() {
+  const [deviceInfo, setDeviceInfo] = useState(detectDevice());
+
+  useEffect(() => {
+    const cleanup = onDeviceChange(newDeviceInfo => {
+      setDeviceInfo(newDeviceInfo);
+    });
+    return cleanup;
+  }, []);
+
+  return deviceInfo;
 } 

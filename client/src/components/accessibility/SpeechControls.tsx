@@ -1,5 +1,5 @@
 // Copyright (c) 2024 brandingbrothers.de. All rights reserved.
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useAccessibility } from '@/hooks/useAccessibility';
 import { translations } from '@/lib/translation';
@@ -12,9 +12,14 @@ const STATUS = {
   error: 'Fehler beim Vorlesen',
 };
 
-export function SpeechControls() {
+export function SpeechControls({ isMobile }: { isMobile: boolean }) {
   const { settings, updateSetting, language } = useAccessibility();
   const trans = translations[language];
+  const dragRef = useRef<HTMLDivElement>(null);
+
+  const [position, setPosition] = useState({ x: 100, y: 100 });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
 
   const {
     text,
@@ -30,6 +35,44 @@ export function SpeechControls() {
     selectedVoice,
     setSelectedVoice,
   } = useTextToSpeech({ lang: language });
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile || !dragRef.current) return;
+    setIsDragging(true);
+    const rect = dragRef.current.getBoundingClientRect();
+    setOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || isMobile) return;
+    setPosition({
+      x: e.clientX - offset.x,
+      y: e.clientY - offset.y,
+    });
+    e.preventDefault();
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+  
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, isMobile]);
 
   const handleUseSelection = () => {
     const selectedText = window.getSelection()?.toString().trim();
@@ -57,14 +100,23 @@ export function SpeechControls() {
       </div>
     );
   }
+  
+  const containerStyle: React.CSSProperties = isMobile ? {} : {
+    position: 'fixed',
+    left: `${position.x}px`,
+    top: `${position.y}px`,
+  };
 
   return (
-    <div className={containerClasses}>
-      <div className="flex justify-between items-center mb-4">
+    <div ref={dragRef} className={containerClasses} style={containerStyle}>
+      <div 
+        className={`flex justify-between items-center mb-4 ${!isMobile ? 'cursor-move' : ''}`}
+        onMouseDown={handleMouseDown}
+      >
         <h3 className="text-lg font-bold">{trans.textToSpeech}</h3>
         <button 
           onClick={() => updateSetting('textToSpeech', false)}
-          className="text-gray-400 hover:text-white"
+          className="text-gray-400 hover:text-white cursor-pointer"
           aria-label={trans.closeAccessibilityMenu}
         >
           <X size={20} />
@@ -74,16 +126,16 @@ export function SpeechControls() {
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <select
-            value={selectedVoice?.name || ''}
+            value={selectedVoice?.voiceURI || ''}
             onChange={(e) => {
-              const voice = voices.find(v => v.name === e.target.value);
+              const voice = voices.find(v => v.voiceURI === e.target.value);
               if (voice) setSelectedVoice(voice);
             }}
             className="w-full bg-gray-700 border-gray-600 rounded-md p-2 text-sm"
             aria-label="Select voice"
           >
             {voices.map(voice => (
-              <option key={voice.name} value={voice.name}>
+              <option key={voice.voiceURI} value={voice.voiceURI}>
                 {voice.name} ({voice.lang})
               </option>
             ))}
