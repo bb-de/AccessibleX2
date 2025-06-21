@@ -100,6 +100,7 @@ export const defaultSettings: AccessibilitySettings = {
 interface AccessibilityContextType {
   isOpen: boolean;
   toggleWidget: () => void;
+  closeWidget: () => void;
   settings: AccessibilitySettings;
   updateSetting: <K extends keyof AccessibilitySettings>(
     key: K, 
@@ -173,6 +174,14 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
       window.removeEventListener('message', handleMessage);
     };
   }, []); // Leere Abhängigkeitsliste, um sicherzustellen, dass der Listener nur einmal hinzugefügt wird
+
+  const closeWidget = useCallback(() => {
+    setIsOpen(false);
+    window.parent.postMessage({
+      type: 'accessibility-widget-toggle',
+      isOpen: false,
+    }, '*');
+  }, []);
 
   // Toggle widget visibility
   const toggleWidget = useCallback(() => {
@@ -441,6 +450,7 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
   const value: AccessibilityContextType = {
     isOpen,
     toggleWidget,
+    closeWidget,
     settings,
     updateSetting,
     incrementSetting,

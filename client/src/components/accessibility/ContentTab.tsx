@@ -87,7 +87,7 @@ const overlayLangMap: Record<string, string> = {
 
 export function ContentTab() {
   useTextToSpeech();
-  const { settings, updateSetting, translations, language } = useAccessibility();
+  const { settings, updateSetting, translations, language, closeWidget } = useAccessibility();
   const deviceInfo = useDeviceDetection();
 
   useEffect(() => {
@@ -130,7 +130,12 @@ export function ContentTab() {
             <span className="text-sm text-gray-700">{translations.textToSpeech}</span>
             <Switch 
               checked={settings.textToSpeech}
-              onCheckedChange={(checked) => updateSetting('textToSpeech', checked)}
+              onCheckedChange={(checked) => {
+                updateSetting('textToSpeech', checked);
+                if (checked) {
+                  closeWidget();
+                }
+              }}
               aria-label={translations.toggleTextToSpeech}
             />
           </div>
