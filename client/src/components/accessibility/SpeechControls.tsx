@@ -326,7 +326,7 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
         }
         #speech-controls-plain-overlay button {
           ${isMobile
-            ? 'padding: 4px 8px; font-size: 13px; border-radius: 6px; border: none; font-weight: bold; margin-right: 2px; margin-bottom: 2px; cursor: pointer;'
+            ? 'padding: 2px 4px; font-size: 8px; border-radius: 6px; border: none; font-weight: bold; margin-right: 1px; margin-bottom: 1px; cursor: pointer;'
             : 'padding: 6px 14px; border-radius: 6px; border: none; font-weight: bold; margin-right: 4px; margin-bottom: 2px; cursor: pointer;'}
         }
         #speech-controls-plain-overlay #speech-controls-start { background: #2563eb; color: white; }
