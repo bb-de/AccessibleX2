@@ -9,7 +9,7 @@
 }
 
 body.is-mobile .speech-controls-container {
-  width: 90vw !important;
+  width: 40vw !important;
   max-width: 320px !important;
   top: 1rem !important;
   right: 1rem !important;
