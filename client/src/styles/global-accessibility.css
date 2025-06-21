@@ -9,12 +9,12 @@
 }
 
 body.is-mobile .speech-controls-container {
-  width: 90vw;
-  max-width: 320px;
-  top: 1rem; /* 16px */
-  right: 1rem; /* 16px */
-  left: auto;
-  transform: none;
+  width: 90vw !important;
+  max-width: 320px !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  left: auto !important;
+  transform: none !important;
 }
 
 body.is-desktop .speech-controls-container {

@@ -55,6 +55,9 @@ function App() {
           <SpeechControlsPortal isMobile={isMobile} />
         </AccessibilityProvider>
       </TooltipProvider>
+      <div className="fixed bottom-2 left-2 bg-red-500 text-white p-2 rounded z-[99999]">
+        {isMobile ? 'Mobile' : 'Desktop'}
+      </div>
     </QueryClientProvider>
   );
 }
