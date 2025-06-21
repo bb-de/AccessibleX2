@@ -128,7 +128,9 @@ export const translations = {
     toggleBigWhiteCursor: 'Toggle big white cursor',
     toggleBigBlackCursor: 'Toggle big black cursor',
     toggleVirtualKeyboard: 'Toggle virtual keyboard',
-    togglePageStructure: 'Toggle page structure'
+    togglePageStructure: 'Toggle page structure',
+    textToSpeechNotSupported: 'Text-to-Speech is not supported by your browser.',
+    selectTextToReadAloud: 'Enter text or select text on the page to read aloud...',
   },
   
   'de': {
@@ -257,7 +259,9 @@ export const translations = {
     toggleBigWhiteCursor: 'Großen weißen Cursor umschalten',
     toggleBigBlackCursor: 'Großen schwarzen Cursor umschalten',
     toggleVirtualKeyboard: 'Virtuelle Tastatur umschalten',
-    togglePageStructure: 'Seitenstruktur umschalten'
+    togglePageStructure: 'Seitenstruktur umschalten',
+    textToSpeechNotSupported: 'Text-zu-Sprache wird von Ihrem Browser nicht unterstützt.',
+    selectTextToReadAloud: 'Text eingeben oder Text auf der Seite zum Vorlesen markieren...',
   },
   
   'fr': {
@@ -385,8 +389,10 @@ export const translations = {
     toggleHighlightFocus: 'Activer/désactiver le surlignage du focus',
     toggleBigWhiteCursor: 'Activer/désactiver le grand curseur blanc',
     toggleBigBlackCursor: 'Activer/désactiver le grand curseur noir',
-    toggleVirtualKeyboard: 'Activer/désactiver le clavier virtuel',
-    togglePageStructure: 'Activer/désactiver la structure de la page'
+    toggleVirtualKeyboard: 'Basculer le clavier virtuel',
+    togglePageStructure: 'Basculer la structure de la page',
+    textToSpeechNotSupported: 'La synthèse vocale n\'est pas prise en charge par votre navigateur.',
+    selectTextToReadAloud: 'Saisissez du texte ou sélectionnez du texte sur la page pour le lire à haute voix...',
   },
   
   'es': {
@@ -515,6 +521,8 @@ export const translations = {
     toggleBigWhiteCursor: 'Alternar cursor grande blanco',
     toggleBigBlackCursor: 'Alternar cursor grande negro',
     toggleVirtualKeyboard: 'Alternar teclado virtual',
-    togglePageStructure: 'Alternar estructura de la página'
+    togglePageStructure: 'Alternar estructura de la página',
+    textToSpeechNotSupported: 'El texto a voz no es compatible con su navegador.',
+    selectTextToReadAloud: 'Ingrese texto o seleccione texto en la página para leerlo en voz alta...',
   }
 };

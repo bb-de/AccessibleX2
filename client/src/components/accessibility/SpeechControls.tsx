@@ -1,5 +1,10 @@
 // Copyright (c) 2024 brandingbrothers.de. All rights reserved.
 import React, { useState, useRef } from 'react';
+import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { useAccessibility } from '@/hooks/useAccessibility';
+import { translations } from '@/lib/translation';
+import { isTouchDevice } from '@/lib/device-detection';
+import { X } from 'lucide-react';
 
 const STATUS = {
   idle: 'Bereit',
@@ -8,109 +13,107 @@ const STATUS = {
   error: 'Fehler beim Vorlesen',
 };
 
-export function SpeechControls({ initialText = '' }: { initialText?: string }) {
-  const [status, setStatus] = useState<'idle' | 'playing' | 'paused' | 'error'>('idle');
-  const [error, setError] = useState<string | null>(null);
-  const [rate, setRate] = useState(1.0);
-  const [currentText, setCurrentText] = useState(initialText);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+export function SpeechControls() {
+  const { settings, updateSetting } = useAccessibility();
+  const { language, textToSpeech } = settings;
+  const trans = translations[language];
+  const isMobile = isTouchDevice();
 
-  // Start Vorlesen
-  const handleStart = () => {
-    if (!currentText) {
-      setError('Kein Text zum Vorlesen markiert.');
-      setStatus('error');
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const utterance = new window.SpeechSynthesisUtterance(currentText);
-    utterance.rate = rate;
-    utterance.onstart = () => {
-      setStatus('playing');
-      setError(null);
-    };
-    utterance.onpause = () => setStatus('paused');
-    utterance.onresume = () => setStatus('playing');
-    utterance.onend = () => setStatus('idle');
-    utterance.onerror = (e) => {
-      setStatus('error');
-      setError('Fehler beim Vorlesen');
-    };
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  };
+  const {
+    text,
+    setText,
+    isPaused,
+    isSpeaking,
+    isEnded,
+    speak,
+    pause,
+    cancel,
+    supported,
+    voices,
+    selectedVoice,
+    setSelectedVoice,
+  } = useTextToSpeech({ lang: language });
 
-  // Pause
-  const handlePause = () => {
-    window.speechSynthesis.pause();
-    setStatus('paused');
-  };
+  if (!textToSpeech) {
+    return null;
+  }
 
-  // Stop
-  const handleStop = () => {
-    window.speechSynthesis.cancel();
-    setStatus('idle');
-  };
-
-  // Geschwindigkeit ändern
-  const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newRate = parseFloat(e.target.value);
-    setRate(newRate);
-    // Wenn gerade vorgelesen wird, neu starten
-    if (status === 'playing' && utteranceRef.current) {
-      handleStop();
-      setTimeout(handleStart, 100);
-    }
-  };
-
-  // Text aus aktueller Selektion übernehmen
   const handleUseSelection = () => {
-    const selection = window.getSelection();
-    const selectedText = selection && selection.toString().trim();
+    const selectedText = window.getSelection()?.toString().trim();
     if (selectedText) {
-      setCurrentText(selectedText);
-      setError(null);
-      setStatus('idle');
-    } else {
-      setError('Bitte markieren Sie zuerst einen Text.');
-      setStatus('error');
+      setText(selectedText);
     }
   };
+
+  if (!supported) {
+    return (
+      <div className={`fixed z-[100000] bg-gray-800 text-white p-4 rounded-lg shadow-2xl ${isMobile ? 'w-[250px] top-4 right-4' : 'w-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}`}>
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-lg font-bold">{trans.textToSpeech}</h3>
+          <button 
+            onClick={() => updateSetting('textToSpeech', false)}
+            className="text-gray-400 hover:text-white"
+            aria-label={trans.closeAccessibilityMenu}
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <p>{trans.textToSpeechNotSupported || 'Text-to-Speech is not supported by your browser.'}</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ background: '#222', color: 'white', padding: 20, fontSize: 18, zIndex: 99999, borderRadius: 12, minWidth: 340, boxShadow: '0 4px 24px rgba(0,0,0,0.2)' }}>
-      <div style={{ marginBottom: 12, fontWeight: 'bold', fontSize: 20 }}>Vorlesefunktion</div>
-      <div style={{ marginBottom: 8 }}>
+    <div 
+      className={`fixed z-[100000] bg-gray-800 text-white p-4 rounded-lg shadow-2xl transition-all duration-300 ${isMobile ? 'w-[250px] top-4 right-4' : 'w-[400px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}`}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold">{trans.textToSpeech}</h3>
+        <button 
+          onClick={() => updateSetting('textToSpeech', false)}
+          className="text-gray-400 hover:text-white"
+          aria-label={trans.closeAccessibilityMenu}
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <select
+            value={selectedVoice?.name || ''}
+            onChange={(e) => {
+              const voice = voices.find(v => v.name === e.target.value);
+              if (voice) setSelectedVoice(voice);
+            }}
+            className="w-full bg-gray-700 border-gray-600 rounded-md p-2 text-sm"
+            aria-label="Select voice"
+          >
+            {voices.map(voice => (
+              <option key={voice.name} value={voice.name}>
+                {voice.name} ({voice.lang})
+              </option>
+            ))}
+          </select>
+        </div>
         <textarea
-          value={currentText}
-          onChange={e => setCurrentText(e.target.value)}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
           rows={3}
-          style={{ width: '100%', borderRadius: 6, padding: 8, fontSize: 16, color: '#222' }}
-          placeholder="Text zum Vorlesen eingeben oder markieren..."
+          className="w-full bg-gray-700 border-gray-600 rounded-md p-2 text-sm"
+          placeholder={trans.selectTextToReadAloud || 'Select text to read aloud...'}
+          aria-label="Text to read"
         />
+        <div className="flex justify-between items-center gap-2 flex-wrap">
+          {isSpeaking && !isPaused ? (
+            <button onClick={pause} className="px-3 py-2 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-md flex-grow">Pause</button>
+          ) : (
+            <button onClick={speak} className="px-3 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md flex-grow">{isPaused ? 'Resume' : 'Speak'}</button>
+          )}
+          <button onClick={cancel} disabled={!isSpeaking && isEnded} className="px-3 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-md flex-grow disabled:bg-red-800 disabled:cursor-not-allowed">Stop</button>
+          <button onClick={handleUseSelection} className="px-3 py-2 text-sm bg-green-500 hover:bg-green-600 text-white rounded-md flex-grow">Use selection</button>
+        </div>
       </div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-        <button onClick={handleStart} style={{ padding: '6px 14px', borderRadius: 6, background: '#2563eb', color: 'white', border: 'none', fontWeight: 'bold' }}>Start</button>
-        <button onClick={handlePause} style={{ padding: '6px 14px', borderRadius: 6, background: '#f59e42', color: 'white', border: 'none', fontWeight: 'bold' }}>Pause</button>
-        <button onClick={handleStop} style={{ padding: '6px 14px', borderRadius: 6, background: '#ef4444', color: 'white', border: 'none', fontWeight: 'bold' }}>Stopp</button>
-        <button onClick={handleUseSelection} style={{ padding: '6px 14px', borderRadius: 6, background: '#10b981', color: 'white', border: 'none', fontWeight: 'bold' }}>Markierten Text übernehmen</button>
-      </div>
-      <div style={{ marginBottom: 8 }}>
-        <label style={{ marginRight: 8 }}>Geschwindigkeit: {rate.toFixed(2)}x</label>
-        <input
-          type="range"
-          min="0.5"
-          max="2"
-          step="0.05"
-          value={rate}
-          onChange={handleRateChange}
-          style={{ verticalAlign: 'middle' }}
-        />
-      </div>
-      <div style={{ marginBottom: 4 }}>
-        <span>Status: <b>{STATUS[status]}</b></span>
-      </div>
-      {error && <div style={{ color: '#f87171', marginTop: 4 }}>{error}</div>}
     </div>
   );
 }
