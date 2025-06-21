@@ -39,21 +39,20 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
   // Dynamische Stil-Anpassungen basierend auf Gerät und Orientierung
   const getDynamicStyles = () => {
     if (deviceInfo.isMobile && deviceInfo.isPortrait) {
-      // Mobil - Hochformat: Zentriert und schmaler
+      // Mobil - Hochformat: Rechtsbündig, Höhe 50%
       return {
         width: '90vw',
-        maxWidth: '280px', // Deutlich schmaler
-        left: '50%',
-        transform: 'translateX(-50%)',
-        maxHeight: '70vh',
-        bottom: '80px',
+        maxWidth: '280px',
+        right: '16px', // Rechtsbündig
+        maxHeight: '50vh', // Höhe auf 50% reduziert
+        bottom: '80px', // Sicherer Abstand zum Button
       };
     } else if (deviceInfo.isMobile && deviceInfo.isLandscape) {
-      // Mobil - Querformat: Rechtsbündig mit sicherem Abstand zum Button
+      // Mobil - Querformat: Rechts, Höhe reduziert, verdeckt Button nicht
       return {
-        width: '280px', // Feste, schmalere Breite
-        right: '80px',  // Sicherer Abstand zum Button (48px Button + 12px Offset + 20px Lücke)
-        maxHeight: 'calc(100vh - 40px)',
+        width: '280px',
+        right: '72px',  // Sicherer Abstand: 48px Button + 12px Offset + 12px Lücke
+        maxHeight: 'calc(100vh - 40px)', // Reduzierte Höhe
         bottom: '20px',
       };
     } else {
@@ -91,8 +90,8 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         zIndex: 999999,
         // Transform für die Animation hinzufügen
         transform: isOpen && !isClosing ? 
-          (dynamicStyles.transform || 'none') : 
-          `${dynamicStyles.transform || ''} translateY(20px) scale(0.95)`
+          'none' : 
+          'translateY(20px) scale(0.95)'
       }}
       aria-hidden={!isOpen && !isClosing}
       onMouseDown={(e) => e.stopPropagation()}
