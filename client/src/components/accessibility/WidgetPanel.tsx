@@ -7,7 +7,7 @@ import { WidgetFooter } from "./WidgetFooter";
 import { LanguageSelector } from "./LanguageSelector";
 import { AccessibleLogoInline } from "./AccessibleLogoInline";
 import { useAccessibility } from "@/hooks/useAccessibility";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useDeviceDetection } from "@/hooks/use-mobile";
 import { 
   UserCog, 
   Eye, 
@@ -27,7 +27,7 @@ type TabType = "profiles" | "vision" | "content" | "navigation";
 
 export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpen, isClosing = false, handleCloseWidget }, ref) => {
   const [activeTab, setActiveTab] = useState<TabType>("profiles");
-  const { toggleWidget, resetSettings, translations, settings } = useAccessibility();
+  const { toggleWidget, resetSettings, translations, settings, deviceInfo } = useAccessibility();
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
@@ -36,8 +36,44 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
   // Calculate dynamic bottom position based on virtual keyboard status
   const dynamicBottom = settings.virtualKeyboard ? '330px' : '80px'; // 80px (original) + ~250px (keyboard height)
 
+  // Dynamische Stil-Anpassungen basierend auf Gerät und Orientierung
+  const getDynamicStyles = () => {
+    if (deviceInfo.isMobile && deviceInfo.isPortrait) {
+      // Mobil - Hochformat
+      return {
+        width: 'calc(100vw - 40px)', // 20px Rand auf jeder Seite
+        maxWidth: '400px',
+        minWidth: 'auto',
+        right: '20px',
+        maxHeight: '75vh', // Reduzierte Höhe
+        bottom: dynamicBottom,
+      };
+    } else if (deviceInfo.isMobile && deviceInfo.isLandscape) {
+      // Mobil - Querformat
+      return {
+        width: '50vw', // 50% der Bildschirmbreite
+        maxWidth: '400px',
+        minWidth: '300px',
+        right: '20px',
+        maxHeight: 'calc(100vh - 40px)', // Fast volle Höhe
+        bottom: '20px',
+      };
+    } else {
+      // Desktop und Tablet
+      return {
+        width: '340px',
+        minWidth: '340px',
+        maxWidth: '340px',
+        maxHeight: 'calc(100vh - 120px)',
+        bottom: dynamicBottom,
+        right: '16px'
+      };
+    }
+  };
+  const dynamicStyles = getDynamicStyles();
+
   // Animation-Logik
-  let panelClass = "fixed right-4 bg-white rounded-xl shadow-lg transition-all duration-300 transform";
+  let panelClass = "fixed bg-white rounded-xl shadow-lg transition-all duration-300 transform";
   if (isOpen && !isClosing) {
     panelClass += " translate-y-0 opacity-100 visible";
   } else if (isClosing) {
@@ -52,11 +88,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
       ref={ref} 
       className={panelClass}
       style={{
-        width: '340px',
-        minWidth: '340px',
-        maxWidth: '340px',
-        maxHeight: 'calc(100vh - 120px)', // Feste maximale Höhe unabhängig vom Keyboard
-        bottom: dynamicBottom, // Dynamischer Abstand vom unteren Rand
+        ...dynamicStyles,
         overflowY: 'scroll',
         scrollBehavior: 'smooth',
         zIndex: 999999 // Höherer z-index als die virtuelle Tastatur
@@ -111,7 +143,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         >
           <div className="flex flex-col items-center">
             <UserCog className="h-5 w-5 mb-1" />
-            <span>{translations.profiles}</span>
+            <span className="whitespace-nowrap">{translations.profiles}</span>
           </div>
         </button>
         <button 
@@ -123,7 +155,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         >
           <div className="flex flex-col items-center">
             <Eye className="h-5 w-5 mb-1" />
-            <span>{translations.vision}</span>
+            <span className="whitespace-nowrap">{translations.vision}</span>
           </div>
         </button>
         <button 
@@ -135,7 +167,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         >
           <div className="flex flex-col items-center">
             <FileText className="h-5 w-5 mb-1" />
-            <span>{translations.content}</span>
+            <span className="whitespace-nowrap">{translations.content}</span>
           </div>
         </button>
         <button 
@@ -147,7 +179,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
         >
           <div className="flex flex-col items-center">
             <Compass className="h-5 w-5 mb-1" />
-            <span>{translations.navigation}</span>
+            <span className="whitespace-nowrap">{translations.navigation}</span>
           </div>
         </button>
       </div>
