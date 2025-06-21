@@ -1,7 +1,9 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { AccessibilityWidget } from '@/components/accessibility/AccessibilityWidget';
+import { DeviceInfo } from '@/components/accessibility/DeviceInfo';
+import { DeviceAwareWidget } from '@/components/accessibility/DeviceAwareWidget';
+import { OrientationDemo } from '@/components/accessibility/OrientationDemo';
 
 export function WidgetDemo() {
   return (
@@ -21,6 +23,25 @@ export function WidgetDemo() {
             Website für alle Benutzer.
           </p>
         </header>
+
+        {/* Geräteerkennung Demo */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Geräteerkennung & Anpassungen
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <DeviceInfo />
+            <DeviceAwareWidget />
+          </div>
+        </div>
+
+        {/* Orientierungsänderungen Demo */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Orientierungsänderungen & Responsive Design
+          </h2>
+          <OrientationDemo />
+        </div>
 
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
           <div className="grid md:grid-cols-2 gap-8">
@@ -136,7 +157,7 @@ export function WidgetDemo() {
       </div>
       
       {/* Das React Accessibility Widget */}
-      <AccessibilityWidget />
+      <AccessibilityWidget shadowRootElement={null} />
     </div>
   );
 }

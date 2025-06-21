@@ -4,6 +4,7 @@ import { translations } from '@/lib/translation';
 import { applyAccessibilityStyles } from '@/lib/a11y-helpers';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useDeviceDetection } from '@/hooks/use-mobile';
 
 const NETLIFY_FUNCTIONS_API_BASE = 'https://shimmering-tartufo-f58e9c.netlify.app/.netlify/functions/analytics';
 
@@ -112,6 +113,20 @@ interface AccessibilityContextType {
   translations: typeof translations['en'];
   applyAccessibilityChanges: () => void;
   shadowRoot: ShadowRoot | null;
+  deviceInfo: {
+    isMobile: boolean;
+    isTablet: boolean;
+    isDesktop: boolean;
+    isTouchDevice: boolean;
+    deviceType: 'mobile' | 'tablet' | 'desktop';
+    screenWidth: number;
+    screenHeight: number;
+    userAgent: string;
+    orientation: 'portrait' | 'landscape';
+    isPortrait: boolean;
+    isLandscape: boolean;
+    orientationAngle: number;
+  };
 }
 
 export const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
@@ -447,6 +462,7 @@ export function AccessibilityProvider({ children, shadowRoot }: { children: Reac
         translations: {...translations.en, ...translations[language]},
         applyAccessibilityChanges,
         shadowRoot,
+        deviceInfo: useDeviceDetection(),
       }}
     >
       {children}
