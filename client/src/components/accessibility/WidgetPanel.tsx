@@ -72,8 +72,12 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
   
   if (isOpen && !isClosing) {
     panelClass += " opacity-100 visible";
+  } else if (isClosing) {
+    // Beim Schließen sichtbar, aber transparent halten für die Animation
+    panelClass += " opacity-0 visible";
   } else {
-    panelClass += " opacity-0 invisible";
+    // Im komplett geschlossenen Zustand vollständig ausblenden
+    panelClass += " opacity-0 invisible w-0 h-0 overflow-hidden pointer-events-none";
   }
 
   return (
