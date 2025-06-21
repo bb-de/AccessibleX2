@@ -108,35 +108,25 @@ export function detectDevice(): DeviceInfo {
   // Bildschirmgröße-basierte Erkennung
   const isMobileScreen = screenWidth < 768;
   const isTabletScreen = screenWidth >= 768 && screenWidth < 1024;
-  const isDesktopScreen = screenWidth >= 1024;
 
-  // Kombinierte Erkennung (User-Agent + Bildschirmgröße + Touch-Support)
-  let deviceType: 'mobile' | 'tablet' | 'desktop' = 'desktop';
-  let isMobile = false;
-  let isTablet = false;
-  let isDesktop = true;
+  // Robustere kombinierte Erkennung
+  let deviceType: 'mobile' | 'tablet' | 'desktop';
 
-  // Mobile-Geräte erkennen
-  if (isMobileUA || (isMobileScreen && isTouchDevice)) {
+  if (isMobileUA) {
     deviceType = 'mobile';
-    isMobile = true;
-    isTablet = false;
-    isDesktop = false;
-  }
-  // Tablet-Geräte erkennen
-  else if (isTabletUA || (isTabletScreen && isTouchDevice)) {
+  } else if (isTabletUA) {
     deviceType = 'tablet';
-    isMobile = false;
-    isTablet = true;
-    isDesktop = false;
-  }
-  // Desktop-Geräte (alles andere)
-  else {
+  } else if (isMobileScreen) {
+    deviceType = 'mobile';
+  } else if (isTabletScreen) {
+    deviceType = 'tablet';
+  } else {
     deviceType = 'desktop';
-    isMobile = false;
-    isTablet = false;
-    isDesktop = true;
   }
+
+  const isMobile = deviceType === 'mobile';
+  const isTablet = deviceType === 'tablet';
+  const isDesktop = deviceType === 'desktop';
 
   return {
     isMobile,
