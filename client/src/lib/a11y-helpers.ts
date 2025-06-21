@@ -700,8 +700,6 @@ function mobileThrottle<T extends (...args: any[]) => void>(func: T, limit: numb
 
 // ---- Reading Mask: Mouse and Touch Support ----
 function handleReadingMask(): void {
-  console.log('🔍 Reading Mask: Starting...');
-  
   // Remove any existing reading mask first
   removeReadingMask();
 
@@ -722,42 +720,42 @@ function handleReadingMask(): void {
     width: '100%',
     pointerEvents: 'none',
     zIndex: '999999',
-    willChange: 'transform', // Optimize for animations
-    backfaceVisibility: 'hidden', // Reduce rendering cost
-    transform: 'translateZ(0)' // Force hardware acceleration
+    willChange: 'transform',
+    backfaceVisibility: 'hidden',
   };
 
   // Apply styles to top mask
   Object.assign(topMask.style, commonStyles, {
     top: '0',
-    height: '0',
+    height: '100vh',
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    transform: 'translateZ(0) translateY(0px)' // Use transform instead of height
+    transform: 'translateZ(0) scaleY(0)',
+    transformOrigin: 'top',
   });
 
   // Apply styles to bottom mask
   Object.assign(bottomMask.style, commonStyles, {
     bottom: '0',
-    height: '0',
+    height: '100vh',
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    transform: 'translateZ(0) translateY(0px)' // Use transform instead of height
+    transform: 'translateZ(0) scaleY(0)',
+    transformOrigin: 'bottom',
   });
 
   // Apply styles to focus strip
   Object.assign(focusStrip.style, commonStyles, {
+    top: '0', // Will be positioned with transform
     height: '100px',
     border: '2px solid rgba(255, 255, 0, 0.5)',
     boxSizing: 'border-box',
     backgroundColor: 'transparent',
-    transform: 'translateZ(0) translateY(0px)' // Use transform for positioning
+    transform: 'translateZ(0) translateY(-100px)', // Initially off-screen
   });
 
   // Add elements to the document
   document.body.appendChild(topMask);
   document.body.appendChild(bottomMask);
   document.body.appendChild(focusStrip);
-
-  console.log('🔍 Reading Mask: Elements created and added to DOM');
 
   // Store current mouse/touch position globally
   if (!window.hasOwnProperty('lastKnownPosition')) {
@@ -795,8 +793,6 @@ function handleReadingMask(): void {
   
   document.addEventListener('mousemove', throttledUpdate);
   document.addEventListener('touchmove', throttledUpdate, { passive: true });
-
-  console.log('🔍 Reading Mask: Event listeners added, mask should be visible');
 }
 
 function updateReadingMask(e: MouseEvent | TouchEvent): void {
@@ -819,15 +815,13 @@ function updateReadingMask(e: MouseEvent | TouchEvent): void {
 
       // Use transform instead of height/top for better performance
       topMask.style.transform = `translateZ(0) scaleY(${topMaskHeight / windowHeight})`;
-      bottomMask.style.transform = `translateZ(0) translateY(${bottomMaskTop - windowHeight}px) scaleY(${bottomMaskHeight / windowHeight})`;
+      bottomMask.style.transform = `translateZ(0) scaleY(${bottomMaskHeight / windowHeight})`;
       focusStrip.style.transform = `translateZ(0) translateY(${focusStripTop}px)`;
     }
   });
 }
 
 function removeReadingMask(): void {
-  console.log('🔍 Reading Mask: Removing...');
-  
   const elementsToRemove = [
     'reading-mask-top',
     'reading-mask-bottom',
@@ -842,14 +836,10 @@ function removeReadingMask(): void {
   // Remove event listeners
   document.removeEventListener('mousemove', updateReadingMask);
   document.removeEventListener('touchmove', updateReadingMask);
-  
-  console.log('🔍 Reading Mask: Removed');
 }
 
 // ---- Reading Guide: Mouse and Touch Support ----
 function handleReadingGuide(): void {
-  console.log('📏 Reading Guide: Starting...');
-  
   // Remove any existing reading guide first
   removeReadingGuide();
 
@@ -873,8 +863,6 @@ function handleReadingGuide(): void {
   // Add to document
   document.body.appendChild(guide);
 
-  console.log('📏 Reading Guide: Element created and added to DOM');
-
   // Use different throttle for mobile vs desktop
   const isMobile = isTouchDevice();
   const throttleDelay = isMobile ? 16 : 16; // 60fps on both mobile and desktop for modern devices
@@ -882,8 +870,6 @@ function handleReadingGuide(): void {
   
   document.addEventListener('mousemove', throttledUpdate);
   document.addEventListener('touchmove', throttledUpdate, { passive: true });
-
-  console.log('📏 Reading Guide: Event listeners added, guide should be visible');
 }
 
 function updateReadingGuide(e: MouseEvent | TouchEvent): void {
@@ -899,16 +885,12 @@ function updateReadingGuide(e: MouseEvent | TouchEvent): void {
 }
 
 function removeReadingGuide(): void {
-  console.log('📏 Reading Guide: Removing...');
-  
   const guide = document.getElementById('reading-guide');
   if (guide) guide.remove();
 
   // Remove event listeners
   document.removeEventListener('mousemove', updateReadingGuide);
   document.removeEventListener('touchmove', updateReadingGuide);
-  
-  console.log('📏 Reading Guide: Removed');
 }
 
 // Helper function for contrast modes
@@ -1441,18 +1423,14 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   }
 
   if (settings.readingMask) {
-    console.log('🎯 applyAccessibilityStyles: Reading Mask is enabled, calling handleReadingMask()');
     handleReadingMask();
   } else {
-    console.log('🎯 applyAccessibilityStyles: Reading Mask is disabled, calling removeReadingMask()');
     removeReadingMask();
   }
 
   if (settings.readingGuide) {
-    console.log('🎯 applyAccessibilityStyles: Reading Guide is enabled, calling handleReadingGuide()');
     handleReadingGuide();
   } else {
-    console.log('🎯 applyAccessibilityStyles: Reading Guide is disabled, calling removeReadingGuide()');
     removeReadingGuide();
   }
 
