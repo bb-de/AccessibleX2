@@ -1352,7 +1352,7 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
         color: #8ab4f8 !important;
       }
       img, video {
-        filter: brightness(0.7) contrast(1.1) !important;
+        filter: brightness(0.5) contrast(1.1) !important;
       }
     `;
   }

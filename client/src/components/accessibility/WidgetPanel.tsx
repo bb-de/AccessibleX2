@@ -68,7 +68,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
   const dynamicStyles = getDynamicStyles();
 
   // Animationslogik (angepasst für smoothe Übergänge)
-  let panelClass = "fixed bg-white rounded-xl shadow-lg transition-all duration-300";
+  let panelClass = "fixed bg-white rounded-xl shadow-lg transition-all duration-300 dark:bg-gray-900 dark:text-white";
   
   if (isOpen && !isClosing) {
     panelClass += " opacity-100 visible";
