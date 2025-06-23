@@ -1337,33 +1337,6 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
   if (settings.monochrome > 0) {
     filterValues.push(`grayscale(${settings.monochrome}%)`);
   }
-  if (settings.darkMode && isPageBright()) {
-    cssRules += `
-      html, body {
-        background: #181818 !important;
-        color: #f0f0f0 !important;
-      }
-      a, button, input, textarea, select {
-        color: #f0f0f0 !important;
-        background: #222 !important;
-        border-color: #333 !important;
-      }
-      a {
-        color: #8ab4f8 !important;
-      }
-      img, video {
-        filter: brightness(0.5) contrast(1.1) !important;
-      }
-      /* Widget-Panel explizit im Darkmode stylen */
-      [data-accessibility-widget] {
-        background: #181818 !important;
-        color: #f0f0f0 !important;
-      }
-      [data-accessibility-widget] img, [data-accessibility-widget] video {
-        filter: brightness(0.5) contrast(1.1) !important;
-      }
-    `;
-  }
   const filterValue = filterValues.length > 0 ? filterValues.join(' ') : 'none';
 
   cssRules += `
@@ -1409,6 +1382,35 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
 
   // Selektiver Darkmode anwenden oder zurücksetzen
   applySelectiveDarkmode(!!settings.darkMode);
+
+  // Darkmode-Styles für das Widget-Panel immer anwenden, sobald darkMode aktiv ist
+  if (settings.darkMode) {
+    cssRules += `
+      html, body {
+        background: #181818 !important;
+        color: #f0f0f0 !important;
+      }
+      a, button, input, textarea, select {
+        color: #f0f0f0 !important;
+        background: #222 !important;
+        border-color: #333 !important;
+      }
+      a {
+        color: #8ab4f8 !important;
+      }
+      img, video {
+        filter: brightness(0.5) contrast(1.1) !important;
+      }
+      /* Widget-Panel explizit im Darkmode stylen */
+      [data-accessibility-widget] {
+        background: #181818 !important;
+        color: #f0f0f0 !important;
+      }
+      [data-accessibility-widget] img, [data-accessibility-widget] video {
+        filter: brightness(0.5) contrast(1.1) !important;
+      }
+    `;
+  }
 
   // Set the CSS rules
   styleElement.textContent = cssRules;
