@@ -1354,6 +1354,14 @@ export function applyAccessibilityStyles(settings: AccessibilitySettings, shadow
       img, video {
         filter: brightness(0.5) contrast(1.1) !important;
       }
+      /* Widget-Panel explizit im Darkmode stylen */
+      [data-accessibility-widget] {
+        background: #181818 !important;
+        color: #f0f0f0 !important;
+      }
+      [data-accessibility-widget] img, [data-accessibility-widget] video {
+        filter: brightness(0.5) contrast(1.1) !important;
+      }
     `;
   }
   const filterValue = filterValues.length > 0 ? filterValues.join(' ') : 'none';

@@ -85,6 +85,7 @@ export const WidgetPanel = forwardRef<HTMLDivElement, WidgetPanelProps>(({ isOpe
       id="accessibility-panel" 
       ref={ref} 
       className={panelClass}
+      data-accessibility-widget
       style={{
         ...dynamicStyles,
         // minWidth auf 280px setzen, um Konsistenz zu gewährleisten
