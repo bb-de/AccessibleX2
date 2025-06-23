@@ -340,9 +340,16 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
           background: #222;
           color: white;
           border-radius: 12px;
-          ${isMobile
-            ? `width: 45vw; max-width: 180px; min-width: unset; right: 1rem; left: unset; top: 1rem; padding: 8px; position: fixed; max-height: 90vh; overflow-y: auto; pointer-events: auto;`
-            : `min-width: 340px; left: calc(100vw - 500px); top: 60px; padding: 20px; position: absolute;`}
+          width: ${isMobile ? '45vw' : '340px'};
+          max-width: ${isMobile ? '180px' : '400px'};
+          min-width: unset;
+          right: 32px;
+          top: 32px;
+          padding: ${isMobile ? '8px' : '20px'};
+          position: fixed;
+          max-height: 90vh;
+          overflow-y: auto;
+          pointer-events: auto;
           box-shadow: 0 4px 24px rgba(0,0,0,0.2);
           z-index: 1000001;
           user-select: none;
@@ -404,19 +411,33 @@ export function exportSpeechControlsOverlayWithLabels(show: boolean, labels: Spe
     let isDragging = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
+    let startRight = 32;
+    let startTop = 32;
 
     if (dragHandle) {
       dragHandle.addEventListener('mousedown', (e: MouseEvent) => {
         isDragging = true;
         const rect = container.getBoundingClientRect();
-        dragOffsetX = e.clientX - rect.left;
+        dragOffsetX = e.clientX - rect.right;
         dragOffsetY = e.clientY - rect.top;
+        startRight = window.innerWidth - rect.right;
+        startTop = rect.top;
         document.body.style.userSelect = 'none';
       });
       document.addEventListener('mousemove', (e: MouseEvent) => {
         if (isDragging) {
-          container.style.left = `${e.clientX - dragOffsetX}px`;
-          container.style.top = `${e.clientY - dragOffsetY}px`;
+          let newRight = window.innerWidth - e.clientX - dragOffsetX;
+          let newTop = e.clientY - dragOffsetY;
+          // Begrenzung auf den Viewport
+          const minRight = 0;
+          const minTop = 0;
+          const maxRight = window.innerWidth - (container.offsetWidth || 340);
+          const maxTop = window.innerHeight - (container.offsetHeight || 200);
+          newRight = Math.max(minRight, Math.min(newRight, maxRight));
+          newTop = Math.max(minTop, Math.min(newTop, maxTop));
+          container.style.right = `${newRight}px`;
+          container.style.top = `${newTop}px`;
+          container.style.left = '';
         }
       });
       document.addEventListener('mouseup', () => {
