@@ -132,9 +132,6 @@ export function ContentTab() {
               checked={settings.textToSpeech}
               onCheckedChange={(checked) => {
                 updateSetting('textToSpeech', checked);
-                if (checked) {
-                  closeWidget();
-                }
               }}
               aria-label={translations.toggleTextToSpeech}
             />

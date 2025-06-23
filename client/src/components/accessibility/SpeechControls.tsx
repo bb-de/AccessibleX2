@@ -19,7 +19,9 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
   const trans = translations[language];
   const dragRef = useRef<HTMLDivElement>(null);
 
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  // Startposition: oben rechts (z.B. 32px von oben und 32px von rechts)
+  const initialPosition = { x: window.innerWidth - 400 - 32, y: 32 };
+  const [position, setPosition] = useState(initialPosition);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
@@ -58,10 +60,16 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging || isMobile) return;
-    setPosition({
-      x: e.clientX - offset.x,
-      y: e.clientY - offset.y,
-    });
+    let newX = e.clientX - offset.x;
+    let newY = e.clientY - offset.y;
+    // Begrenzung auf den Viewport
+    const minX = 0;
+    const minY = 0;
+    const maxX = window.innerWidth - (dragRef.current?.offsetWidth || 400);
+    const maxY = window.innerHeight - (dragRef.current?.offsetHeight || 200);
+    newX = Math.max(minX, Math.min(newX, maxX));
+    newY = Math.max(minY, Math.min(newY, maxY));
+    setPosition({ x: newX, y: newY });
     e.preventDefault();
   };
 
@@ -82,6 +90,22 @@ export function SpeechControls({ isMobile }: { isMobile: boolean }) {
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, isMobile]);
+
+  // Wenn Fenstergröße sich ändert (z.B. durch Resize), Position ggf. anpassen
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition(pos => {
+        const maxX = window.innerWidth - (dragRef.current?.offsetWidth || 400);
+        const maxY = window.innerHeight - (dragRef.current?.offsetHeight || 200);
+        return {
+          x: Math.max(0, Math.min(pos.x, maxX)),
+          y: Math.max(0, Math.min(pos.y, maxY)),
+        };
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleUseSelection = () => {
     const selectedText = window.getSelection()?.toString().trim();
