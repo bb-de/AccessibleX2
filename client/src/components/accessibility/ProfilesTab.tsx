@@ -31,7 +31,7 @@ export function ProfilesTab() {
                settings.highlightTitles &&
                settings.highlightLinks &&
                settings.customCursor &&
-               settings.cursorSize === 'bigger' ;
+               settings.cursorSize === 'bigger';
                
       case 'motorImpaired':
         return settings.keyboardNavigation && 
@@ -58,8 +58,7 @@ export function ProfilesTab() {
                settings.cursorSize === 'bigger' &&
                settings.cursorColor === 'red';
       case 'screenreaderMode':
-        return  
-               settings.textToSpeech;
+        return settings.textToSpeech;
       default:
         return false;
     }

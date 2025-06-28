@@ -326,7 +326,6 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
             highlightLinks: true,
             customCursor: true,
             cursorSize: 'bigger',
-            keyboardNavigation: true,
           };
         case 'motorImpaired':
           return {
