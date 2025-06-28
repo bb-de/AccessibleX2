@@ -160,28 +160,19 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
 
   // Load saved settings on initial render
   useEffect(() => {
-    console.log('🔄 Loading saved settings...');
     const savedSettings = localStorage.getItem('accessibility-settings');
     const savedLanguage = localStorage.getItem('accessibility-language');
     
     if (savedSettings) {
       try {
-        const parsedSettings = JSON.parse(savedSettings);
-        console.log('✅ Loaded settings from localStorage:', parsedSettings);
-        setSettings(parsedSettings);
-      } catch (error) {
-        console.error('❌ Failed to parse saved accessibility settings', error);
-      }
-    } else {
-      console.log('ℹ️ No saved settings found, using defaults');
+        setSettings(JSON.parse(savedSettings));
+      } catch (error) {}
     }
     
     if (savedLanguage) {
       setLanguage(savedLanguage as Language);
     }
-    
     setIsInitialized(true);
-    console.log('✅ Initialization complete');
   }, []);
 
   useEffect(() => {
@@ -192,11 +183,8 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
   // Wende die Einstellungen an, wenn sie sich ändern (nur nach der Initialisierung)
   useEffect(() => {
     if (isInitialized) {
-      console.log('🔄 Applying settings:', settings);
       localStorage.setItem('accessibility-settings', JSON.stringify(settings));
       applyAccessibilityStyles(settings, shadowRoot);
-    } else {
-      console.log('⏳ Skipping settings application - not yet initialized');
     }
   }, [settings, shadowRoot, isInitialized]);
 
