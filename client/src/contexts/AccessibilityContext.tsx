@@ -2,12 +2,29 @@
 import React, { createContext, useCallback, useEffect, useState, useContext } from 'react';
 import { translations } from '@/lib/translation';
 import { applyAccessibilityStyles } from '@/lib/a11y-helpers';
-import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useDeviceDetection } from '@/hooks/use-mobile';
 import { Toaster } from '@/components/ui/toaster';
 
 const NETLIFY_FUNCTIONS_API_BASE = 'https://shimmering-tartufo-f58e9c.netlify.app/.netlify/functions/analytics';
+
+// Robuste API-Request-Funktion, die keine Exceptions wirft
+async function safeApiRequest(method: string, url: string, data?: unknown): Promise<void> {
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: data ? { "Content-Type": "application/json" } : {},
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+    });
+    
+    if (!response.ok) {
+      console.warn(`API request failed: ${response.status} ${response.statusText}`);
+    }
+  } catch (error) {
+    console.warn('API request failed:', error);
+  }
+}
 
 // Define types
 export type AccessibilityProfileId = 
@@ -136,27 +153,52 @@ export const AccessibilityContext = createContext<AccessibilityContextType | und
 export const AccessibilityProvider = ({ children, shadowRoot }: { children: React.ReactNode, shadowRoot: ShadowRoot | null }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState<AccessibilitySettings>(defaultSettings);
+  const [isInitialized, setIsInitialized] = useState(false);
   const { toast } = useToast();
   const [language, setLanguage] = useState<Language>('en');
   const deviceInfo = useDeviceDetection();
+
+  // Load saved settings on initial render
+  useEffect(() => {
+    console.log('🔄 Loading saved settings...');
+    const savedSettings = localStorage.getItem('accessibility-settings');
+    const savedLanguage = localStorage.getItem('accessibility-language');
+    
+    if (savedSettings) {
+      try {
+        const parsedSettings = JSON.parse(savedSettings);
+        console.log('✅ Loaded settings from localStorage:', parsedSettings);
+        setSettings(parsedSettings);
+      } catch (error) {
+        console.error('❌ Failed to parse saved accessibility settings', error);
+      }
+    } else {
+      console.log('ℹ️ No saved settings found, using defaults');
+    }
+    
+    if (savedLanguage) {
+      setLanguage(savedLanguage as Language);
+    }
+    
+    setIsInitialized(true);
+    console.log('✅ Initialization complete');
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle('is-mobile', deviceInfo.isMobile);
     document.body.classList.toggle('is-desktop', !deviceInfo.isMobile);
   }, [deviceInfo.isMobile]);
 
-  // Wende die Einstellungen an, wenn sie sich ändern
+  // Wende die Einstellungen an, wenn sie sich ändern (nur nach der Initialisierung)
   useEffect(() => {
-    localStorage.setItem('accessibility-settings', JSON.stringify(settings));
-    applyAccessibilityStyles(settings, shadowRoot);
-
-    // Handle virtual keyboard visibility
-  }, [settings, shadowRoot]);
-
-  // Wende die Einstellungen auch beim ersten Laden an
-  useEffect(() => {
-    applyAccessibilityStyles(settings, shadowRoot);
-  }, []);
+    if (isInitialized) {
+      console.log('🔄 Applying settings:', settings);
+      localStorage.setItem('accessibility-settings', JSON.stringify(settings));
+      applyAccessibilityStyles(settings, shadowRoot);
+    } else {
+      console.log('⏳ Skipping settings application - not yet initialized');
+    }
+  }, [settings, shadowRoot, isInitialized]);
 
   // Lausche auf Nachrichten vom übergeordneten Fenster, um den Widget-Status zu synchronisieren
   useEffect(() => {
@@ -207,18 +249,20 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
       [key]: value,
     }));
 
-    // Save analytics data
-    try {
-      apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, {
-        action: 'setting-change',
-        payload: {
-          setting: key,
-          value,
-        },
-      });
-    } catch (error) {
-      console.error('Failed to log setting change', error);
-    }
+    // Save analytics data (non-blocking)
+    setTimeout(() => {
+      try {
+        safeApiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, {
+          action: 'setting-change',
+          payload: {
+            setting: key,
+            value,
+          },
+        });
+      } catch (error) {
+        console.error('Failed to log setting change', error);
+      }
+    }, 0);
   }, []);
 
   // Increment numeric settings
@@ -230,17 +274,19 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
       [key]: Math.min((prevSettings[key] as number) + 1, 5),
     }));
 
-    // Log analytics
-    try {
-      apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, { 
-        action: 'profile-applied',
-        payload: {
-          profileId: 'visionImpaired'
-        },
-      });
-    } catch (error) {
-      console.error('Failed to log profile application', error);
-    }
+    // Log analytics (non-blocking)
+    setTimeout(() => {
+      try {
+        safeApiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, { 
+          action: 'profile-applied',
+          payload: {
+            profileId: 'visionImpaired'
+          },
+        });
+      } catch (error) {
+        console.error('Failed to log profile application', error);
+      }
+    }, 0);
 
     // Show toast notification
     toast({
@@ -343,17 +389,19 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
       ...profileSettings,
     });
 
-    // Log analytics
-    try {
-      apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, {
-        action: 'profile-applied',
-        payload: {
-          profileId
-        },
-      });
-    } catch (error) {
-      console.error('Failed to log profile application', error);
-    }
+    // Log analytics (non-blocking)
+    setTimeout(() => {
+      try {
+        safeApiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, {
+          action: 'profile-applied',
+          payload: {
+            profileId
+          },
+        });
+      } catch (error) {
+        console.error('Failed to log profile application', error);
+      }
+    }, 0);
 
     // Show toast notification
     toast({
@@ -369,15 +417,17 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
     // Styles sofort zurücksetzen!
     applyAccessibilityStyles(defaultSettings, null);
 
-    // Log analytics
-    try {
-      apiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, {
-        action: 'settings-reset',
-        payload: {},
-      });
-    } catch (error) {
-      console.error('Failed to log settings reset', error);
-    }
+    // Log analytics (non-blocking)
+    setTimeout(() => {
+      try {
+        safeApiRequest('POST', NETLIFY_FUNCTIONS_API_BASE, {
+          action: 'settings-reset',
+          payload: {},
+        });
+      } catch (error) {
+        console.error('Failed to log settings reset', error);
+      }
+    }, 0);
 
     // Show toast notification
     toast({
@@ -408,11 +458,6 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
   const applyAccessibilityChanges = useCallback(() => {
     applyAccessibilityStyles(settings, shadowRoot || undefined);
   }, [settings, shadowRoot]);
-
-  // Apply changes whenever settings change
-  useEffect(() => {
-    applyAccessibilityChanges();
-  }, [settings, applyAccessibilityChanges]);
 
   // Listen for page structure panel close event
   useEffect(() => {

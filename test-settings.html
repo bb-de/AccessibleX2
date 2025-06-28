@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessibility Settings Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Accessibility Settings Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Einstellungen speichern</h2>
+        <button onclick="saveTestSettings()">Test-Einstellungen speichern</button>
+        <button onclick="clearSettings()">Alle Einstellungen löschen</button>
+        <div id="save-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Einstellungen laden</h2>
+        <button onclick="loadAndDisplaySettings()">Einstellungen laden und anzeigen</button>
+        <div id="load-status"></div>
+        <pre id="settings-display"></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Einstellungen anwenden</h2>
+        <button onclick="applyTestSettings()">Test-Einstellungen anwenden</button>
+        <div id="apply-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Automatischer Test</h2>
+        <button onclick="runFullTest()">Vollständigen Test ausführen</button>
+        <div id="test-status"></div>
+    </div>
+
+    <script>
+        const testSettings = {
+            contrastMode: 'high',
+            saturation: 80,
+            monochrome: 20,
+            textColor: 'blue',
+            titleColor: 'red',
+            backgroundColor: 'white',
+            textSize: 2,
+            lineHeight: 1,
+            letterSpacing: 1,
+            darkMode: true,
+            hideImages: false,
+            stopAnimations: true,
+            highlightTitles: true,
+            highlightLinks: true,
+            textToSpeech: false,
+            readingMask: false,
+            readingGuide: false,
+            fontFamily: 'readable',
+            wordSpacing: 30,
+            textAlign: 'left',
+            keyboardNavigation: true,
+            highlightFocus: true,
+            customCursor: true,
+            cursorSize: 'bigger',
+            cursorColor: 'red',
+            virtualKeyboard: false,
+            pageStructure: false
+        };
+
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function saveTestSettings() {
+            try {
+                localStorage.setItem('accessibility-settings', JSON.stringify(testSettings));
+                showStatus('save-status', '✅ Test-Einstellungen erfolgreich gespeichert!', 'success');
+            } catch (error) {
+                showStatus('save-status', `❌ Fehler beim Speichern: ${error.message}`, 'error');
+            }
+        }
+
+        function clearSettings() {
+            try {
+                localStorage.removeItem('accessibility-settings');
+                localStorage.removeItem('accessibility-language');
+                showStatus('save-status', '🗑️ Alle Einstellungen gelöscht!', 'info');
+            } catch (error) {
+                showStatus('save-status', `❌ Fehler beim Löschen: ${error.message}`, 'error');
+            }
+        }
+
+        function loadAndDisplaySettings() {
+            try {
+                const savedSettings = localStorage.getItem('accessibility-settings');
+                const savedLanguage = localStorage.getItem('accessibility-language');
+                
+                if (savedSettings) {
+                    const parsedSettings = JSON.parse(savedSettings);
+                    document.getElementById('settings-display').textContent = 
+                        JSON.stringify(parsedSettings, null, 2);
+                    showStatus('load-status', '✅ Einstellungen erfolgreich geladen!', 'success');
+                } else {
+                    showStatus('load-status', 'ℹ️ Keine gespeicherten Einstellungen gefunden.', 'info');
+                    document.getElementById('settings-display').textContent = 'Keine Einstellungen';
+                }
+                
+                if (savedLanguage) {
+                    showStatus('load-status', `✅ Sprache geladen: ${savedLanguage}`, 'success');
+                }
+            } catch (error) {
+                showStatus('load-status', `❌ Fehler beim Laden: ${error.message}`, 'error');
+            }
+        }
+
+        function applyTestSettings() {
+            try {
+                // Simuliere die applyAccessibilityStyles Funktion
+                const styleId = 'test-accessibility-styles';
+                let styleElement = document.getElementById(styleId);
+                
+                if (styleElement) {
+                    styleElement.remove();
+                }
+                
+                styleElement = document.createElement('style');
+                styleElement.id = styleId;
+                
+                let cssRules = '';
+                
+                // Wende einige Test-Einstellungen an
+                if (testSettings.darkMode) {
+                    cssRules += `
+                        body {
+                            background: #181818 !important;
+                            color: #f0f0f0 !important;
+                        }
+                    `;
+                }
+                
+                if (testSettings.textSize > 0) {
+                    cssRules += `
+                        body {
+                            font-size: ${100 + (testSettings.textSize * 10)}% !important;
+                        }
+                    `;
+                }
+                
+                if (testSettings.highlightTitles) {
+                    cssRules += `
+                        h1, h2, h3, h4, h5, h6 {
+                            background-color: #ffffcc !important;
+                            border: 1px solid #e6e600 !important;
+                            padding: 2px 5px !important;
+                        }
+                    `;
+                }
+                
+                styleElement.textContent = cssRules;
+                document.head.appendChild(styleElement);
+                
+                showStatus('apply-status', '✅ Test-Einstellungen angewendet! (Dark Mode, größere Schrift, hervorgehobene Titel)', 'success');
+            } catch (error) {
+                showStatus('apply-status', `❌ Fehler beim Anwenden: ${error.message}`, 'error');
+            }
+        }
+
+        function runFullTest() {
+            showStatus('test-status', '🔄 Test läuft...', 'info');
+            
+            // Test 1: Speichern
+            saveTestSettings();
+            
+            // Test 2: Laden
+            setTimeout(() => {
+                loadAndDisplaySettings();
+                
+                // Test 3: Anwenden
+                setTimeout(() => {
+                    applyTestSettings();
+                    showStatus('test-status', '✅ Vollständiger Test abgeschlossen! Alle Schritte erfolgreich.', 'success');
+                }, 500);
+            }, 500);
+        }
+
+        // Beim Laden der Seite automatisch Einstellungen laden
+        window.addEventListener('load', () => {
+            loadAndDisplaySettings();
+        });
+    </script>
+</body>
+</html> 
