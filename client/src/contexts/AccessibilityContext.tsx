@@ -375,7 +375,6 @@ export const AccessibilityProvider = ({ children, shadowRoot }: { children: Reac
           };
         case 'screenreaderMode':
           return {
-            keyboardNavigation: true,
             textToSpeech: true,
           };
         default:
